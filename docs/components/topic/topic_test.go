@@ -150,3 +150,39 @@ func TestLayoutBodyReplacesRatherThanAppends(t *testing.T) {
 }
 
 var _ page.Screen = (*Screen)(nil)
+
+func TestLoadPrefixesTheRootPath(t *testing.T) {
+	t.Setenv("GOAPP_ROOT_PREFIX", "/WebGo")
+
+	ctx, engine := newContext(t)
+	var requested string
+	screen := newScreen(t, func(url string) (string, error) {
+		requested = url
+		return "# Markdown\n", nil
+	})
+
+	screen.OnMount(ctx)
+	engine.ConsumeAll()
+
+	if requested != "/WebGo/data/markdown.md" {
+		t.Errorf("expected the root prefix to be applied, got %q", requested)
+	}
+}
+
+func TestLoadLeavesTheURLAloneAtTheRoot(t *testing.T) {
+	t.Setenv("GOAPP_ROOT_PREFIX", "/")
+
+	ctx, engine := newContext(t)
+	var requested string
+	screen := newScreen(t, func(url string) (string, error) {
+		requested = url
+		return "# Markdown\n", nil
+	})
+
+	screen.OnMount(ctx)
+	engine.ConsumeAll()
+
+	if requested != "/data/markdown.md" {
+		t.Errorf("expected the url to be unchanged at the root, got %q", requested)
+	}
+}

@@ -183,6 +183,18 @@ podman run --rm --sysctl net.ipv4.ip_unprivileged_port_start=0 -p 8080:80 webgo-
 
 Then open http://localhost:8080. The gateway listens on port 80 inside the container and runs as a non-root user, which is what the `--sysctl` flag is for.
 
+## Deploying the docs
+
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) builds the site and publishes it to GitHub Pages on every push to `main`.
+
+A project Pages site is served from `/<repo>/`, not the domain root, so the build passes the repository name to the generator:
+
+```sh
+go run . static -o dist --github-pages WebGo
+```
+
+That sets go-app's resource resolver, which prefixes every asset path and exposes the prefix to the running app as `GOAPP_ROOT_PREFIX`. The pages read it when fetching their markdown, so the same code serves correctly from `/` in the container and from `/WebGo/` on Pages.
+
 ## Requirements
 
 - Go matching the version in your `go.mod`

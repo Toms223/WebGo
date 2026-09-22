@@ -10,7 +10,7 @@ import (
 
 func TestGenerateWritesIndex(t *testing.T) {
 	dir := t.TempDir()
-	if err := Generate(dir); err != nil {
+	if err := Generate(dir, ""); err != nil {
 		t.Fatalf("Generate returned an error: %v", err)
 	}
 	for _, name := range []string{"index.html", "app.js", "manifest.webmanifest"} {
@@ -21,7 +21,7 @@ func TestGenerateWritesIndex(t *testing.T) {
 }
 
 func TestHandlerCarriesSiteMetadata(t *testing.T) {
-	h := Handler()
+	h := Handler("")
 	if h.Name == "" {
 		t.Error("handler Name must be set")
 	}
@@ -34,7 +34,7 @@ func TestGenerateWritesEveryRoute(t *testing.T) {
 	pages.Register()
 
 	dir := t.TempDir()
-	if err := Generate(dir); err != nil {
+	if err := Generate(dir, ""); err != nil {
 		t.Fatalf("Generate returned an error: %v", err)
 	}
 	for _, name := range []string{"index.html", "markdown.html", "state.html"} {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Toms223/WebGo/model"
@@ -64,7 +65,7 @@ func (s *Screen) OnMount(ctx app.Context) page.Screen {
 }
 
 func (s *Screen) load(ctx app.Context) {
-	url := s.url
+	url := resolve(s.url)
 	loader := s.loader
 	ctx.Async(func() {
 		source, err := loader(url)
@@ -86,6 +87,14 @@ func (s *Screen) commit(ctx app.Context, source string, failure error) {
 		state.Source = source
 		return state
 	}).Set()
+}
+
+func resolve(url string) string {
+	prefix := strings.TrimSuffix(app.Getenv("GOAPP_ROOT_PREFIX"), "/")
+	if prefix == "" {
+		return url
+	}
+	return prefix + url
 }
 
 func fetch(url string) (string, error) {
