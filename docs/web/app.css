@@ -1,0 +1,427 @@
+:root {
+	--signal: #FF5B23;
+	--signal-dim: #C43D0E;
+	--on-signal: #1A0A03;
+	--coolant: #00C9BE;
+	--coolant-dim: #00847C;
+	--filament: #C8F53C;
+
+	--surface: #F4F1EC;
+	--surface-container-low: #EEEAE3;
+	--surface-container: #E6E1D8;
+	--surface-container-high: #DCD6CB;
+	--surface-inverse: #14161A;
+	--code-surface: #14161A;
+	--code-on: #E9EAEC;
+
+	--on-surface: #16181C;
+	--on-surface-variant: #55585F;
+	--on-surface-inverse: #E9EAEC;
+
+	--outline: #B6B1A6;
+	--outline-strong: #16181C;
+
+	--error: #B3261E;
+	--error-container: #F9DEDC;
+
+	--rail: 4px;
+	--shape-l: 24px;
+	--shape-m: 14px;
+	--shape-s: 8px;
+
+	--sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--signal: #FF6B37;
+		--signal-dim: #FF9A74;
+		--on-signal: #1A0A03;
+		--coolant: #2BE8DC;
+		--coolant-dim: #7DF3EB;
+		--filament: #D6FF57;
+
+		--surface: #0B0D10;
+		--surface-container-low: #121519;
+		--surface-container: #181C21;
+		--surface-container-high: #21262D;
+		--surface-inverse: #E9EAEC;
+		--code-surface: #05070A;
+		--code-on: #DCE3EA;
+
+		--on-surface: #E7E9EC;
+		--on-surface-variant: #9AA0A9;
+		--on-surface-inverse: #14161A;
+
+		--outline: #333941;
+		--outline-strong: #4A525C;
+
+		--error: #FF6B6B;
+		--error-container: #2A1214;
+	}
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background-color: var(--surface);
+	background-image:
+		repeating-linear-gradient(90deg, transparent 0 63px, color-mix(in srgb, var(--outline) 28%, transparent) 63px 64px),
+		repeating-linear-gradient(0deg, transparent 0 63px, color-mix(in srgb, var(--outline) 16%, transparent) 63px 64px);
+	color: var(--on-surface);
+	font-family: var(--sans);
+	font-size: 16px;
+	line-height: 1.65;
+	-webkit-font-smoothing: antialiased;
+}
+
+.shell {
+	max-width: 68rem;
+	margin: 0 auto;
+	padding: 0 1.5rem 6rem;
+}
+
+.shell-header {
+	position: relative;
+	padding: 3rem 0 0;
+	margin-bottom: 2.5rem;
+}
+
+.shell-header::after {
+	content: "";
+	display: block;
+	height: var(--rail);
+	margin-top: 1.25rem;
+	background: linear-gradient(
+		90deg,
+		var(--signal) 0 22%,
+		var(--coolant) 22% 34%,
+		var(--outline-strong) 34% 100%
+	);
+}
+
+.shell-title {
+	margin: 0;
+	font-size: clamp(2.25rem, 7vw, 3.75rem);
+	font-weight: 800;
+	letter-spacing: -0.045em;
+	line-height: 0.95;
+	text-transform: uppercase;
+}
+
+.shell-title::before {
+	content: "GO \002F\002F WASM";
+	display: block;
+	margin-bottom: 0.9rem;
+	font-family: var(--mono);
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.32em;
+	color: var(--on-surface-variant);
+	text-transform: none;
+}
+
+.nav {
+	margin-top: 1.5rem;
+	counter-reset: route;
+}
+
+.nav ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.nav li {
+	counter-increment: route;
+}
+
+.nav-link {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6rem;
+	padding: 0.5rem 1rem 0.5rem 0.75rem;
+	border: 1px solid var(--outline);
+	border-radius: 999px;
+	color: var(--on-surface-variant);
+	font-size: 0.9rem;
+	font-weight: 500;
+	text-decoration: none;
+	background: transparent;
+	transition: background-color 120ms linear, color 120ms linear, border-color 120ms linear;
+}
+
+.nav-link::before {
+	content: counter(route, decimal-leading-zero);
+	font-family: var(--mono);
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	opacity: 0.65;
+}
+
+.nav-link:hover {
+	background: color-mix(in srgb, var(--on-surface) 8%, transparent);
+	color: var(--on-surface);
+	border-color: var(--outline-strong);
+}
+
+.nav-link-active {
+	background: var(--signal);
+	border-color: var(--signal);
+	color: var(--on-signal);
+	border-radius: var(--shape-s);
+	font-weight: 700;
+}
+
+.nav-link-active::before {
+	opacity: 1;
+}
+
+.nav-link-active:hover {
+	background: var(--signal);
+	color: var(--on-signal);
+	border-color: var(--signal);
+}
+
+.shell-main {
+	position: relative;
+}
+
+.topic {
+	position: relative;
+	padding: 2.5rem 2.5rem 3rem;
+	border: 1px solid var(--outline);
+	border-left: var(--rail) solid var(--signal);
+	border-radius: 0 var(--shape-l) var(--shape-l) 0;
+	background: var(--surface-container-low);
+}
+
+.topic-title {
+	margin: 0 0 2rem;
+	font-size: clamp(1.75rem, 4.5vw, 2.6rem);
+	font-weight: 750;
+	letter-spacing: -0.03em;
+	line-height: 1.08;
+}
+
+.topic-title::after {
+	content: "";
+	display: block;
+	width: 3.5rem;
+	height: 3px;
+	margin-top: 1rem;
+	background: var(--coolant);
+}
+
+.doc > *:first-child {
+	margin-top: 0;
+}
+
+.doc p {
+	margin: 0 0 1.15rem;
+	max-width: 68ch;
+}
+
+.doc-heading {
+	position: relative;
+	margin: 3rem 0 1rem;
+	padding-left: 1.1rem;
+	font-size: 1.3rem;
+	font-weight: 700;
+	letter-spacing: -0.015em;
+	line-height: 1.25;
+}
+
+.doc-heading::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.28em;
+	width: 5px;
+	height: 0.85em;
+	background: var(--signal);
+}
+
+.doc-subheading {
+	margin: 2rem 0 0.6rem;
+	font-family: var(--mono);
+	font-size: 0.82rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--coolant-dim);
+}
+
+.doc ul,
+.doc ol {
+	margin: 0 0 1.15rem;
+	padding-left: 1.3rem;
+	max-width: 68ch;
+}
+
+.doc li {
+	margin-bottom: 0.4rem;
+}
+
+.doc li::marker {
+	color: var(--signal);
+	font-weight: 700;
+}
+
+.doc a {
+	color: var(--on-surface);
+	text-decoration: underline;
+	text-decoration-color: var(--signal);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 3px;
+}
+
+.doc a:hover {
+	background: color-mix(in srgb, var(--signal) 18%, transparent);
+}
+
+.doc strong {
+	font-weight: 700;
+}
+
+.doc code {
+	padding: 0.12em 0.38em;
+	border: 1px solid var(--outline);
+	border-radius: var(--shape-s);
+	background: var(--surface-container);
+	font-family: var(--mono);
+	font-size: 0.86em;
+}
+
+.doc pre {
+	position: relative;
+	margin: 0 0 1.5rem;
+	padding: 1.25rem 1.35rem;
+	overflow-x: auto;
+	border: 1px solid var(--outline-strong);
+	border-left: var(--rail) solid var(--coolant);
+	border-radius: 0 var(--shape-m) var(--shape-m) 0;
+	background: var(--code-surface);
+	color: var(--code-on);
+	font-size: 0.875rem;
+	line-height: 1.6;
+}
+
+.doc pre code {
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	color: inherit;
+	font-size: inherit;
+}
+
+.doc blockquote {
+	margin: 0 0 1.35rem;
+	padding: 0.85rem 1.1rem;
+	border: 1px solid var(--outline);
+	border-left: var(--rail) solid var(--filament);
+	border-radius: 0 var(--shape-m) var(--shape-m) 0;
+	background: var(--surface-container);
+	color: var(--on-surface-variant);
+}
+
+.doc blockquote p:last-child {
+	margin-bottom: 0;
+}
+
+.doc hr {
+	height: var(--rail);
+	width: 4rem;
+	margin: 2.75rem 0;
+	border: 0;
+	background: var(--outline-strong);
+}
+
+.topic-loading,
+.topic-error,
+.shell-loading,
+.shell-error,
+.doc-empty {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.7rem;
+	margin: 2rem 0;
+	padding: 0.75rem 1.1rem;
+	border: 1px solid var(--outline);
+	border-radius: var(--shape-s);
+	background: var(--surface-container);
+	font-family: var(--mono);
+	font-size: 0.82rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--on-surface-variant);
+}
+
+.topic-loading::before,
+.shell-loading::before,
+.doc-empty::before {
+	content: "";
+	width: 9px;
+	height: 9px;
+	background: var(--coolant);
+	animation: pulse 1.1s steps(2, jump-none) infinite;
+}
+
+.topic-error,
+.shell-error {
+	border-color: var(--error);
+	background: var(--error-container);
+	color: var(--error);
+	text-transform: none;
+	letter-spacing: 0.02em;
+}
+
+.topic-error::before,
+.shell-error::before {
+	content: "";
+	width: 9px;
+	height: 9px;
+	background: var(--error);
+}
+
+@keyframes pulse {
+	0% { opacity: 1; }
+	50% { opacity: 0.15; }
+	100% { opacity: 1; }
+}
+
+@media (max-width: 48rem) {
+	.shell {
+		padding: 0 1rem 4rem;
+	}
+
+	.topic {
+		padding: 1.75rem 1.25rem 2.25rem;
+		border-radius: 0 var(--shape-m) var(--shape-m) 0;
+	}
+
+	.shell-header {
+		padding-top: 2rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation: none !important;
+		transition: none !important;
+	}
+}

@@ -1,0 +1,15 @@
+kind: Gateway
+metadata: { name: webgo-docs }
+spec:
+  # Port 80 requires container to be run with: --sysctl net.ipv4.ip_unprivileged_port_start=0
+  # HOG runtime runs as non-root user (uid 10001), so binding port 80 needs this sysctl.
+  listen: ":80"
+---
+kind: Route
+metadata: { name: docs }
+spec:
+  match: /
+  handler:
+    type: static
+    dir: /srv/web
+  access: { auth: public }
