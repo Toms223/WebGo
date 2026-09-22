@@ -65,7 +65,7 @@ func (s *Screen) OnMount(ctx app.Context) page.Screen {
 }
 
 func (s *Screen) load(ctx app.Context) {
-	url := resolve(s.url)
+	url := mountedURL(ctx.Page().URL().Path, s.Route(), s.url)
 	loader := s.loader
 	ctx.Async(func() {
 		source, err := loader(url)
@@ -89,12 +89,13 @@ func (s *Screen) commit(ctx app.Context, source string, failure error) {
 	}).Set()
 }
 
-func resolve(url string) string {
-	prefix := strings.TrimSuffix(app.Getenv("GOAPP_ROOT_PREFIX"), "/")
-	if prefix == "" {
-		return url
+func mountedURL(browserPath, route, path string) string {
+	base := strings.TrimSuffix(browserPath, route)
+	base = strings.TrimSuffix(base, "/")
+	if base == "" {
+		return path
 	}
-	return prefix + url
+	return base + path
 }
 
 func fetch(url string) (string, error) {

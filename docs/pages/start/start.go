@@ -13,7 +13,7 @@ const (
 func New() (*topic.Screen, error) {
 	return topic.New(topic.Config{
 		Key:        "start",
-		Path:       "",
+		Path:       Route,
 		Title:      Title,
 		URL:        "/data/start.md",
 		OnActivate: base.Activate,

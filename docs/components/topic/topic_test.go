@@ -2,6 +2,7 @@ package topic
 
 import (
 	"errors"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -151,10 +152,10 @@ func TestLayoutBodyReplacesRatherThanAppends(t *testing.T) {
 
 var _ page.Screen = (*Screen)(nil)
 
-func TestLoadPrefixesTheRootPath(t *testing.T) {
-	t.Setenv("GOAPP_ROOT_PREFIX", "/WebGo")
-
+func TestLoadDerivesTheMountFromTheCurrentURL(t *testing.T) {
 	ctx, engine := newContext(t)
+	ctx.Page().ReplaceURL(mustParse(t, "/WebGo/markdown"))
+
 	var requested string
 	screen := newScreen(t, func(url string) (string, error) {
 		requested = url
@@ -165,14 +166,14 @@ func TestLoadPrefixesTheRootPath(t *testing.T) {
 	engine.ConsumeAll()
 
 	if requested != "/WebGo/data/markdown.md" {
-		t.Errorf("expected the root prefix to be applied, got %q", requested)
+		t.Errorf("expected the mount to be applied, got %q", requested)
 	}
 }
 
 func TestLoadLeavesTheURLAloneAtTheRoot(t *testing.T) {
-	t.Setenv("GOAPP_ROOT_PREFIX", "/")
-
 	ctx, engine := newContext(t)
+	ctx.Page().ReplaceURL(mustParse(t, "/markdown"))
+
 	var requested string
 	screen := newScreen(t, func(url string) (string, error) {
 		requested = url
@@ -185,4 +186,34 @@ func TestLoadLeavesTheURLAloneAtTheRoot(t *testing.T) {
 	if requested != "/data/markdown.md" {
 		t.Errorf("expected the url to be unchanged at the root, got %q", requested)
 	}
+}
+
+func TestMountedURL(t *testing.T) {
+	cases := []struct {
+		browser string
+		route   string
+		want    string
+	}{
+		{"/markdown", "/markdown", "/data/markdown.md"},
+		{"/", "/", "/data/markdown.md"},
+		{"/WebGo/markdown", "/markdown", "/WebGo/data/markdown.md"},
+		{"/WebGo", "/", "/WebGo/data/markdown.md"},
+		{"/a/b/markdown", "/markdown", "/a/b/data/markdown.md"},
+	}
+
+	for _, test := range cases {
+		got := mountedURL(test.browser, test.route, "/data/markdown.md")
+		if got != test.want {
+			t.Errorf("mountedURL(%q, %q): expected %q, got %q", test.browser, test.route, test.want, got)
+		}
+	}
+}
+
+func mustParse(t *testing.T, raw string) *url.URL {
+	t.Helper()
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		t.Fatalf("parsing %q failed: %v", raw, err)
+	}
+	return parsed
 }

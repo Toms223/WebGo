@@ -11,10 +11,10 @@ The docs site is itself a WebGo app — it is built with the packages it documen
 ## Install
 
 ```sh
-go get github.com/Toms223/WebGo@v0.0.3
+go get github.com/Toms223/WebGo@v0.0.4
 ```
 
-`v0.0.3` is the minimum usable release. Earlier tags do not work and should not be used.
+`v0.0.4` is the current release. `v0.0.3` added `ViewModel.State()`; `v0.0.4` made `Base` work when the app is mounted under a subpath rather than at the domain root. `v0.0.1` and `v0.0.2` do not work and should not be used.
 
 You will import `github.com/maxence-charriere/go-app/v11/pkg/app` directly too, so run `go mod tidy` afterwards to record it as a direct dependency.
 
@@ -139,6 +139,29 @@ shell, err := page.NewBase(&appLayout{}, vm, []page.Screen{home, settings})
 
 `Base.OnNav` matches the current path against each screen's `Route()`, dismounts the previous screen and mounts the new one. If nothing matches, it renders `Error(ErrNoRoute)`.
 
+### Mounting under a subpath
+
+Screens always use paths rooted at `/`. They never need to know where the app is served from.
+
+On its first mount, `Base` works out its own mount point by comparing the landing URL against the routes it holds, and stores it. From then on it subtracts that prefix before matching, and puts it back in the address bar after each navigation. So an app whose screens are `/`, `/markdown` and `/state` runs unchanged at `example.com/` and at `example.com/docs/`, and the links it renders stay reloadable and shareable in both.
+
+You only need the mount yourself when building a URL to something that is not a route — a data file, say. If you hold the `Base`, ask it:
+
+```go
+source := shell.BasePath() + "/data/page.md"
+```
+
+From inside a screen, which has no reference to the `Base`, subtract your own route from the current path instead. `Base` fixes the address bar before mounting a screen, so the path is correct by then:
+
+```go
+func (s *screen) sourceURL(ctx app.Context) string {
+	base := strings.TrimSuffix(ctx.Page().URL().Path, s.Route())
+	return strings.TrimSuffix(base, "/") + "/data/page.md"
+}
+```
+
+Nothing reads an environment variable, and no build flag configures it.
+
 ### Rendering markdown
 
 ```go
@@ -193,10 +216,12 @@ A project Pages site is served from `/<repo>/`, not the domain root, so the buil
 go run . static -o dist --github-pages WebGo
 ```
 
-That sets go-app's resource resolver, which prefixes every asset path and exposes the prefix to the running app as `GOAPP_ROOT_PREFIX`. The pages read it when fetching their markdown, so the same code serves correctly from `/` in the container and from `/WebGo/` on Pages.
+That sets go-app's resource resolver, so the generated HTML points at `/WebGo/app.js`, `/WebGo/web/app.wasm` and so on instead of the domain root.
+
+The flag covers go-app's own assets only. The app's routing needs nothing: `Base` deduces its mount at runtime, so the same source serves correctly from `/` in the container and from `/WebGo/` on Pages, with no build-time switch and no environment variable.
 
 ## Requirements
 
 - Go matching the version in your `go.mod`
-- `github.com/Toms223/WebGo` v0.0.3 or later
+- `github.com/Toms223/WebGo` v0.0.4 or later
 - `github.com/maxence-charriere/go-app/v11`

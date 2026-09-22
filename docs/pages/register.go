@@ -35,8 +35,8 @@ func Screens() ([]page.Screen, error) {
 }
 
 func Register() {
-	for _, entry := range Entries() {
-		app.Route(entry.Route, func() app.Composer {
+	for _, route := range []string{start.Route, markdown.Route, state.Route} {
+		app.Route(route, func() app.Composer {
 			screens, err := Screens()
 			if err != nil {
 				panic(err)
