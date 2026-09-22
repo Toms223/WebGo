@@ -26,6 +26,10 @@ func (v *ViewModel[T]) Get(ctx app.Context) *ViewModel[T] {
 	return v
 }
 
+func (v *ViewModel[T]) State() *T {
+	return v.state
+}
+
 func (v *ViewModel[T]) Load(ctx app.Context) *Action[T] {
 	ctx.GetState(v.key, v.state)
 	return &Action[T]{ctx: ctx, model: v}
