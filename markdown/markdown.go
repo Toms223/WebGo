@@ -1,4 +1,4 @@
-package news_feed
+package markdown
 
 import (
 	"strings"

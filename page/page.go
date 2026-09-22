@@ -1,8 +1,8 @@
 package page
 
 import (
-	"WebGo/model"
 	"errors"
+	"github.com/Toms223/WebGo/model"
 	"strings"
 
 	"github.com/maxence-charriere/go-app/v11/pkg/app"

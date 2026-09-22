@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"WebGo/model"
+	"github.com/Toms223/WebGo/model"
 
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
