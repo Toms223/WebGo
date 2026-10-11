@@ -1,4 +1,4 @@
-package model
+package data
 
 import (
 	"errors"
@@ -7,8 +7,9 @@ import (
 )
 
 type ViewModel[T any] struct {
-	key   string
-	state *T
+	key    string
+	state  *T
+	source app.UI
 }
 
 func NewViewModel[T any](key string, value *T) (*ViewModel[T], error) {
@@ -37,6 +38,16 @@ func (v *ViewModel[T]) Load(ctx app.Context) *Action[T] {
 
 func (v *ViewModel[T]) Observe(ctx app.Context) app.Observer {
 	return ctx.ObserveState(v.key, v.state)
+}
+
+func (v *ViewModel[T]) OnAction(ctx app.Context) {
+	if v.source != nil && v.source.Mounted() {
+		return
+	}
+	v.source = ctx.Src()
+	ctx.ObserveState(v.key, v.state).OnChange(func() {
+		ctx.NewActionWithValue(v.key, v.state)
+	})
 }
 
 type Action[T any] struct {

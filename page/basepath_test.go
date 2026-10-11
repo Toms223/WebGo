@@ -1,6 +1,10 @@
 package page
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/maxence-charriere/go-app/v11/pkg/app"
+)
 
 func routes(paths ...string) []Screen {
 	screens := make([]Screen, 0, len(paths))
@@ -149,6 +153,27 @@ func TestNavigatingRestoresTheMountInTheUrl(t *testing.T) {
 	}
 }
 
+func TestRestoringTheMountKeepsTheQueryAndFragment(t *testing.T) {
+	home := newScreen("/", "home")
+	styling := newScreen("/styling", "styling")
+	base := newBase(t, newLayout("shell"), newModel("ada"), []Screen{home, styling})
+	base.basePath = "/WebGo"
+	base.baseKnown = true
+	ctx, engine := mountInTree(t, base)
+	ctx.Page().ReplaceURL(mustParseUrl("/styling?tab=go#values"))
+
+	base.OnNav(ctx)
+	engine.ConsumeAll()
+
+	if base.selected != 1 {
+		t.Fatalf("expected the styling screen to be selected, got %d", base.selected)
+	}
+	got := ctx.Page().URL()
+	if got.Path != "/WebGo/styling" || got.RawQuery != "tab=go" || got.Fragment != "values" {
+		t.Fatalf("expected /WebGo/styling?tab=go#values, got %q", got.String())
+	}
+}
+
 func TestNavigatingLeavesACorrectUrlAlone(t *testing.T) {
 	home := newScreen("/", "home")
 	base := newBase(t, newLayout("shell"), newModel("ada"), []Screen{home})
@@ -169,5 +194,55 @@ func TestBrowserPathIsTheInverseOfTrimBasePath(t *testing.T) {
 		if got := trimBasePath(normalizePath(browser), base.basePath); got != route {
 			t.Errorf("route %q: browserPath gave %q which trims back to %q", route, browser, got)
 		}
+	}
+}
+
+type navigatingScreen struct {
+	*recordingScreen
+	navCalls int
+}
+
+func newNavigatingScreen(route, name string) *navigatingScreen {
+	return &navigatingScreen{recordingScreen: newScreen(route, name)}
+}
+
+func (s *navigatingScreen) OnMount(ctx app.Context) Screen {
+	s.recordingScreen.OnMount(ctx)
+	return s
+}
+
+func (s *navigatingScreen) OnDismount() Screen {
+	s.recordingScreen.OnDismount()
+	return s
+}
+
+func (s *navigatingScreen) OnNav(app.Context) { s.navCalls++ }
+
+func TestNavigatingWithinTheSelectedScreenForwardsTheNavigation(t *testing.T) {
+	home := newNavigatingScreen("/", "home")
+	settings := newNavigatingScreen("/settings", "settings")
+	base := newBase(t, newLayout("shell"), newModel("ada"), []Screen{home, settings})
+	ctx, engine := mountInTree(t, base)
+	base.OnMount(ctx)
+
+	base.OnNav(ctx)
+	engine.ConsumeAll()
+
+	if home.navCalls != 1 {
+		t.Fatalf("expected a navigation within the selected screen to be forwarded once, got %d", home.navCalls)
+	}
+	if home.mountCalls != 1 {
+		t.Fatalf("expected the selected screen not to be remounted, got %d mounts", home.mountCalls)
+	}
+
+	ctx.Page().ReplaceURL(mustParseUrl("/settings"))
+	base.OnNav(ctx)
+	engine.ConsumeAll()
+
+	if settings.navCalls != 0 || home.navCalls != 1 {
+		t.Fatalf("expected a route change not to forward, got home %d and settings %d", home.navCalls, settings.navCalls)
+	}
+	if settings.mountCalls != 1 || home.dismountCalls != 1 {
+		t.Fatalf("expected a route change to dismount home and mount settings, got %d dismounts and %d mounts", home.dismountCalls, settings.mountCalls)
 	}
 }

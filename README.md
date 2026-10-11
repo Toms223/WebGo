@@ -1,8 +1,27 @@
-# WebGo
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/hero-dark.svg">
+  <img alt="WebGo: small building blocks for web front ends in Go" src=".github/readme/hero-light.svg">
+</picture>
+</p>
 
-Small building blocks for writing web front ends in Go, compiled to WebAssembly.
+<p align="center">
+  <a href="https://toms223.github.io/WebGo/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/readme/docs-dark.svg">
+      <img alt="Read the docs" src=".github/readme/docs-light.svg" width="270">
+    </picture>
+  </a>
+</p>
 
-WebGo sits on top of [go-app](https://github.com/maxence-charriere/go-app) and adds three things: a `Page` that pairs a layout with a view model, a `Base` that swaps pages by route, and a `ViewModel` that holds the state a page reads and writes. A markdown renderer is included for pages whose content is written as text.
+WebGo sits on top of [go-app](https://github.com/maxence-charriere/go-app) and adds four things: a `Page` that pairs a layout with a view model, a `Base` that swaps pages by route, a `ViewModel` that holds the state a page reads and writes, and typed styling, which writes CSS as Go values that the compiler checks. A markdown renderer is included for pages whose content is written as text.
+
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/features-dark.svg">
+  <img alt="The four parts of WebGo: Page, Base, ViewModel and typed styling" src=".github/readme/features-light.svg">
+</picture>
+</p>
 
 **Documentation: https://toms223.github.io/WebGo/**
 
@@ -11,10 +30,10 @@ The docs site is itself a WebGo app — it is built with the packages it documen
 ## Install
 
 ```sh
-go get github.com/Toms223/WebGo@v0.0.4
+go get github.com/Toms223/WebGo@v0.0.5
 ```
 
-`v0.0.4` is the current release. `v0.0.3` added `ViewModel.State()`; `v0.0.4` made `Base` work when the app is mounted under a subpath rather than at the domain root. `v0.0.1` and `v0.0.2` do not work and should not be used.
+`v0.0.5` is the current release. `v0.0.3` added `ViewModel.State()`; `v0.0.4` made `Base` work when the app is mounted under a subpath rather than at the domain root; `v0.0.5` renamed the `model` package to `data`. `v0.0.1` and `v0.0.2` do not work and should not be used.
 
 You will import `github.com/maxence-charriere/go-app/v11/pkg/app` directly too, so run `go mod tidy` afterwards to record it as a direct dependency.
 
@@ -63,9 +82,21 @@ go run .
 | --- | --- |
 | `page.Page[T]` | One screen: a path, a `Layout[T]`, and a `ViewModel[T]` |
 | `page.Base[U]` | The app shell: holds the screens and switches between them on navigation |
-| `model.ViewModel[T]` | Typed state under a key, readable from a layout and writable through an action |
+| `data.ViewModel[T]` | Typed state under a key, readable from a layout and writable through an action |
 | `page.Layout[T]` | Interface you implement: loading, error and drawn states |
 | `page.Screen` | Interface a screen satisfies; `*Page[T]` already does |
+| `style.Rule` | One CSS rule as a Go value: a selector, its properties, its pseudo-class, `@media`, `@container` and `@supports` blocks, and nested rules |
+| `style.Item` | Anything a stylesheet holds: a `Rule`, `KeyframesRule`, `FontFaceRule`, `PropertyRule`, `ImportRule`, `LayerRule` or `LayerOrderRule` |
+| `style.KeyframesRule` and friends | `@keyframes`, `@font-face`, `@property`, `@import` and `@layer` as Go values, made by `Keyframes`, `FontFace`, `Property`, `Import`, `Layer` and `LayerOrder` |
+| `style.Binding` | A typed link from an action to a rule: `When` decides presence, `Compute` and `ComputeFrames` decide the properties or frames |
+| `style.Style` | How items reach the browser: a `Static` file, a `Generated` file, or `Dynamic` items switched by actions |
+| `serve.Handler` | go-app's `app.Handler` with `Styles []style.Style`; `Build()` checks them, writes the generated files and returns the `*app.Handler` |
+| `css` | Typed values (`Px`, `Hex`, `Var`, `Calc`, `Raw`), one function per CSS property, and `Important()` on every property |
+| `css.Descriptor` | One declaration inside `@font-face` or `@property`, such as `css.Src` or `css.Syntax` |
+| `kw` | One typed constant per CSS keyword and named color, such as `kw.Underline` |
+| `media` | Media queries (`Screen`, `Print`, `Not`, and `And` and `Or` on a query) and the functions for each media feature |
+| `container.Query` | Container queries (`Named`, `Not`, `And`, `Or`) and the functions for each container feature |
+| `supports.Query` | `@supports` conditions: `Property`, `Selector`, `FontFormat`, `FontTech`, `Not`, `And`, `Or` |
 | `markdown` | Renders a markdown string into `[]app.UI` |
 
 ### Building a page
@@ -74,7 +105,7 @@ go run .
 
 ```go
 state := &AppState{}
-vm, err := model.NewViewModel("app", state)
+vm, err := data.NewViewModel("app", state)
 if err != nil {
 	log.Fatal(err)
 }
@@ -96,7 +127,7 @@ if err := p.Err(); err != nil {
 type Layout[T any] interface {
 	Loading() app.UI
 	Error(error) app.UI
-	Draw(m *model.ViewModel[T]) app.HTMLDiv
+	Draw(m *data.ViewModel[T]) app.HTMLDiv
 	Body(...app.UI) Layout[T]
 }
 ```
@@ -122,7 +153,7 @@ func (s *screen) load(ctx app.Context) {
 	})
 }
 
-func (l *layout) Draw(m *model.ViewModel[AppState]) app.HTMLDiv {
+func (l *layout) Draw(m *data.ViewModel[AppState]) app.HTMLDiv {
 	return app.Div().Text(m.State().User)
 }
 ```
@@ -179,6 +210,91 @@ Links are filtered. Relative paths starting with `/`, anchors, `http://`, `https
 
 `ErrNoLayout`, `ErrNoModel`, `ErrNoScreens` and `ErrNoRoute` are exported sentinels. Match them with `errors.Is`.
 
+### Styling
+
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/typed-dark.svg">
+  <img alt="A Go rule on the left, the CSS it generates on the right" src=".github/readme/typed-light.svg">
+</picture>
+</p>
+
+CSS is written as typed Go. A `style.Rule` is a selector with its properties; `css` supplies the values and one function per property, `kw` the keywords, and `media`, `container` and `supports` the queries. A property that does not exist or a misspelled keyword fails to compile.
+
+The docs cover it on two pages: [Styling](https://toms223.github.io/WebGo/styling) for writing rules and [Applying](https://toms223.github.io/WebGo/applying) for delivering them. Both have live examples. Beyond plain rules:
+
+- nesting with `Nest` and `Self()`, written as CSS nesting;
+- `@keyframes`, `@font-face`, `@property`, `@import` and `@layer`;
+- `!important` through `Important()` on a property;
+- `@container` and `@supports` blocks through `Container` and `Supports`;
+- typed bindings: `Bind(style.When(...))` and `Bind(style.Compute(...))` insert, remove or recompute a rule from an action's typed value;
+- `ViewModel.OnAction`, which turns a model's state changes into those actions.
+
+```go
+package theme
+
+import (
+	"github.com/Toms223/WebGo/css"
+	"github.com/Toms223/WebGo/kw"
+	"github.com/Toms223/WebGo/media"
+	"github.com/Toms223/WebGo/style"
+)
+
+var Card = style.Class("card").
+	Set(css.Padding(css.Rem(1)), css.BorderRadius(css.Px(8)))
+
+var Link = style.Class("nav-link").
+	Set(css.Color(css.Var("--ink"))).
+	Hover(css.TextDecoration(kw.Underline)).
+	Media(media.Screen().And(media.MaxWidth(css.Px(600))), css.FontSize(css.Rem(0.9)))
+
+func Styles() []style.Style {
+	return []style.Style{
+		style.Generated("/web/theme.css", Card, Link),
+	}
+}
+```
+
+A rule is used by name: `app.Div().Class(theme.Card.Name())`.
+
+`serve.Handler` is go-app's `app.Handler` with `Styles` taking `style.Style` values, each in one of three modes. `Static` links a `.css` file you wrote, `Generated` writes a `.css` file from your rules, and `Dynamic` inserts and removes rules in the browser in response to go-app actions. `Build` checks the styles, writes the generated files and returns the `*app.Handler`:
+
+```go
+handler := &serve.Handler{
+	Handler: app.Handler{Name: "Hello"},
+	Styles:  theme.Styles(),
+}
+built, err := handler.Build()
+if err != nil {
+	log.Fatal(err)
+}
+http.Handle("/", built)
+```
+
+`Build` writes `web/theme.css` only when its bytes change, so building twice leaves the file alone. On a composite literal, call it as `(&serve.Handler{…}).Build()`: it has a pointer receiver.
+
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/flow-dark.svg">
+  <img alt="How a WebGo app runs in the browser and on the server" src=".github/readme/flow-light.svg">
+</picture>
+</p>
+
+`Dynamic` items need the browser side started. Call `style.Run` once in `main`, before `app.RunWhenOnBrowser()`; on the server it does nothing:
+
+```go
+style.Run(theme.Styles()...)
+app.RunWhenOnBrowser()
+```
+
+The property functions, keywords, media features and pseudo-class and pseudo-element methods are generated from W3C webref and MDN browser-compat-data. Only properties that the latest release of Chrome, Chrome Android, Edge, Firefox, Firefox Android, Safari and Safari on iOS can all render are included, and one that is left out belongs in a `.css` file loaded with `Static`. To regenerate them, run this from the root of this repository:
+
+```sh
+go run ./internal/cssgen
+```
+
+`Build` returns sentinel errors such as `serve.ErrMissingStyle` and `style.ErrDuplicateRule`. Match them with `errors.Is`. Every error is listed on the [Applying](https://toms223.github.io/WebGo/applying) page.
+
 ## Shipping a static site
 
 `GenerateStaticWebsite` writes `index.html`, the go-app runtime files, and one HTML file per registered route:
@@ -223,5 +339,5 @@ The flag covers go-app's own assets only. The app's routing needs nothing: `Base
 ## Requirements
 
 - Go matching the version in your `go.mod`
-- `github.com/Toms223/WebGo` v0.0.4 or later
+- `github.com/Toms223/WebGo` v0.0.5 or later
 - `github.com/maxence-charriere/go-app/v11`

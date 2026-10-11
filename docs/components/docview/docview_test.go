@@ -9,7 +9,7 @@ import (
 
 func render(t *testing.T, source string) string {
 	t.Helper()
-	return app.HTMLString(Render(source))
+	return app.HTMLString(Render(source, nil))
 }
 
 func TestRenderAppliesHeadingClasses(t *testing.T) {
@@ -31,7 +31,7 @@ func TestRenderEmptySourceIsMarked(t *testing.T) {
 
 func TestRenderKeepsCodeBlocks(t *testing.T) {
 	out := render(t, "```go\nfmt.Println()\n```\n")
-	if !strings.Contains(out, "<pre>") || !strings.Contains(out, "<code>") {
+	if !strings.Contains(out, `<pre class="lang-go">`) || !strings.Contains(out, "<code>") {
 		t.Errorf("expected a fenced block to render as pre/code, got %s", out)
 	}
 }
@@ -53,5 +53,23 @@ func TestRenderKeepsSafeLinks(t *testing.T) {
 	}
 	if !strings.Contains(out, `rel="noopener noreferrer"`) {
 		t.Errorf("expected the rel attribute on external links, got %s", out)
+	}
+}
+
+func TestRenderPassesDemosThrough(t *testing.T) {
+	demos := map[string]func() app.UI{
+		"card": func() app.UI { return app.Span().Class("live-card").Text("live") },
+	}
+	out := app.HTMLString(Render("```go card\nx := 1\n```\n", demos))
+	for _, want := range []string{
+		`<div class="example">`,
+		`<div class="example-label">Go</div>`,
+		`<div class="example-code">`,
+		`<div class="example-live">`,
+		`<span class="live-card">live</span>`,
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in the rendered demo, got %s", want, out)
+		}
 	}
 }

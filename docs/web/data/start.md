@@ -1,11 +1,11 @@
 This page shows how to install WebGo, write a minimal app, build it to WebAssembly, and generate a static site.
 
-> The minimum usable release is `github.com/Toms223/WebGo v0.0.3`. Earlier tagged versions do not work and should not be used.
+> This guide targets `github.com/Toms223/WebGo v0.0.5`. `v0.0.1` and `v0.0.2` do not work and should not be used.
 
 ### Requirements
 
 - Go, matching the version required by your `go.mod`.
-- `github.com/Toms223/WebGo`, version `v0.0.3` or later.
+- `github.com/Toms223/WebGo`, version `v0.0.5` or later.
 - `github.com/maxence-charriere/go-app/v11`, pulled in as a dependency of WebGo. Your own code also imports it directly, for example to call `app.RunWhenOnBrowser` and `app.Route`.
 
 ### Install
@@ -13,7 +13,7 @@ This page shows how to install WebGo, write a minimal app, build it to WebAssemb
 Run this in your module:
 
 ```sh
-go get github.com/Toms223/WebGo@v0.0.3
+go get github.com/Toms223/WebGo@v0.0.5
 ```
 
 This adds WebGo to your `go.mod`. If you import `github.com/maxence-charriere/go-app/v11/pkg/app` directly in your own code, run `go mod tidy` afterward so it is added as a direct dependency too.
@@ -116,3 +116,5 @@ Running the generator binary writes the static files (`index.html`, `app.js`, `a
 
 - See the pages and state guide for building pages with `Page`, `Base`, and `ViewModel`.
 - See the markdown guide for rendering markdown content inside a page.
+- See the Styling page for writing typed CSS rules with the `style`, `css`, `kw`, `media`, `container` and `supports` packages: selectors, nesting, at-rules and `!important`.
+- See the Applying page for delivering those rules: stylesheets, `serve.Handler`, `style.Run`, and rules driven by actions and `ViewModel.OnAction`.

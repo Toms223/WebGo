@@ -1,6 +1,6 @@
-The `page` package builds screens out of a `Layout` and a `model.ViewModel`, and assembles them under a `Base` component that switches between screens by route. The `model` package holds the state each screen reads and writes.
+The `page` package builds screens out of a `Layout` and a `data.ViewModel`, and assembles them under a `Base` component that switches between screens by route. The `data` package holds the state each screen reads and writes.
 
-This page covers `github.com/Toms223/WebGo` from `v0.0.3` onward. `ViewModel.State()` only exists from `v0.0.3` onward.
+This page covers `github.com/Toms223/WebGo` from `v0.0.5` onward. `v0.0.5` renamed the `model` package to `data` (the API is otherwise identical).
 
 ## Page
 
@@ -23,7 +23,7 @@ func NewPage[T any](path string) *Page[T]
 package main
 
 import (
-	"github.com/Toms223/WebGo/model"
+	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/page"
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
@@ -44,7 +44,7 @@ func (s *shellLayout) Error(err error) app.UI {
 	return app.Text(err.Error())
 }
 
-func (s *shellLayout) Draw(m *model.ViewModel[AppState]) app.HTMLDiv {
+func (s *shellLayout) Draw(m *data.ViewModel[AppState]) app.HTMLDiv {
 	return app.Div().Body(s.body...)
 }
 
@@ -54,7 +54,7 @@ func (s *shellLayout) Body(content ...app.UI) page.Layout[AppState] {
 }
 
 func main() {
-	vm, err := model.NewViewModel("app-state", &AppState{})
+	vm, err := data.NewViewModel("app-state", &AppState{})
 	if err != nil {
 		panic(err)
 	}
@@ -72,7 +72,7 @@ func main() {
 
 - `At(path string) *Page[T]` sets the page's path.
 - `WithLayout(layout Layout[T]) *Page[T]` sets the page's layout. Passing `nil` sets the page's error to `ErrNoLayout`.
-- `WithModel(m *model.ViewModel[T]) *Page[T]` sets the page's model. Passing `nil` sets the page's error to `ErrNoModel`.
+- `WithModel(m *data.ViewModel[T]) *Page[T]` sets the page's model. Passing `nil` sets the page's error to `ErrNoModel`.
 
 ### Error latching
 
@@ -134,7 +134,7 @@ Only `*Page[T]` (a pointer) satisfies the `Screen` interface described below. A 
 ```go
 type Base[U any] struct {
 	BaseLayout Layout[U]
-	Model      *model.ViewModel[U]
+	Model      *data.ViewModel[U]
 	Screens    []Screen
 	// unexported fields
 }
@@ -145,7 +145,7 @@ type Base[U any] struct {
 ### NewBase
 
 ```go
-func NewBase[U any](layout Layout[U], model *model.ViewModel[U], screens []Screen) (*Base[U], error)
+func NewBase[U any](layout Layout[U], model *data.ViewModel[U], screens []Screen) (*Base[U], error)
 ```
 
 `NewBase` requires all three arguments:
@@ -203,14 +203,14 @@ A consumer of this package implements both of these interfaces.
 type Layout[T any] interface {
 	Loading() app.UI
 	Error(error) app.UI
-	Draw(m *model.ViewModel[T]) app.HTMLDiv
+	Draw(m *data.ViewModel[T]) app.HTMLDiv
 	Body(...app.UI) Layout[T]
 }
 ```
 
 - `Loading()` returns what to show while a `Page` or `Base` is not yet mounted.
 - `Error(err error)` returns what to show when a `Page` or `Base` has an error (see the four exported errors below).
-- `Draw(m *model.ViewModel[T])` returns the fully assembled markup, given the current model.
+- `Draw(m *data.ViewModel[T])` returns the fully assembled markup, given the current model.
 - `Body(content ...app.UI)` receives the content to show inside the layout and returns the layout itself (so it can be chained into `Draw`). On a `Base`, `Body` is called on every render — store the given content by replacing what was stored before, not by appending to it.
 
 ### Screen
@@ -241,7 +241,7 @@ type ViewModel[T any] struct {
 }
 ```
 
-A `ViewModel[T]` binds a state value of type `T` to a key in `go-app`'s state store.
+`ViewModel[T]` lives in the `data` package. A `ViewModel[T]` binds a state value of type `T` to a key in `go-app`'s state store.
 
 ### NewViewModel
 
@@ -286,6 +286,28 @@ func (v *ViewModel[T]) Observe(ctx app.Context) app.Observer
 ```
 
 `Observe` returns an `app.Observer` that watches the model's key in the state store. It fires when the store's value for that key changes through `Set` or `SetAndPersist` — not on a direct write to the model's in-memory state.
+
+### OnAction
+
+```go
+func (v *ViewModel[T]) OnAction(ctx app.Context) {
+	if v.source != nil && v.source.Mounted() {
+		return
+	}
+	v.source = ctx.Src()
+	ctx.ObserveState(v.key, v.state).OnChange(func() {
+		ctx.NewActionWithValue(v.key, v.state)
+	})
+}
+```
+
+`OnAction` turns state changes into go-app actions. Each `Set` or `SetAndPersist` through the model fires an action named after the model's key, whose value is the model's `*T`. A direct write to the in-memory state fires nothing.
+
+- Call it in `OnMount`.
+- Use the same key in `style.When` and `style.Compute`: the key is the action name, and `*T` is the type the binding receives.
+- Call it from lifecycle hooks only, never from `Render`.
+
+It registers once per model, however many components call it. It registers again only when the component it registered on has dismounted, so a component that mounts again after a navigation calls it again in its own `OnMount`. The Applying page shows it driving dynamic rules.
 
 ### Action.Apply
 
@@ -342,7 +364,7 @@ Storing a fetched value and reading it back in a layout's `Draw`:
 package main
 
 import (
-	"github.com/Toms223/WebGo/model"
+	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/page"
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
@@ -355,7 +377,7 @@ func fetchUser() string {
 	return "ada"
 }
 
-func loadUser(ctx app.Context, vm *model.ViewModel[AppState]) {
+func loadUser(ctx app.Context, vm *data.ViewModel[AppState]) {
 	ctx.Async(func() {
 		user := fetchUser()
 		ctx.Dispatch(func(ctx app.Context) {
@@ -386,13 +408,13 @@ func (l *AppLayout) Body(content ...app.UI) page.Layout[AppState] {
 	return l
 }
 
-func (l *AppLayout) Draw(m *model.ViewModel[AppState]) app.HTMLDiv {
+func (l *AppLayout) Draw(m *data.ViewModel[AppState]) app.HTMLDiv {
 	current := m.State()
 	return app.Div().Text(current.User)
 }
 
 func main() {
-	vm, err := model.NewViewModel("app-state", &AppState{})
+	vm, err := data.NewViewModel("app-state", &AppState{})
 	if err != nil {
 		panic(err)
 	}

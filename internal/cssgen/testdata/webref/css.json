@@ -1,0 +1,419 @@
+{
+  "atrules": [
+    {
+      "name": "@container",
+      "href": "https://drafts.csswg.org/css-conditional-5/#at-ruledef-container",
+      "syntax": "@container <container-condition># { <rule-list> }",
+      "descriptors": [
+        {
+          "name": "inline-size",
+          "href": "https://drafts.csswg.org/css-conditional-5/#descdef-container-inline-size",
+          "for": "@container",
+          "type": "range",
+          "syntax": "<length>"
+        },
+        {
+          "name": "orientation",
+          "href": "https://drafts.csswg.org/css-conditional-5/#descdef-container-orientation",
+          "for": "@container",
+          "type": "discrete",
+          "syntax": "portrait | landscape"
+        },
+        {
+          "name": "scrollable",
+          "href": "https://drafts.csswg.org/css-conditional-5/#descdef-container-scrollable",
+          "for": "@container",
+          "type": "discrete",
+          "syntax": "none | top | x"
+        },
+        {
+          "name": "width",
+          "href": "https://drafts.csswg.org/css-conditional-5/#descdef-container-width",
+          "for": "@container",
+          "type": "range",
+          "syntax": "<length>"
+        }
+      ],
+      "extended": []
+    },
+    {
+      "name": "@font-face",
+      "href": "https://drafts.csswg.org/css-fonts-4/#at-ruledef-font-face",
+      "syntax": "@font-face { <declaration-list> }",
+      "descriptors": [
+        {
+          "name": "ascent-override",
+          "href": "https://drafts.csswg.org/css-fonts-4/#descdef-font-face-ascent-override",
+          "for": "@font-face",
+          "type": "discrete",
+          "syntax": "[ normal | <percentage [0,∞]> ]{1,2}"
+        },
+        {
+          "name": "font-display",
+          "href": "https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-display",
+          "for": "@font-face",
+          "type": "discrete",
+          "syntax": "auto | block | swap | fallback | optional"
+        },
+        {
+          "name": "font-family",
+          "href": "https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-family",
+          "for": "@font-face",
+          "type": "discrete",
+          "syntax": "<font-family-name>"
+        },
+        {
+          "name": "font-weight",
+          "href": "https://drafts.csswg.org/css-fonts-4/#descdef-font-face-font-weight",
+          "for": "@font-face",
+          "type": "discrete",
+          "syntax": "auto | <font-weight-absolute>{1,2}"
+        },
+        {
+          "name": "src",
+          "href": "https://drafts.csswg.org/css-fonts-4/#descdef-font-face-src",
+          "for": "@font-face",
+          "type": "discrete",
+          "syntax": "<font-src-list>"
+        }
+      ],
+      "extended": []
+    },
+    {
+      "name": "@import",
+      "href": "https://drafts.csswg.org/css-cascade-5/#at-ruledef-import",
+      "syntax": "@import [ <url> | <string> ] [ layer | layer(<layer-name>) ]? <import-conditions> ;",
+      "descriptors": [],
+      "extended": []
+    },
+    {
+      "name": "@keyframes",
+      "href": "https://drafts.csswg.org/css-animations-1/#at-ruledef-keyframes",
+      "syntax": "@keyframes <keyframes-name> { <rule-list> }",
+      "descriptors": [],
+      "extended": []
+    },
+    {
+      "name": "@layer",
+      "href": "https://drafts.csswg.org/css-cascade-5/#at-ruledef-layer",
+      "syntax": "@layer [ <layer-name># | <layer-name>? { <rule-list> } ]",
+      "descriptors": [],
+      "extended": []
+    },
+    {
+      "name": "@media",
+      "href": "https://drafts.csswg.org/css-conditional-3/#at-ruledef-media",
+      "syntax": "@media <media-query-list> { <rule-list> }",
+      "descriptors": [
+        {
+          "name": "-webkit-device-pixel-ratio",
+          "href": "https://compat.spec.whatwg.org/#descdef-media--webkit-device-pixel-ratio",
+          "for": "@media",
+          "type": "range",
+          "syntax": "<number>"
+        },
+        {
+          "name": "aspect-ratio",
+          "href": "https://drafts.csswg.org/mediaqueries-5/#descdef-media-aspect-ratio",
+          "for": "@media",
+          "type": "range",
+          "syntax": "<ratio>"
+        },
+        {
+          "name": "grid",
+          "href": "https://drafts.csswg.org/mediaqueries-5/#descdef-media-grid",
+          "for": "@media",
+          "type": "discrete",
+          "syntax": "<mq-boolean>"
+        },
+        {
+          "name": "hover",
+          "href": "https://drafts.csswg.org/mediaqueries-5/#descdef-media-hover",
+          "for": "@media",
+          "type": "discrete",
+          "syntax": "none | hover"
+        },
+        {
+          "name": "orientation",
+          "href": "https://drafts.csswg.org/mediaqueries-5/#descdef-media-orientation",
+          "for": "@media",
+          "type": "discrete",
+          "syntax": "portrait | landscape"
+        },
+        {
+          "name": "prefers-color-scheme",
+          "href": "https://drafts.csswg.org/mediaqueries-5/#descdef-media-prefers-color-scheme",
+          "for": "@media",
+          "type": "discrete",
+          "syntax": "light | dark"
+        },
+        {
+          "name": "resolution",
+          "href": "https://drafts.csswg.org/mediaqueries-5/#descdef-media-resolution",
+          "for": "@media",
+          "type": "range",
+          "syntax": "<resolution> | infinite"
+        },
+        {
+          "name": "width",
+          "href": "https://drafts.csswg.org/mediaqueries-5/#descdef-media-width",
+          "for": "@media",
+          "type": "range",
+          "syntax": "<length>"
+        }
+      ],
+      "extended": []
+    },
+    {
+      "name": "@property",
+      "href": "https://drafts.css-houdini.org/css-properties-values-api-1/#at-ruledef-property",
+      "syntax": "@property <custom-property-name> { <declaration-list> }",
+      "descriptors": [
+        {
+          "name": "inherits",
+          "href": "https://drafts.css-houdini.org/css-properties-values-api-1/#descdef-property-inherits",
+          "for": "@property",
+          "type": "discrete",
+          "syntax": "true | false"
+        },
+        {
+          "name": "initial-value",
+          "href": "https://drafts.css-houdini.org/css-properties-values-api-1/#descdef-property-initial-value",
+          "for": "@property",
+          "type": "discrete",
+          "syntax": "<declaration-value>?"
+        },
+        {
+          "name": "syntax",
+          "href": "https://drafts.css-houdini.org/css-properties-values-api-1/#descdef-property-syntax",
+          "for": "@property",
+          "type": "discrete",
+          "syntax": "<string>"
+        }
+      ],
+      "extended": []
+    },
+    {
+      "name": "@supports",
+      "href": "https://drafts.csswg.org/css-conditional-3/#at-ruledef-supports",
+      "syntax": "@supports <supports-condition> { <rule-list> }",
+      "descriptors": [],
+      "extended": []
+    }
+  ],
+  "functions": [],
+  "properties": [
+    {
+      "name": "width",
+      "href": "https://drafts.csswg.org/css-sizing-3/#propdef-width",
+      "syntax": "auto | <box-size> | <anchor-size()>",
+      "extended": []
+    },
+    {
+      "name": "padding-top",
+      "href": "https://drafts.csswg.org/css-box-4/#propdef-padding-top",
+      "syntax": "<length-percentage [0,∞]>",
+      "extended": []
+    },
+    {
+      "name": "padding",
+      "href": "https://drafts.csswg.org/css-box-4/#propdef-padding",
+      "syntax": "<'padding-top'>{1,4}",
+      "extended": []
+    },
+    {
+      "name": "border-width",
+      "href": "https://drafts.csswg.org/css-borders-4/#propdef-border-width",
+      "syntax": "<line-width>{1,4}",
+      "extended": []
+    },
+    {
+      "name": "backdrop-filter",
+      "href": "https://drafts.csswg.org/filter-effects-2/#propdef-backdrop-filter",
+      "syntax": "none | <filter-value-list>",
+      "extended": []
+    },
+    {
+      "name": "font-family",
+      "href": "https://drafts.csswg.org/css-fonts-4/#propdef-font-family",
+      "syntax": "[ <family-name> | <generic-family> ]#",
+      "extended": []
+    },
+    {
+      "name": "anchor-name",
+      "href": "https://drafts.csswg.org/css-anchor-position-1/#propdef-anchor-name",
+      "syntax": "none | <dashed-ident>#",
+      "extended": []
+    },
+    {
+      "name": "display",
+      "href": "https://drafts.csswg.org/css-display-4/#propdef-display",
+      "syntax": "[ <display-outside> || <display-inside> ] | list-item | contents | none",
+      "extended": [
+        "https://drafts.csswg.org/css-grid-3/"
+      ]
+    },
+    {
+      "name": "cursor",
+      "href": "https://drafts.csswg.org/css-ui-4/#propdef-cursor",
+      "syntax": "auto | default | pointer",
+      "extended": []
+    },
+    {
+      "name": "-webkit-line-clamp",
+      "href": "https://drafts.csswg.org/css-overflow-4/#propdef--webkit-line-clamp",
+      "syntax": "none | <integer [1,∞]>",
+      "extended": []
+    },
+    {
+      "name": "legacy-thing",
+      "href": "https://drafts.csswg.org/css-fixture-1/#propdef-legacy-thing",
+      "syntax": "<length>",
+      "extended": []
+    },
+    {
+      "name": "flagged-thing",
+      "href": "https://drafts.csswg.org/css-fixture-1/#propdef-flagged-thing",
+      "syntax": "<length>",
+      "extended": []
+    },
+    {
+      "name": "-webkit-box-align",
+      "href": "https://compat.spec.whatwg.org/#propdef--webkit-box-align",
+      "extended": []
+    }
+  ],
+  "selectors": [
+    {
+      "name": ":hover",
+      "href": "https://drafts.csswg.org/selectors-4/#hover-pseudo",
+      "syntax": ":hover",
+      "extended": []
+    },
+    {
+      "name": "::before",
+      "href": "https://drafts.csswg.org/css-pseudo-4/#selectordef-before",
+      "syntax": "::before",
+      "extended": []
+    },
+    {
+      "name": ":nth-child()",
+      "href": "https://drafts.csswg.org/selectors-4/#nth-child-pseudo",
+      "syntax": ":nth-child(An+B [of S]? )",
+      "extended": []
+    },
+    {
+      "name": ":not()",
+      "href": "https://drafts.csswg.org/selectors-4/#negation-pseudo",
+      "extended": []
+    },
+    {
+      "name": ":default",
+      "href": "https://drafts.csswg.org/selectors-4/#default-pseudo",
+      "syntax": ":default",
+      "extended": []
+    },
+    {
+      "name": ":dir()",
+      "href": "https://drafts.csswg.org/selectors-4/#dir-pseudo",
+      "extended": []
+    },
+    {
+      "name": ":lang()",
+      "href": "https://drafts.csswg.org/selectors-4/#lang-pseudo",
+      "extended": []
+    },
+    {
+      "name": ":popover-open",
+      "href": "https://drafts.csswg.org/selectors-4/#selectordef-popover-open",
+      "syntax": ":popover-open",
+      "extended": []
+    },
+    {
+      "name": ":first",
+      "href": "https://drafts.csswg.org/css2/#selectordef-first",
+      "syntax": ":first",
+      "extended": []
+    },
+    {
+      "name": ":left",
+      "href": "https://drafts.csswg.org/css2/#selectordef-left",
+      "syntax": ":left",
+      "extended": []
+    }
+  ],
+  "types": [
+    {
+      "name": "box-size",
+      "href": "https://drafts.csswg.org/css-sizing-4/#typedef-box-size",
+      "syntax": "<length-percentage [0,∞]> | min-content | max-content | fit-content(<length-percentage [0,∞]>) | stretch",
+      "extended": []
+    },
+    {
+      "name": "display-inside",
+      "href": "https://drafts.csswg.org/css-display-4/#typedef-display-inside",
+      "syntax": "flow | flow-root | table | flex | grid | ruby",
+      "extended": []
+    },
+    {
+      "name": "display-outside",
+      "href": "https://drafts.csswg.org/css-display-4/#typedef-display-outside",
+      "syntax": "block | inline | run-in",
+      "extended": []
+    },
+    {
+      "name": "filter-value-list",
+      "href": "https://drafts.csswg.org/filter-effects-1/#typedef-filter-value-list",
+      "syntax": "[ <filter-function> | <url> ]+",
+      "extended": []
+    },
+    {
+      "name": "font-family-name",
+      "href": "https://drafts.csswg.org/css-fonts-4/#typedef-font-family-name",
+      "syntax": "<string> | <custom-ident>+",
+      "extended": []
+    },
+    {
+      "name": "font-format",
+      "href": "https://drafts.csswg.org/css-fonts-4/#typedef-font-format",
+      "syntax": "woff | woff2 | truetype | opentype | collection | embedded-opentype | svg",
+      "extended": []
+    },
+    {
+      "name": "font-src-list",
+      "href": "https://drafts.csswg.org/css-fonts-4/#typedef-font-src-list",
+      "syntax": "<font-src>#",
+      "extended": []
+    },
+    {
+      "name": "font-weight-absolute",
+      "href": "https://drafts.csswg.org/css-fonts-4/#typedef-font-weight-absolute",
+      "syntax": "normal | bold | <number [1,1000]>",
+      "extended": []
+    },
+    {
+      "name": "length-percentage",
+      "href": "https://drafts.csswg.org/css-values-4/#typedef-length-percentage",
+      "syntax": "[ <length> | <percentage> ]",
+      "extended": []
+    },
+    {
+      "name": "line-width",
+      "href": "https://drafts.csswg.org/css-borders-4/#typedef-line-width",
+      "syntax": "<length [0,∞]> | thin | medium | thick",
+      "extended": []
+    },
+    {
+      "name": "mq-boolean",
+      "href": "https://drafts.csswg.org/mediaqueries-5/#typedef-mq-boolean",
+      "syntax": "<integer [0,1]>",
+      "extended": []
+    },
+    {
+      "name": "named-color",
+      "href": "https://drafts.csswg.org/css-color-4/#typedef-named-color",
+      "syntax": "red | rebeccapurple",
+      "extended": []
+    }
+  ]
+}

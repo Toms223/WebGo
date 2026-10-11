@@ -1,6 +1,11 @@
 package nav
 
-import "github.com/maxence-charriere/go-app/v11/pkg/app"
+import (
+	"github.com/Toms223/WebGo/docs/theme"
+	"github.com/maxence-charriere/go-app/v11/pkg/app"
+)
+
+const ID = "side-nav"
 
 type Entry struct {
 	Title string
@@ -10,13 +15,16 @@ type Entry struct {
 func Render(entries []Entry, active string) app.UI {
 	items := make([]app.UI, 0, len(entries))
 	for _, entry := range entries {
-		class := "nav-link"
+		classes := []string{theme.NavLink.Name()}
 		if entry.Route == active {
-			class = "nav-link nav-link-active"
+			classes = append(classes, theme.NavLinkActive.Name())
 		}
 		items = append(items, app.Li().Body(
-			app.A().Class(class).Href(entry.Route).Text(entry.Title),
+			app.A().Class(classes...).Href(entry.Route).Text(entry.Title),
 		))
 	}
-	return app.Nav().Class("nav").Body(app.Ul().Body(items...))
+	return app.Nav().ID(ID).Class(theme.SideNav.Name()).Body(
+		app.Span().Class(theme.NavLabel.Name()).Text("Guides"),
+		app.Ul().Body(items...),
+	)
 }

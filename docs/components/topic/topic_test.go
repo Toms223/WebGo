@@ -3,6 +3,7 @@ package topic
 import (
 	"errors"
 	"net/url"
+	"slices"
 	"strings"
 	"testing"
 
@@ -141,7 +142,7 @@ func TestOnActivateReceivesTheRoute(t *testing.T) {
 }
 
 func TestLayoutBodyReplacesRatherThanAppends(t *testing.T) {
-	layout := NewLayout("Markdown")
+	layout := NewLayout("Markdown", nil)
 	layout.Body(app.Div().Class("first"))
 	layout.Body(app.Div().Class("second"))
 
@@ -216,4 +217,250 @@ func mustParse(t *testing.T, raw string) *url.URL {
 		t.Fatalf("parsing %q failed: %v", raw, err)
 	}
 	return parsed
+}
+
+const sectioned = "Lead paragraph.\n\n## Overview\n\nOverview body.\n\n## Values\n\nValues body.\n"
+
+func mountSectioned(t *testing.T, raw string) (*Screen, app.Context, app.TestEngine) {
+	t.Helper()
+	ctx, engine := newContext(t)
+	if raw != "" {
+		ctx.Page().ReplaceURL(mustParse(t, raw))
+	}
+	screen, err := New(Config{
+		Key:   "styling",
+		Path:  "/styling",
+		Title: "Styling",
+		URL:   "/data/styling.md",
+	})
+	if err != nil {
+		t.Fatalf("building the screen failed: %v", err)
+	}
+	screen.loader = func(string) (string, error) { return sectioned, nil }
+	screen.OnMount(ctx)
+	engine.ConsumeAll()
+	return screen, ctx, engine
+}
+
+func TestCommitSplitsSections(t *testing.T) {
+	screen, _, _ := mountSectioned(t, "/styling")
+
+	state := screen.model.State()
+	if state.Intro != "Lead paragraph.\n\n" {
+		t.Errorf("expected the intro before the first section, got %q", state.Intro)
+	}
+	slugs := make([]string, 0, len(state.Sections))
+	for _, section := range state.Sections {
+		slugs = append(slugs, section.Slug)
+	}
+	if want := []string{"overview", "values"}; !slices.Equal(slugs, want) {
+		t.Errorf("section slugs = %v, want %v", slugs, want)
+	}
+	if state.Active != "overview" {
+		t.Errorf("expected the first section to be active, got %q", state.Active)
+	}
+}
+
+func TestFragmentSelectsTheSection(t *testing.T) {
+	screen, _, _ := mountSectioned(t, "/styling#values")
+
+	if got := screen.model.State().Active; got != "values" {
+		t.Errorf("expected the fragment to select values, got %q", got)
+	}
+}
+
+func TestUnknownFragmentFallsBackToTheFirstSection(t *testing.T) {
+	screen, _, _ := mountSectioned(t, "/styling#missing")
+
+	if got := screen.model.State().Active; got != "overview" {
+		t.Errorf("expected an unknown fragment to fall back to overview, got %q", got)
+	}
+}
+
+func TestDrawRendersOnlyTheActiveSection(t *testing.T) {
+	screen, _, _ := mountSectioned(t, "/styling")
+
+	out := app.HTMLString(screen.Content())
+	opening := out[:strings.Index(out, ">")+1]
+	for _, want := range []string{`class="topic"`, `id="topic"`} {
+		if !strings.HasPrefix(opening, "<div ") || !strings.Contains(opening, want) {
+			t.Errorf("expected the topic container to carry %s, got %s", want, opening)
+		}
+	}
+	for _, want := range []string{
+		`<h2 class="topic-title">Styling</h2>`,
+		"Lead paragraph.",
+		`<nav class="sections">`,
+		`href="#overview"`,
+		`href="#values"`,
+		"Overview body.",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in the topic, got %s", want, out)
+		}
+	}
+	if strings.Contains(out, "Values body.") {
+		t.Errorf("expected only the active section to render, got %s", out)
+	}
+	if count := strings.Count(out, "section-link-active"); count != 1 {
+		t.Errorf("expected exactly one active section link, found %d in %s", count, out)
+	}
+	active := linkFor(out, "Overview")
+	if !strings.Contains(active, `class="section-link section-link-active"`) {
+		t.Errorf("expected the overview link to be active, got %s", active)
+	}
+}
+
+func TestDrawWithoutSectionsRendersTheWholeSource(t *testing.T) {
+	ctx, engine := newContext(t)
+	screen := newScreen(t, func(string) (string, error) { return "Plain text.\n\n### Deeper\n", nil })
+
+	screen.OnMount(ctx)
+	engine.ConsumeAll()
+
+	out := app.HTMLString(screen.Content())
+	if strings.Contains(out, `class="sections"`) {
+		t.Errorf("expected no section switch without sections, got %s", out)
+	}
+	for _, want := range []string{"Plain text.", "Deeper"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in the topic, got %s", want, out)
+		}
+	}
+}
+
+func TestActivateUpdatesActive(t *testing.T) {
+	screen, ctx, engine := mountSectioned(t, "/styling")
+
+	screen.Activate(ctx, "values")
+	engine.ConsumeAll()
+
+	if got := screen.model.State().Active; got != "values" {
+		t.Fatalf("expected Activate to select values, got %q", got)
+	}
+	out := app.HTMLString(screen.Content())
+	if !strings.Contains(out, "Values body.") || strings.Contains(out, "Overview body.") {
+		t.Errorf("expected only the values section to render, got %s", out)
+	}
+}
+
+func TestActivateNavigatesToTheFragment(t *testing.T) {
+	cases := []struct {
+		browser string
+		want    string
+	}{
+		{"/styling", "/styling#values"},
+		{"/styling#overview", "/styling#values"},
+		{"/WebGo/styling", "/WebGo/styling#values"},
+	}
+
+	for _, test := range cases {
+		t.Run(test.browser, func(t *testing.T) {
+			screen, ctx, engine := mountSectioned(t, test.browser)
+			var visited []string
+			screen.navigate = func(ctx app.Context, destination *url.URL) {
+				visited = append(visited, destination.String())
+			}
+
+			screen.Activate(ctx, "values")
+			engine.ConsumeAll()
+
+			if !slices.Equal(visited, []string{test.want}) {
+				t.Errorf("expected one navigation to %s, got %v", test.want, visited)
+			}
+			if got := ctx.Page().URL().String(); got != test.browser {
+				t.Errorf("expected the current URL to be left for the navigator, got %s", got)
+			}
+		})
+	}
+}
+
+func TestActivateIgnoresAnUnknownSection(t *testing.T) {
+	screen, ctx, engine := mountSectioned(t, "/styling")
+
+	navigated := false
+	screen.navigate = func(app.Context, *url.URL) { navigated = true }
+
+	screen.Activate(ctx, "missing")
+	engine.ConsumeAll()
+
+	if navigated {
+		t.Error("expected an unknown section not to navigate")
+	}
+
+	if got := screen.model.State().Active; got != "overview" {
+		t.Errorf("expected an unknown section to leave overview active, got %q", got)
+	}
+}
+
+func linkFor(html, text string) string {
+	marker := ">" + text + "</a>"
+	end := strings.Index(html, marker)
+	if end < 0 {
+		return ""
+	}
+	start := strings.LastIndex(html[:end], "<a ")
+	if start < 0 {
+		return ""
+	}
+	return html[start : end+len(marker)]
+}
+
+func TestOnNavFollowsTheFragment(t *testing.T) {
+	cases := []struct {
+		name     string
+		fragment string
+		want     string
+	}{
+		{"a known section is selected", "/styling#values", "values"},
+		{"an unknown section leaves the active one", "/styling#missing", "overview"},
+		{"no fragment leaves the active one", "/styling", "overview"},
+	}
+
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			screen, ctx, engine := mountSectioned(t, "/styling")
+			navigated := false
+			screen.navigate = func(app.Context, *url.URL) { navigated = true }
+
+			ctx.Page().ReplaceURL(mustParse(t, test.fragment))
+			screen.OnNav(ctx)
+			engine.ConsumeAll()
+
+			if got := screen.model.State().Active; got != test.want {
+				t.Errorf("expected %q to be active, got %q", test.want, got)
+			}
+			if navigated {
+				t.Error("expected OnNav to follow the URL without navigating")
+			}
+		})
+	}
+}
+
+func TestDrawRendersTheRegisteredDemos(t *testing.T) {
+	ctx, engine := newContext(t)
+	screen, err := New(Config{
+		Key:   "demos",
+		Path:  "/demos",
+		Title: "Demos",
+		URL:   "/data/demos.md",
+		Demos: map[string]func() app.UI{
+			"box": func() app.UI { return app.Span().Class("demo-box") },
+		},
+	})
+	if err != nil {
+		t.Fatalf("building the screen failed: %v", err)
+	}
+	screen.loader = func(string) (string, error) {
+		return "Lead.\n\n## Box\n\n```go box\nvar Box = 1\n```\n", nil
+	}
+	screen.OnMount(ctx)
+	engine.ConsumeAll()
+
+	out := app.HTMLString(screen.Content())
+	for _, want := range []string{`class="example"`, `class="demo-box"`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in the topic, got %s", want, out)
+		}
+	}
 }

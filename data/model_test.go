@@ -1,4 +1,4 @@
-package model
+package data
 
 import (
 	"reflect"
@@ -507,5 +507,145 @@ func TestTwoViewModelsOnTheSameKeyShareState(t *testing.T) {
 
 	if reader.state.N != 21 {
 		t.Fatalf("expected the second view model to see the write, got %+v", reader.state)
+	}
+}
+
+type actionProbe struct {
+	vm   *ViewModel[counter]
+	seen *[]app.Action
+	ctx  *app.Context
+}
+
+func (p actionProbe) register(ctx app.Context) {
+	*p.ctx = ctx
+	p.vm.OnAction(ctx)
+	ctx.Handle(p.vm.key, func(ctx app.Context, a app.Action) { *p.seen = append(*p.seen, a) })
+}
+
+type actionWatcher struct {
+	app.Compo
+	Tick  int
+	probe actionProbe
+}
+
+func (w *actionWatcher) OnUpdate(ctx app.Context) { w.probe.register(ctx) }
+
+func (w *actionWatcher) Render() app.UI { return app.Div() }
+
+type otherActionWatcher struct {
+	app.Compo
+	Tick  int
+	probe actionProbe
+}
+
+func (w *otherActionWatcher) OnUpdate(ctx app.Context) { w.probe.register(ctx) }
+
+func (w *otherActionWatcher) Render() app.UI { return app.Div() }
+
+type actionCaller struct {
+	app.Compo
+	Tick int
+	vm   *ViewModel[counter]
+}
+
+func (c *actionCaller) OnUpdate(ctx app.Context) { c.vm.OnAction(ctx) }
+
+func (c *actionCaller) Render() app.UI { return app.Div() }
+
+type actionPair struct {
+	app.Compo
+	Tick  int
+	probe actionProbe
+}
+
+func (p *actionPair) OnUpdate(ctx app.Context) {
+	*p.probe.ctx = ctx
+	ctx.Handle(p.probe.vm.key, func(ctx app.Context, a app.Action) { *p.probe.seen = append(*p.probe.seen, a) })
+}
+
+func (p *actionPair) Render() app.UI {
+	return app.Div().Body(
+		&actionCaller{Tick: p.Tick, vm: p.probe.vm},
+		&actionCaller{Tick: p.Tick, vm: p.probe.vm},
+	)
+}
+
+func mount(t *testing.T, engine app.TestEngine, first, second app.Composer) {
+	t.Helper()
+
+	if err := engine.Load(first); err != nil {
+		t.Fatalf("mounting the root failed: %v", err)
+	}
+	if err := engine.Load(second); err != nil {
+		t.Fatalf("updating the root failed: %v", err)
+	}
+	engine.ConsumeAll()
+}
+
+func TestOnActionFiresTheKeyWithTheState(t *testing.T) {
+	vm, err := NewViewModel("settings", &counter{N: 1})
+	if err != nil {
+		t.Fatalf("creating view model failed: %v", err)
+	}
+	engine := app.NewTestEngine()
+	var seen []app.Action
+	var ctx app.Context
+	mount(t, engine, &actionWatcher{probe: actionProbe{vm: vm, seen: &seen, ctx: &ctx}}, &actionWatcher{Tick: 1})
+
+	ctx.SetState("settings", &counter{N: 7})
+	engine.ConsumeAll()
+
+	if len(seen) != 1 {
+		t.Fatalf("expected one action, got %d", len(seen))
+	}
+	if seen[0].Name != "settings" {
+		t.Fatalf("expected the action to be named after the key, got %q", seen[0].Name)
+	}
+	value, ok := seen[0].Value.(*counter)
+	if !ok {
+		t.Fatalf("expected the action to carry a *counter, got %T", seen[0].Value)
+	}
+	if value != vm.State() {
+		t.Fatalf("expected the action to carry the view model's pointer, got %p want %p", value, vm.State())
+	}
+	if value.N != 7 {
+		t.Fatalf("expected the carried state to be the new one, got %+v", value)
+	}
+}
+
+func TestOnActionRegistersOnce(t *testing.T) {
+	vm, err := NewViewModel("registered-once", &counter{})
+	if err != nil {
+		t.Fatalf("creating view model failed: %v", err)
+	}
+	engine := app.NewTestEngine()
+	var seen []app.Action
+	var ctx app.Context
+	mount(t, engine, &actionPair{probe: actionProbe{vm: vm, seen: &seen, ctx: &ctx}}, &actionPair{Tick: 1})
+
+	ctx.SetState("registered-once", &counter{N: 1})
+	engine.ConsumeAll()
+
+	if len(seen) != 1 {
+		t.Fatalf("expected two components calling OnAction to yield one action, got %d", len(seen))
+	}
+}
+
+func TestOnActionReregistersAfterDismount(t *testing.T) {
+	vm, err := NewViewModel("reregistered", &counter{})
+	if err != nil {
+		t.Fatalf("creating view model failed: %v", err)
+	}
+	engine := app.NewTestEngine()
+	var seen []app.Action
+	var first, second app.Context
+	mount(t, engine, &actionWatcher{probe: actionProbe{vm: vm, seen: &seen, ctx: &first}}, &actionWatcher{Tick: 1})
+	mount(t, engine, &otherActionWatcher{probe: actionProbe{vm: vm, seen: &seen, ctx: &second}}, &otherActionWatcher{Tick: 1})
+
+	second.SetState("reregistered", &counter{N: 1})
+	engine.ConsumeAll()
+
+	if len(seen) != 1 {
+		t.Fatalf("expected the observer to move to the surviving component, got %d actions", len(seen))
 	}
 }

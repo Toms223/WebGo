@@ -12,8 +12,13 @@ import (
 var markdownParser = goldmark.New().Parser()
 
 type Style struct {
-	Heading    string
-	Subheading string
+	Heading      string
+	Subheading   string
+	Demos        map[string]func() app.UI
+	Example      string
+	ExampleCode  string
+	ExampleLive  string
+	ExampleLabel string
 }
 
 func RenderMarkdown(source string, style Style) []app.UI {
@@ -45,9 +50,9 @@ func block(node ast.Node, src []byte, style Style) app.UI {
 	case *ast.Blockquote:
 		return app.Blockquote().Body(blocks(node, src, style)...)
 	case *ast.FencedCodeBlock:
-		return codeBlock(typed.Lines(), src)
+		return fencedCodeBlock(typed, src, style)
 	case *ast.CodeBlock:
-		return codeBlock(typed.Lines(), src)
+		return codeBlock("", typed.Lines(), src)
 	case *ast.ThematicBreak:
 		return app.Hr()
 	case *ast.HTMLBlock:
@@ -86,8 +91,55 @@ func listItem(node *ast.ListItem, src []byte, style Style) app.UI {
 	return app.Li().Body(body...)
 }
 
-func codeBlock(segments *textm.Segments, src []byte) app.UI {
-	return app.Pre().Body(
+func DemoNames(source string) []string {
+	src := []byte(source)
+	var names []string
+	_ = ast.Walk(markdownParser.Parse(textm.NewReader(src)), func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+		if fence, ok := node.(*ast.FencedCodeBlock); ok && entering {
+			if _, name := fenceInfo(fence, src); name != "" {
+				names = append(names, name)
+			}
+		}
+		return ast.WalkContinue, nil
+	})
+	return names
+}
+
+func fenceInfo(node *ast.FencedCodeBlock, src []byte) (language, demo string) {
+	if node.Info == nil {
+		return "", ""
+	}
+	words := strings.Fields(string(node.Info.Segment.Value(src)))
+	if len(words) > 0 {
+		language = words[0]
+	}
+	if len(words) > 1 {
+		demo = words[1]
+	}
+	return language, demo
+}
+
+func fencedCodeBlock(node *ast.FencedCodeBlock, src []byte, style Style) app.UI {
+	language, name := fenceInfo(node, src)
+	code := codeBlock(language, node.Lines(), src)
+	demo, registered := style.Demos[name]
+	if name == "" || !registered {
+		return code
+	}
+	return app.Div().Class(style.Example).Body(
+		app.Div().Class(style.ExampleLabel).Text("Go"),
+		app.Div().Class(style.ExampleCode).Body(code),
+		app.Div().Class(style.ExampleLabel).Text("Result"),
+		app.Div().Class(style.ExampleLive).Body(demo()),
+	)
+}
+
+func codeBlock(language string, segments *textm.Segments, src []byte) app.UI {
+	pre := app.Pre()
+	if language != "" {
+		pre = pre.Class("lang-" + language)
+	}
+	return pre.Body(
 		app.Code().Text(lines(segments, src)),
 	)
 }

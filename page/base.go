@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/Toms223/WebGo/model"
+	"github.com/Toms223/WebGo/data"
 
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
@@ -12,7 +12,7 @@ import (
 type Base[U any] struct {
 	app.Compo
 	BaseLayout Layout[U]
-	Model      *model.ViewModel[U]
+	Model      *data.ViewModel[U]
 	Screens    []Screen
 	selected   int
 	mounted    bool
@@ -20,7 +20,7 @@ type Base[U any] struct {
 	baseKnown  bool
 }
 
-func NewBase[U any](layout Layout[U], model *model.ViewModel[U], screens []Screen) (*Base[U], error) {
+func NewBase[U any](layout Layout[U], model *data.ViewModel[U], screens []Screen) (*Base[U], error) {
 	if layout == nil {
 		return nil, ErrNoLayout
 	}
@@ -60,6 +60,9 @@ func (b *Base[U]) OnNav(ctx app.Context) {
 		}
 		b.restoreURL(ctx, route)
 		if index == b.selected {
+			if navigator, ok := screen.(interface{ OnNav(app.Context) }); ok {
+				navigator.OnNav(ctx)
+			}
 			return
 		}
 		if b.selected >= 0 && b.selected < len(b.Screens) {
@@ -74,10 +77,14 @@ func (b *Base[U]) OnNav(ctx app.Context) {
 
 func (b *Base[U]) restoreURL(ctx app.Context, route string) {
 	wanted := b.browserPath(route)
-	if normalizePath(ctx.Page().URL().Path) == wanted {
+	current := ctx.Page().URL()
+	if normalizePath(current.Path) == wanted {
 		return
 	}
-	ctx.Page().ReplaceURL(mustParseUrl(wanted))
+	next := *current
+	next.Path = wanted
+	next.RawPath = ""
+	ctx.Page().ReplaceURL(&next)
 }
 
 func (b *Base[U]) browserPath(route string) string {

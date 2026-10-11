@@ -38,3 +38,14 @@ func TestRenderMarksNothingForAnUnknownRoute(t *testing.T) {
 		t.Errorf("an unknown route must not mark any entry active, got %s", out)
 	}
 }
+
+func TestRenderIsASidebarList(t *testing.T) {
+	out := app.HTMLString(Render(entries, "/"))
+	open, _, _ := strings.Cut(out, ">")
+	if !strings.HasPrefix(open, "<nav ") || !strings.Contains(open, `class="side-nav"`) || !strings.Contains(open, `id="`+ID+`"`) {
+		t.Errorf("expected the navigation to be the side-nav list with id %q, got %s", ID, out)
+	}
+	if count := strings.Count(out, `class="nav-link`); count != len(entries) {
+		t.Errorf("expected %d nav links, found %d in %s", len(entries), count, out)
+	}
+}

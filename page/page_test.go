@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Toms223/WebGo/model"
+	"github.com/Toms223/WebGo/data"
 
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
@@ -62,7 +62,7 @@ type recordingLayout struct {
 	drawCalls    int
 	errorCalls   int
 	errs         []error
-	drawnWith    []*model.ViewModel[appState]
+	drawnWith    []*data.ViewModel[appState]
 	body         []app.UI
 }
 
@@ -82,7 +82,7 @@ func (l *recordingLayout) Body(content ...app.UI) Layout[appState] {
 	return l
 }
 
-func (l *recordingLayout) Draw(m *model.ViewModel[appState]) app.HTMLDiv {
+func (l *recordingLayout) Draw(m *data.ViewModel[appState]) app.HTMLDiv {
 	l.drawCalls++
 	l.drawnWith = append(l.drawnWith, m)
 	body := []app.UI{app.Header().Class("chrome").Text("chrome")}
@@ -141,12 +141,12 @@ func newLayout(name string) *recordingLayout {
 	return &recordingLayout{name: name}
 }
 
-func newModel(user string) *model.ViewModel[appState] {
-	viewModel, _ := model.NewViewModel("app-state", &appState{User: user})
+func newModel(user string) *data.ViewModel[appState] {
+	viewModel, _ := data.NewViewModel("app-state", &appState{User: user})
 	return viewModel
 }
 
-func newBase(t *testing.T, layout Layout[appState], m *model.ViewModel[appState], screens []Screen) *Base[appState] {
+func newBase(t *testing.T, layout Layout[appState], m *data.ViewModel[appState], screens []Screen) *Base[appState] {
 	t.Helper()
 
 	base, err := NewBase(layout, m, screens)
@@ -459,7 +459,7 @@ func TestNewBaseRejectsMissingDependencies(t *testing.T) {
 	cases := []struct {
 		name    string
 		layout  Layout[appState]
-		model   *model.ViewModel[appState]
+		model   *data.ViewModel[appState]
 		screens []Screen
 		want    error
 	}{

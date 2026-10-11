@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Toms223/WebGo/docs/components/topic"
+	"github.com/Toms223/WebGo/docs/pages/home"
 )
 
 func TestEveryScreenHasItsDataFile(t *testing.T) {
@@ -16,6 +17,9 @@ func TestEveryScreenHasItsDataFile(t *testing.T) {
 	}
 
 	for _, screen := range screens {
+		if screen.Route() == home.Route {
+			continue
+		}
 		topicScreen, ok := screen.(*topic.Screen)
 		if !ok {
 			t.Fatalf("screen %q is a %T, not a *topic.Screen: cannot determine its data source", screen.Route(), screen)

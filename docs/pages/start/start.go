@@ -7,7 +7,7 @@ import (
 
 const (
 	Title = "Getting Started"
-	Route = "/"
+	Route = "/start"
 )
 
 func New() (*topic.Screen, error) {

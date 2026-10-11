@@ -1,7 +1,10 @@
 package topic
 
 type State struct {
-	Source string
-	Err    string
-	Loaded bool
+	Source   string
+	Intro    string
+	Sections []Section
+	Active   string
+	Err      string
+	Loaded   bool
 }

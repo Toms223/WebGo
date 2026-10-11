@@ -2,8 +2,9 @@ package page
 
 import (
 	"errors"
-	"github.com/Toms223/WebGo/model"
 	"strings"
+
+	"github.com/Toms223/WebGo/data"
 
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
@@ -18,7 +19,7 @@ var (
 type Layout[T any] interface {
 	Loading() app.UI
 	Error(error) app.UI
-	Draw(m *model.ViewModel[T]) app.HTMLDiv
+	Draw(m *data.ViewModel[T]) app.HTMLDiv
 	Body(...app.UI) Layout[T]
 }
 
@@ -32,7 +33,7 @@ type Screen interface {
 
 type Page[T any] struct {
 	Path    string
-	model   *model.ViewModel[T]
+	model   *data.ViewModel[T]
 	layout  Layout[T]
 	err     error
 	mounted bool
@@ -62,7 +63,7 @@ func (p *Page[T]) WithLayout(layout Layout[T]) *Page[T] {
 	return p
 }
 
-func (p *Page[T]) WithModel(m *model.ViewModel[T]) *Page[T] {
+func (p *Page[T]) WithModel(m *data.ViewModel[T]) *Page[T] {
 	if p.err != nil {
 		return p
 	}

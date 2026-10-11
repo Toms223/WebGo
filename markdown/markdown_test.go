@@ -1,6 +1,7 @@
 package markdown
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
@@ -163,5 +164,125 @@ func TestRenderMarkdownRendersNothingForBlankSource(t *testing.T) {
 		if got := RenderMarkdown(source, style); got != nil {
 			t.Fatalf("expected no elements for %q, got %d", source, len(got))
 		}
+	}
+}
+
+func demoStyle() Style {
+	return Style{
+		Example:      "example",
+		ExampleCode:  "example-code",
+		ExampleLive:  "example-live",
+		ExampleLabel: "example-label",
+		Demos: map[string]func() app.UI{
+			"card": func() app.UI { return app.Div().Class("demo-card").Text("live") },
+		},
+	}
+}
+
+var betweenTags = regexp.MustCompile(`\s*(<[^>]*>)\s*`)
+
+func renderWith(t *testing.T, source string, style Style) string {
+	t.Helper()
+	var out strings.Builder
+	for _, ui := range RenderMarkdown(source, style) {
+		out.WriteString(app.HTMLString(ui))
+	}
+	return betweenTags.ReplaceAllString(out.String(), "$1")
+}
+
+func TestFencedCodeBlockCarriesItsLanguage(t *testing.T) {
+	cases := []struct {
+		name   string
+		source string
+		want   string
+	}{
+		{"language", "```go\nx := 1\n```", `<pre class="lang-go">`},
+		{"language with an unknown demo", "```go missing\nx := 1\n```", `<pre class="lang-go">`},
+		{"no language", "```\nx := 1\n```", "<pre>"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			html := renderWith(t, tc.source, demoStyle())
+			if !strings.Contains(html, tc.want) {
+				t.Fatalf("expected %q in %s", tc.want, html)
+			}
+			if strings.Contains(html, "example") {
+				t.Fatalf("expected no example wrapper in %s", html)
+			}
+		})
+	}
+}
+
+func TestDemoFenceRendersTheLiveElement(t *testing.T) {
+	html := renderWith(t, "```go card\nx := 1\n```", demoStyle())
+	for _, expected := range []string{
+		`<div class="example">`,
+		`<div class="example-label">Go</div>`,
+		`<div class="example-code"><pre class="lang-go"><code>x := 1</code></pre></div>`,
+		`<div class="example-label">Result</div>`,
+		`<div class="example-live"><div class="demo-card">live</div></div>`,
+	} {
+		if !strings.Contains(html, expected) {
+			t.Fatalf("expected %q in %s", expected, html)
+		}
+	}
+}
+
+func TestDemoFenceWithEmptyClassNamesDropsTheClassAttributes(t *testing.T) {
+	style := Style{Demos: demoStyle().Demos}
+	html := renderWith(t, "```go card\nx := 1\n```", style)
+	if strings.Contains(html, `class=""`) {
+		t.Fatalf("expected no empty class attributes in %s", html)
+	}
+	if !strings.Contains(html, `<div class="demo-card">live</div>`) {
+		t.Fatalf("expected the demo in %s", html)
+	}
+}
+
+func TestUnregisteredDemoRendersCodeOnly(t *testing.T) {
+	for name, style := range map[string]Style{
+		"unregistered name": demoStyle(),
+		"nil demos":         {Example: "example"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			html := renderWith(t, "```go other\nx := 1\n```", style)
+			if strings.Contains(html, "example") || strings.Contains(html, "demo-card") {
+				t.Fatalf("expected the code block alone in %s", html)
+			}
+			if !strings.Contains(html, `<pre class="lang-go"><code>x := 1</code></pre>`) {
+				t.Fatalf("expected the code in %s", html)
+			}
+		})
+	}
+}
+
+func TestIndentedCodeBlockStaysPlain(t *testing.T) {
+	html := renderWith(t, "text\n\n    x := 1\n", demoStyle())
+	if !strings.Contains(html, "<pre><code>x := 1</code></pre>") {
+		t.Fatalf("expected a plain pre in %s", html)
+	}
+}
+
+func TestDemoNames(t *testing.T) {
+	cases := []struct {
+		name   string
+		source string
+		want   []string
+	}{
+		{"second words in order", "```go card\n```\n```css\n```\n```go accent\n```", []string{"card", "accent"}},
+		{"none", "```go\n```", nil},
+		{"blank", "", nil},
+		{"ignores indented code", "    code\n", nil},
+		{"fences inside lists", "- item\n\n  ```go card\n  x\n  ```", []string{"card"}},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := DemoNames(tc.source)
+			if strings.Join(got, ",") != strings.Join(tc.want, ",") {
+				t.Fatalf("expected %v, got %v", tc.want, got)
+			}
+		})
 	}
 }
