@@ -92,8 +92,3 @@ var ShellError = style.Class("shell-error").
 	Before(dot...).
 	Before(statusErrorMark...).
 	Media(narrow, shellStatusNarrow...)
-
-var DocEmpty = style.Class("doc-empty").
-	Set(statusBox...).
-	Before(dot...).
-	Before(statusPulse...)

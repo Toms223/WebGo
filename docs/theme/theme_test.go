@@ -48,7 +48,10 @@ func TestStylesBuild(t *testing.T) {
 		"@supports (color: color-mix(in srgb, red, blue)) {",
 		"& ",
 		".side {",
-		".sections {",
+		".rail {",
+		"\t.example-live button {",
+		"@keyframes reveal {",
+		".demo-counter {",
 		"@media (prefers-color-scheme: dark) {",
 		"@media (max-width: 48rem) {",
 		"\t&::before {\n\t\t\t@media (prefers-reduced-motion: reduce) {\n\t\t\t\tanimation: none !important;",
@@ -106,18 +109,25 @@ func TestNamesMatchTheMarkup(t *testing.T) {
 		{ShellError, "shell-error"},
 		{NavLink, "nav-link"},
 		{NavLinkActive, "nav-link-active"},
-		{Sections, "sections"},
-		{SectionLink, "section-link"},
-		{SectionLinkActive, "section-link-active"},
+		{Rail, "rail"},
+		{RailLink, "rail-link"},
+		{RailLinkActive, "rail-link-active"},
+		{Pager, "pager"},
+		{PagerLink, "pager-link"},
 		{Topic, "topic"},
+		{TopicHeader, "topic-header"},
 		{TopicTitle, "topic-title"},
+		{TopicSection, "topic-section"},
+		{SectionHeading, "section-heading"},
 		{TopicLoading, "topic-loading"},
 		{TopicError, "topic-error"},
 		{Doc, "doc"},
 		{DocHeading, "doc-heading"},
 		{DocSubheading, "doc-subheading"},
-		{DocEmpty, "doc-empty"},
+		{Note, "note"},
 		{Example, "example"},
+		{ExampleBar, "example-bar"},
+		{ExampleTab, "example-tab"},
 		{ExampleCode, "example-code"},
 		{ExampleLive, "example-live"},
 		{ExampleLabel, "example-label"},
@@ -130,7 +140,7 @@ func TestNamesMatchTheMarkup(t *testing.T) {
 }
 
 func TestStatusRulesPulse(t *testing.T) {
-	for _, rule := range []*style.Rule{TopicLoading, ShellLoading, DocEmpty} {
+	for _, rule := range []*style.Rule{TopicLoading, ShellLoading} {
 		if want := "animation-name: " + Pulse.Name() + ";"; !strings.Contains(rule.CSS(), want) {
 			t.Errorf("%s lacks %q:\n%s", rule.Selector(), want, rule.CSS())
 		}

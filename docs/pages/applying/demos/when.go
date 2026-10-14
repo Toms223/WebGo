@@ -11,8 +11,6 @@ const CompactKey = "demo/compact"
 
 type Compact struct{ On bool }
 
-var compact = model(CompactKey, &Compact{})
-
 var DemoCompactBase = style.Class("demo-compact").
 	Set(
 		css.Padding(css.Rem(2)),
@@ -23,6 +21,8 @@ var DemoCompactBase = style.Class("demo-compact").
 var DemoCompact = style.Class("demo-compact").
 	Set(css.Padding(css.Rem(0.25))).
 	Bind(style.When(CompactKey, func(c *Compact) bool { return c.On }))
+
+var compact = model(CompactKey, &Compact{})
 
 type whenDemo struct{ app.Compo }
 

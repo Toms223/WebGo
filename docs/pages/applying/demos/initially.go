@@ -11,8 +11,6 @@ const BannerKey = "demo/banner"
 
 type Banner struct{ Hidden bool }
 
-var banner = model(BannerKey, &Banner{})
-
 var DemoBannerHidden = style.Class("demo-banner").
 	Set(css.Display(kw.None))
 
@@ -25,6 +23,8 @@ var DemoBanner = style.Class("demo-banner").
 	).
 	Bind(style.When(BannerKey, func(b *Banner) bool { return !b.Hidden })).
 	Initially(true)
+
+var banner = model(BannerKey, &Banner{})
 
 type initiallyDemo struct{ app.Compo }
 

@@ -22,29 +22,20 @@ func TestItemsBuild(t *testing.T) {
 	}
 }
 
-func TestEveryDemoMounts(t *testing.T) {
-	for name, demo := range All() {
-		compo, ok := demo().(app.Composer)
+func TestEveryExampleMounts(t *testing.T) {
+	for _, e := range Examples() {
+		compo, ok := e.Live().(app.Composer)
 		if !ok {
-			t.Errorf("demo %q is not a component", name)
+			t.Errorf("example %s is not a component", e.Name)
 			continue
 		}
 		engine := app.NewTestEngine()
 		if err := engine.Load(compo); err != nil {
-			t.Errorf("mounting demo %q failed: %v", name, err)
+			t.Errorf("mounting example %s failed: %v", e.Name, err)
 		}
 		engine.ConsumeAll()
-	}
-}
-
-func TestEveryDemoIsPinned(t *testing.T) {
-	pins := Pins()
-	if len(pins) != len(All()) {
-		t.Errorf("%d pins for %d demos", len(pins), len(All()))
-	}
-	for name := range All() {
-		if pins[name] == "" {
-			t.Errorf("demo %q has no pinned CSS", name)
+		if e.CSS == "" || !strings.Contains(e.CSS, "demo-") {
+			t.Errorf("example %s shows no rule CSS: %q", e.Name, e.CSS)
 		}
 	}
 }

@@ -19,22 +19,13 @@ func TestItemsBuild(t *testing.T) {
 	}
 }
 
-func TestEveryDemoRendersADemoClass(t *testing.T) {
-	for name, demo := range All() {
-		if out := app.HTMLString(demo()); !strings.Contains(out, `"demo-`) {
-			t.Errorf("demo %q renders no demo- class: %s", name, out)
+func TestEveryExampleRendersADemoClass(t *testing.T) {
+	for _, e := range Examples() {
+		if out := app.HTMLString(e.Live()); !strings.Contains(out, `"demo-`) {
+			t.Errorf("example %s renders no demo- class: %s", e.Name, out)
 		}
-	}
-}
-
-func TestEveryDemoIsPinned(t *testing.T) {
-	pins := Pins()
-	if len(pins) != len(All()) {
-		t.Errorf("%d pins for %d demos", len(pins), len(All()))
-	}
-	for name := range All() {
-		if pins[name] == "" {
-			t.Errorf("demo %q has no pinned CSS", name)
+		if e.CSS == "" || !strings.Contains(e.CSS, "demo-") {
+			t.Errorf("example %s shows no rule CSS: %q", e.Name, e.CSS)
 		}
 	}
 }

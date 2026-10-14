@@ -9,17 +9,7 @@ import (
 
 const AccentKey = "demo/accent"
 
-const (
-	Red   = "#FF3B30"
-	Blue  = "#2F6BFF"
-	Green = "#12A150"
-)
-
 type Accent struct{ Color string }
-
-var accent = model(AccentKey, startAccent())
-
-func startAccent() *Accent { return &Accent{Color: Red} }
 
 var DemoAccent = style.Class("demo-accent").
 	Bind(style.Compute(AccentKey, func(a *Accent) []css.Property {
@@ -28,6 +18,16 @@ var DemoAccent = style.Class("demo-accent").
 			css.BorderBottom(css.Px(3), kw.Solid, css.Hex(a.Color)),
 		}
 	}))
+
+const (
+	Red   = "#FF3B30"
+	Blue  = "#2F6BFF"
+	Green = "#12A150"
+)
+
+var accent = model(AccentKey, startAccent())
+
+func startAccent() *Accent { return &Accent{Color: Red} }
 
 type computeDemo struct{ app.Compo }
 

@@ -50,13 +50,11 @@ jobs:
       - name: Generate the static site
         run: go run . static -o dist --github-pages "${{ github.event.repository.name }}"
 
-      # The generator does not copy web/, and the markdown is fetched from
-      # /data/, so it is moved out of web/ the same way the container build does.
+      # The generator does not copy web/, so the wasm and the stylesheets are copied in.
       - name: Assemble the artifact
         run: |
           mkdir -p dist/web
           cp -r web/. dist/web/
-          mv dist/web/data dist/data
           cp dist/index.html dist/404.html
           touch dist/.nojekyll
 

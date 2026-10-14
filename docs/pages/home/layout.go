@@ -2,6 +2,7 @@ package home
 
 import (
 	"github.com/Toms223/WebGo/data"
+	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/pages/base"
 	"github.com/Toms223/WebGo/docs/pages/markdown"
 	"github.com/Toms223/WebGo/docs/pages/start"
@@ -52,7 +53,7 @@ func hero() app.UI {
 			),
 			app.P().Class(theme.Lead.Name()).Text("WebGo adds pages, view models, markdown and typed CSS to go-app. Routing, state and stylesheets are plain Go that compiles to WebAssembly, so the compiler checks your UI the way it checks your server."),
 			app.Div().Class(theme.Actions.Name()).Body(
-				app.A().Class(theme.Button.Name(), theme.ButtonPrimary.Name()).Href(start.Route).Body(app.Text("Get started"), arrow()),
+				app.A().Class(theme.Button.Name(), theme.ButtonPrimary.Name()).Href(nav.Href(start.Route)).Body(app.Text("Get started"), arrow()),
 				app.A().Class(theme.Button.Name()).Href(base.Repository).Text("Star on GitHub"),
 			),
 			app.Div().Class(theme.Code.Name(), theme.CodeQuiet.Name()).Body(
@@ -81,10 +82,10 @@ func features() app.UI {
 	return app.Section().Class(theme.Section.Name()).Body(
 		app.Span().Class(theme.Eyebrow.Name()).Text("What you get"),
 		app.Div().Class(theme.Tiles.Name()).Body(
-			card(state.Route, theme.FillSun, iconPages(), "Pages and routing", "A Base shell hosts Screens. Routes, base paths and fragments resolve in the browser, with no server round trip."),
-			card(state.Route, theme.FillLime, iconState(), "View models", "Typed state with Load, Apply and Set. Observe it from any component, or react to it from a stylesheet."),
-			card(styling.Route, theme.FillLilac, iconBrush(), "Typed CSS", "Properties, keywords, media and container queries, keyframes, nesting and layers as Go values. Dead rules never ship."),
-			card(markdown.Route, theme.FillCoral, iconDoc(), "Markdown with live demos", "Render docs from markdown and drop a running Go component into any fence. This site is built that way."),
+			card(nav.Href(state.Route), theme.FillSun, iconPages(), "Pages and routing", "A Base shell hosts Screens. Routes, base paths and fragments resolve in the browser, with no server round trip."),
+			card(nav.Href(state.Route), theme.FillLime, iconState(), "View models", "Typed state with Load, Apply and Set. Observe it from any component, or react to it from a stylesheet."),
+			card(nav.Href(styling.Route), theme.FillLilac, iconBrush(), "Typed CSS", "Properties, keywords, media and container queries, keyframes, nesting and layers as Go values. Dead rules never ship."),
+			card(nav.Href(markdown.Route), theme.FillCoral, iconDoc(), "Markdown with live demos", "Render docs from markdown and drop a running Go component into any fence. Every example on this site runs live."),
 		),
 	)
 }
@@ -154,13 +155,13 @@ func closing() app.UI {
 			app.H2().Class(theme.SectionTitle.Name()).Text("Ready when you are."),
 			app.P().Class(theme.ClosingLead.Name()).Text("The getting started guide takes you from an empty module to a static site. Every example on this site is live."),
 		),
-		app.A().Class(theme.Button.Name()).Href(start.Route).Body(app.Text("Open the docs"), arrow()),
+		app.A().Class(theme.Button.Name()).Href(nav.Href(start.Route)).Body(app.Text("Open the docs"), arrow()),
 	)
 }
 
 func footer() app.UI {
 	return app.Footer().Class(theme.Footer.Name()).Body(
-		app.Span().Text("Built with WebGo and go-app. Docs rendered from markdown, styled with typed CSS."),
+		app.Span().Text("Built with WebGo and go-app. Docs written in Go, styled with typed CSS."),
 		app.A().Class(theme.Pill.Name()).Href(base.Repository).Text("github.com/Toms223/WebGo"),
 	)
 }

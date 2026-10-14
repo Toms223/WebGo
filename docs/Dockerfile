@@ -14,7 +14,6 @@ COPY --from=wasm-builder /app/web/ ./web
 RUN CGO_ENABLED=0 go build -o local-server .
 RUN ./local-server static -o dist
 RUN cp -r web/ dist/
-RUN mv dist/web/data dist/data
 
 FROM ghcr.io/paulopiriquito/hog-runtime:v2.0.0
 

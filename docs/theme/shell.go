@@ -212,7 +212,7 @@ var ShellToggle = style.Class("shell-toggle").
 var Content = style.Class("content").
 	Set(
 		css.Display(kw.Grid),
-		css.GridTemplateColumns(css.Raw("minmax(0, 960px)")),
+		css.GridTemplateColumns(css.Raw("minmax(0, 1120px)")),
 		css.AlignContent(kw.Start),
 		css.MinWidth(css.Px(0)),
 		css.Padding(css.Rem(2.5), css.Rem(3), css.Rem(4.5)),

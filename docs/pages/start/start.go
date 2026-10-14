@@ -1,8 +1,10 @@
 package start
 
 import (
+	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/components/topic"
 	"github.com/Toms223/WebGo/docs/pages/base"
+	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (
@@ -12,10 +14,133 @@ const (
 
 func New() (*topic.Screen, error) {
 	return topic.New(topic.Config{
-		Key:        "start",
-		Path:       Route,
-		Title:      Title,
-		URL:        "/data/start.md",
+		Key:   "start",
+		Path:  Route,
+		Title: Title,
+		Lead:  "Install WebGo, write a minimal app, build it to WebAssembly and generate a static site.",
+		Intro: intro,
+		Sections: []topic.Section{
+			{Title: "Requirements", Body: requirements},
+			{Title: "Install", Body: install},
+			{Title: "Minimum main.go", Body: minimumMain},
+			{Title: "Register a route", Body: registerRoute},
+			{Title: "Build the wasm binary", Body: buildWasm},
+			{Title: "Generate the static site", Body: generateStatic},
+			{Title: "Next steps", Body: nextSteps},
+		},
 		OnActivate: base.Activate,
 	})
+}
+
+func intro() []app.UI {
+	return []app.UI{
+		doc.P("This page shows how to install WebGo, write a minimal app, build it to WebAssembly, and generate a static site."),
+		doc.Note("This guide targets `github.com/Toms223/WebGo v0.0.5`. `v0.0.1` and `v0.0.2` do not work and should not be used."),
+	}
+}
+
+func requirements() []app.UI {
+	return []app.UI{
+		doc.List(
+			doc.Item("Go, matching the version required by your `go.mod`."),
+			doc.Item("`github.com/Toms223/WebGo`, version `v0.0.5` or later."),
+			doc.Item("`github.com/maxence-charriere/go-app/v11`, pulled in as a dependency of WebGo. Your own code also imports it directly, for example to call `app.RunWhenOnBrowser` and `app.Route`."),
+		),
+	}
+}
+
+func install() []app.UI {
+	return []app.UI{
+		doc.P("Run this in your module:"),
+		doc.Sh(`go get github.com/Toms223/WebGo@v0.0.5`),
+		doc.P("This adds WebGo to your `go.mod`. If you import `github.com/maxence-charriere/go-app/v11/pkg/app` directly in your own code, run `go mod tidy` afterward so it is added as a direct dependency too."),
+	}
+}
+
+func minimumMain() []app.UI {
+	return []app.UI{
+		doc.P("A WebGo app is a normal Go program that also runs compiled to WebAssembly in the browser. The minimum version needs a component, a route, and a call to `app.RunWhenOnBrowser`:"),
+		doc.Go(`package main
+
+import (
+	"net/http"
+
+	"github.com/maxence-charriere/go-app/v11/pkg/app"
+)
+
+type hello struct {
+	app.Compo
+}
+
+func (h *hello) Render() app.UI {
+	return app.Text("Hello, WebGo")
+}
+
+func main() {
+	app.Route("/", func() app.Composer { return &hello{} })
+	app.RunWhenOnBrowser()
+
+	http.Handle("/", &app.Handler{
+		Name: "Hello",
+	})
+	http.ListenAndServe(":8080", nil)
+}`),
+		doc.P("`app.RunWhenOnBrowser` starts the app when the compiled binary is running inside a browser as WebAssembly. When the same binary runs on the server, this call does nothing and execution continues to the `http.Handle` and `http.ListenAndServe` calls, which serve the page and the compiled `app.wasm` file to the browser."),
+		doc.P("This example uses a plain `app.Compo` component. To build pages with WebGo's `Page` and `ViewModel` types instead, see the ", doc.A("/state", "pages and state guide"), "."),
+	}
+}
+
+func registerRoute() []app.UI {
+	return []app.UI{
+		doc.P("`app.Route` associates a URL path with a function that creates the component to display at that path:"),
+		doc.Go(`func Route(path string, newComponent func() Composer)`),
+		doc.P("Call it once per path, before `app.RunWhenOnBrowser`:"),
+		doc.Go(`app.Route("/", func() app.Composer { return &hello{} })
+app.Route("/about", func() app.Composer { return &about{} })`),
+		doc.P("Each call to `newComponent` must return a fresh instance, not a shared value."),
+	}
+}
+
+func buildWasm() []app.UI {
+	return []app.UI{
+		doc.P("The browser needs a compiled WebAssembly binary. Build it with `GOOS=js` and `GOARCH=wasm`, and place the output at `web/app.wasm`:"),
+		doc.Sh(`GOARCH=wasm GOOS=js go build -o web/app.wasm .`),
+		doc.P("Run this from the directory containing your `main.go`. The `web` directory must exist, or be created, before this command produces `web/app.wasm`. The `app.Handler` shown above serves this file to the browser at `/web/app.wasm`."),
+	}
+}
+
+func generateStatic() []app.UI {
+	return []app.UI{
+		doc.P("A WebGo app can also be exported as a set of static files, for hosting without a Go server. Replace the `http.Handle` and `http.ListenAndServe` calls with `app.GenerateStaticWebsite`:"),
+		doc.Go(`func main() {
+	app.Route("/", func() app.Composer { return &hello{} })
+	app.RunWhenOnBrowser()
+
+	err := app.GenerateStaticWebsite(".", &app.Handler{
+		Name: "Hello",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}`),
+		doc.P("Then build and run:"),
+		doc.Sh(`# Build app.wasm first.
+GOARCH=wasm GOOS=js go build -o web/app.wasm .
+
+# Build and run the generator binary.
+go build -o generate .
+./generate`),
+		doc.P("Running the generator binary writes the static files (`index.html`, `app.js`, `app-worker.js`, `manifest.webmanifest`, `wasm_exec.js`, and one HTML file per route) into the directory passed to `app.GenerateStaticWebsite`. The `web/app.wasm` file built in the first step is not regenerated by this call and must already be in place."),
+	}
+}
+
+func nextSteps() []app.UI {
+	return []app.UI{
+		doc.List(
+			doc.Item("See the ", doc.A("/state", "pages and state guide"), " for building pages with `Page`, `Base`, and `ViewModel`."),
+			doc.Item("See the ", doc.A("/markdown", "markdown guide"), " for rendering markdown content inside a page."),
+			doc.Item("See the ", doc.A("/styling", "Styling page"), " for writing typed CSS rules with the `style`, `css`, `kw`, `media`, `container` and `supports` packages: selectors, nesting, at-rules and `!important`."),
+			doc.Item("See the ", doc.A("/applying", "Applying page"), " for delivering those rules: stylesheets, `serve.Handler`, `style.Run`, and rules driven by actions and `ViewModel.OnAction`."),
+		),
+	}
 }

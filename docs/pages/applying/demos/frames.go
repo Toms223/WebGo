@@ -13,10 +13,6 @@ const SpeedKey = "demo/speed"
 
 type Speed struct{ Beats int }
 
-var speed = model(SpeedKey, startSpeed())
-
-func startSpeed() *Speed { return &Speed{Beats: 1} }
-
 var DemoPulse = style.Keyframes("demo-beat").
 	Bind(style.ComputeFrames(SpeedKey, func(s *Speed) []style.Frame {
 		var frames []style.Frame
@@ -43,6 +39,10 @@ var DemoPulseBox = style.Class("demo-beating").
 		css.AnimationIterationCount(kw.Infinite),
 		css.AnimationTimingFunction(kw.Linear),
 	)
+
+var speed = model(SpeedKey, startSpeed())
+
+func startSpeed() *Speed { return &Speed{Beats: 1} }
 
 type framesDemo struct{ app.Compo }
 

@@ -63,7 +63,7 @@ func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 func (l *Layout) landing(state *State) app.HTMLDiv {
 	links := []app.UI{}
 	if len(l.entries) > 0 {
-		links = append(links, app.A().Class(theme.Pill.Name()).Href(l.entries[0].Route).Text("Docs"))
+		links = append(links, app.A().Class(theme.Pill.Name()).Href(nav.Href(l.entries[0].Route)).Text("Docs"))
 	}
 	links = append(links,
 		app.A().Class(theme.Pill.Name()).Href(Repository).Text("GitHub"),
@@ -87,7 +87,7 @@ func (l *Layout) toggleButton(state *State) app.UI {
 }
 
 func logo() app.UI {
-	return app.A().Class(theme.Logo.Name()).Href(HomeRoute).Body(
+	return app.A().Class(theme.Logo.Name()).Href(nav.Href(HomeRoute)).Body(
 		app.Span().Class(theme.LogoMark.Name()).Text("W"),
 		app.Text("WebGo"),
 	)
