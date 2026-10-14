@@ -46,6 +46,7 @@ var DocHeading = style.Class("doc-heading").
 var DocSubheading = style.Class("doc-subheading").
 	Set(label...).
 	Set(
+		css.ScrollMarginTop(css.Rem(1)),
 		css.Display(kw.InlineBlock),
 		css.Margin(css.Rem(1), css.Px(0), css.Px(0)),
 		css.Padding(css.Rem(0.2), css.Rem(0.65)),
@@ -53,7 +54,8 @@ var DocSubheading = style.Class("doc-subheading").
 		css.BorderRadius(css.Px(999)),
 		css.Background(css.Var("lime")),
 		css.Color(css.Var("on-fill")),
-	)
+	).
+	Media(narrow, css.ScrollMarginTop(css.Rem(5.5)))
 
 var docLists = []css.Property{
 	css.Margin(css.Px(0)),
@@ -103,6 +105,13 @@ var DocCode = Doc.Descendant(style.Element("code")).Set(
 	css.FontFamily(css.Var("mono")),
 	css.FontSize(css.Em(0.86)),
 	css.FontWeight(css.Num(600)),
+	css.OverflowWrap(kw.Anywhere),
+)
+
+var CodeBlock = style.Class("codeblock").Set(
+	css.Position(kw.Relative),
+	css.AlignSelf(kw.Stretch),
+	css.MinWidth(css.Px(0)),
 )
 
 var DocPre = Doc.Descendant(style.Element("pre")).Set(
@@ -126,11 +135,13 @@ var DocPre = Doc.Descendant(style.Element("pre")).Set(
 var langTab = []css.Property{
 	css.Position(kw.Absolute),
 	css.Top(css.Px(0)),
-	css.Right(css.Px(0)),
+	css.Left(css.Px(18)),
 	css.Padding(css.Rem(0.15), css.Rem(0.7)),
 	css.BorderLeft(css.Var("border"), kw.Solid, css.Var("line")),
+	css.BorderRight(css.Var("border"), kw.Solid, css.Var("line")),
 	css.BorderBottom(css.Var("border"), kw.Solid, css.Var("line")),
 	css.BorderBottomLeftRadius(css.Px(10)),
+	css.BorderBottomRightRadius(css.Px(10)),
 	css.Background(css.Var("lilac")),
 	css.Color(css.Var("on-fill")),
 	css.FontFamily(css.Var("mono")),
@@ -148,6 +159,8 @@ var LangCSS = style.Class("lang-css")
 var LangShell = style.Class("lang-sh")
 
 var LangMarkdown = style.Class("lang-md")
+
+var LangPlain = style.Class("lang-plain")
 
 var LangHTML = style.Class("lang-html")
 
@@ -168,6 +181,7 @@ var DocPreCode = DocPre.Descendant(style.Element("code")).Set(
 	css.Color(kw.Inherit),
 	css.FontSize(kw.Inherit),
 	css.FontWeight(kw.Inherit),
+	css.OverflowWrap(kw.Normal),
 )
 
 var Note = style.Class("note").

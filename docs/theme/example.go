@@ -31,6 +31,12 @@ var ExampleBar = style.Class("example-bar").Set(
 	css.Color(css.Var("on-fill")),
 )
 
+var ExampleTools = style.Class("example-tools").Set(
+	css.Display(kw.Flex),
+	css.AlignItems(kw.Center),
+	css.Gap(css.Rem(0.5)),
+)
+
 var ExampleName = style.Class("example-name").
 	Set(label...).
 	Set(css.LetterSpacing(css.Em(0.1)), css.TextTransform(kw.None))
@@ -47,6 +53,7 @@ var ExampleTabs = style.Class("example-tabs").Set(
 var ExampleTab = style.Class("example-tab").
 	Set(label...).
 	Set(
+		css.Position(kw.Relative),
 		css.Padding(css.Rem(0.25), css.Rem(0.7)),
 		css.Border(css.Px(0)),
 		css.BorderRadius(css.Px(999)),
@@ -56,11 +63,66 @@ var ExampleTab = style.Class("example-tab").
 		css.Transition(css.Raw("background 120ms ease, color 120ms ease")),
 	).
 	Hover(css.Background(css.Var("panel-2"))).
-	FocusVisible(ring...)
+	FocusVisible(css.Outline(css.Px(3), kw.Solid, css.Var("on-fill")), css.OutlineOffset(css.Px(2))).
+	After(hitArea...)
 
 var ExampleTabOn = style.Class("example-tab-on").
 	Set(css.Background(css.Var("tab")), css.Color(css.Var("tab-on"))).
 	Hover(css.Background(css.Var("tab")))
+
+var hitArea = []css.Property{
+	css.Content(css.String("")),
+	css.Position(kw.Absolute),
+	css.Inset(css.Px(-10), css.Px(0)),
+}
+
+var ExampleCodeClamped = style.Class("example-code-clamped").Set(
+	css.MaxHeight(css.Rem(24)),
+	css.OverflowY(kw.Hidden),
+)
+
+var ExampleMore = style.Class("example-more").
+	Set(label...).
+	Set(
+		css.Width(css.Pct(100)),
+		css.MinHeight(css.Px(44)),
+		css.Padding(css.Rem(0.4), css.Rem(1)),
+		css.Border(css.Px(0)),
+		css.BorderTop(css.Var("border"), kw.Solid, css.Var("line")),
+		css.Background(css.Var("code")),
+		css.Color(css.Var("code-on")),
+		css.TextAlign(kw.Left),
+		css.Cursor(kw.Pointer),
+	).
+	Hover(css.Color(css.Var("code-fn"))).
+	FocusVisible(css.Outline(css.Px(3), kw.Solid, css.Var("code-on")), css.OutlineOffset(css.Px(-5)))
+
+var CopyButton = style.Class("copy").
+	Set(label...).
+	Set(
+		css.Position(kw.Relative),
+		css.Padding(css.Rem(0.2), css.Rem(0.65)),
+		line,
+		css.BorderRadius(css.Px(999)),
+		css.Background(css.Var("panel")),
+		css.Color(css.Var("ink")),
+		css.FontSize(css.Rem(0.7)),
+		css.Cursor(kw.Pointer),
+		css.Transition(css.Raw("transform 120ms ease, box-shadow 120ms ease")),
+	).
+	Hover(lift...).
+	Active(press...).
+	FocusVisible(css.Outline(css.Px(3), kw.Solid, css.Var("on-fill")), css.OutlineOffset(css.Px(2))).
+	After(hitArea...)
+
+var CopyFloat = style.Class("copy-float").Set(
+	css.Position(kw.Absolute),
+	css.Top(css.Rem(0.6)),
+	css.Right(css.Rem(0.75)),
+	css.ZIndex(css.Int(1)),
+	css.Background(css.Var("lilac")),
+	css.Color(css.Var("on-fill")),
+)
 
 var ExampleCode = style.Class("example-code").Set(
 	css.Margin(css.Px(0)),
@@ -72,6 +134,14 @@ var ExampleCode = style.Class("example-code").Set(
 	css.FontWeight(css.Num(500)),
 	css.LineHeight(css.Num(1.7)),
 	css.TabSize(css.Num(4)),
+)
+
+var ExamplePre = Example.Descendant(ExampleCode).Set(
+	css.Margin(css.Px(0)),
+	css.Border(css.Px(0)),
+	css.BorderRadius(css.Px(0)),
+	css.BoxShadow(kw.None),
+	css.AlignSelf(kw.Auto),
 )
 
 var ExampleLabel = style.Class("example-label").

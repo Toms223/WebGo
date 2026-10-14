@@ -151,7 +151,7 @@ func TestBaseMountsAndRendersWithoutPanicking(t *testing.T) {
 	if strings.Contains(out, "shell-loading") {
 		t.Errorf("expected the shell to have progressed past its loading state, got %s", out)
 	}
-	if !strings.Contains(out, `<main class="content">`) {
+	if !mainContent.MatchString(out) {
 		t.Errorf("expected the mounted shell's main content wrapper, got %s", out)
 	}
 	if !strings.Contains(out, `class="stub"`) {
@@ -272,7 +272,7 @@ func TestDrawHasSidebarAndContent(t *testing.T) {
 		t.Errorf("expected the menu button before the navigation, got %s", sidebar)
 	}
 
-	main := strings.Index(out, `<main class="content">`)
+	main := mainContent.FindStringIndex(out)[0]
 	if main < asideEnd {
 		t.Fatalf("expected main.content after the sidebar, got %s", out)
 	}
@@ -283,6 +283,8 @@ func TestDrawHasSidebarAndContent(t *testing.T) {
 		t.Errorf("expected the closed shell to carry only the shell class, got %s", out)
 	}
 }
+
+var mainContent = regexp.MustCompile(`<main[^>]*class="content"`)
 
 var expandedTrue = regexp.MustCompile(`aria-expanded[ >]`)
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/page"
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
@@ -135,7 +136,7 @@ func TestSectionsGetUniqueSlugs(t *testing.T) {
 	for _, s := range layout.sections {
 		slugs = append(slugs, s.Slug)
 	}
-	if want := []string{"css", "css-2", "section"}; !slices.Equal(slugs, want) {
+	if want := []string{"css", "css-2", "section-2"}; !slices.Equal(slugs, want) {
 		t.Errorf("slugs = %v, want %v", slugs, want)
 	}
 }
@@ -169,8 +170,8 @@ func TestDrawRendersOnlyTheActiveSection(t *testing.T) {
 		`<h1 class="topic-title">Styling</h1>`,
 		`class="topic-lead">Typed CSS.</p>`,
 		"Lead paragraph.",
-		`class="rail"`, `href="#overview"`, `href="#values"`, `href="#css"`,
-		`<h2 class="section-heading">Overview</h2>`,
+		`class="rail"`, `class="rail-count">1 of 3`,
+		`class="section-heading"`, `>Overview</h2>`,
 		"Overview body.",
 		`class="pager"`, "Next", "Values",
 	} {
@@ -182,9 +183,6 @@ func TestDrawRendersOnlyTheActiveSection(t *testing.T) {
 		if strings.Contains(out, unwanted) {
 			t.Errorf("did not expect %q in the first section, got %s", unwanted, out)
 		}
-	}
-	if count := strings.Count(out, "rail-link-active"); count != 1 {
-		t.Errorf("expected exactly one active rail link, found %d in %s", count, out)
 	}
 }
 
@@ -296,5 +294,148 @@ func TestOnNavFollowsTheFragment(t *testing.T) {
 				t.Error("expected OnNav to follow the URL without navigating")
 			}
 		})
+	}
+}
+
+func wideRail(query string, open bool) *Rail {
+	layout := NewLayout(Config{Sections: []Section{
+		{Title: "Overview", Body: func() []app.UI { return []app.UI{doc.H("Block order"), app.P().Text("x"), doc.H("CSS")} }},
+		{Title: "Values", Body: text("v")},
+		{Title: "CSS()", Body: text("c")},
+	}})
+	return &Rail{Sections: layout.sections, Active: 0, wide: true, open: open, query: query}
+}
+
+func TestWideRailListsSectionsAndTheActiveHeadings(t *testing.T) {
+	out := app.HTMLString(wideRail("", false))
+	for _, want := range []string{
+		`aria-label="Sections"`, `type="search"`, "In this section",
+		`href="#overview"`, `href="#values"`, `href="#css"`,
+		`href="#block-order"`, `href="#css-2"`, "aria-current",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in the wide rail, got %s", want, out)
+		}
+	}
+	if strings.Contains(out, "rail-summary") {
+		t.Errorf("expected no collapse button on a wide screen, got %s", out)
+	}
+	if count := strings.Count(out, "rail-link-active"); count != 1 {
+		t.Errorf("expected exactly one active rail link, found %d in %s", count, out)
+	}
+}
+
+func TestNarrowRailCollapsesUntilOpened(t *testing.T) {
+	closed := wideRail("", false)
+	closed.wide = false
+	out := app.HTMLString(closed)
+	for _, want := range []string{"rail-summary", `aria-expanded="false"`, "1 of 3"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in the closed rail, got %s", want, out)
+		}
+	}
+	if strings.Contains(out, `type="search"`) {
+		t.Errorf("expected the closed rail to hide its panel, got %s", out)
+	}
+	opened := wideRail("", true)
+	opened.wide = false
+	out = app.HTMLString(opened)
+	for _, want := range []string{"aria-expanded ", `id="rail-panel"`, `type="search"`, `href="#values"`, "rail-open"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in the open rail, got %s", want, out)
+		}
+	}
+}
+
+func TestRailSearchFindsSectionsAndHeadings(t *testing.T) {
+	cases := []struct {
+		query string
+		want  []string
+		not   []string
+	}{
+		{"val", []string{`href="#values"`}, []string{`href="#overview"`}},
+		{"block", []string{`href="#block-order"`, "Overview"}, []string{`href="#values"`}},
+		{"  CSS ", []string{`href="#css"`, `href="#css-2"`}, nil},
+		{"nothing", []string{"No section or heading matches"}, []string{"<a "}},
+	}
+	for _, test := range cases {
+		out := app.HTMLString(wideRail(test.query, false))
+		for _, want := range test.want {
+			if !strings.Contains(out, want) {
+				t.Errorf("query %q: expected %q in %s", test.query, want, out)
+			}
+		}
+		for _, not := range test.not {
+			if strings.Contains(out, not) {
+				t.Errorf("query %q: did not expect %q in %s", test.query, not, out)
+			}
+		}
+	}
+}
+
+func TestRailSearchIsCapped(t *testing.T) {
+	var sections []Section
+	for i := 0; i < 20; i++ {
+		sections = append(sections, Section{Title: "Match " + Slugify(string(rune('a'+i)))})
+	}
+	rail := &Rail{Sections: slugged(sections), wide: true, query: "match"}
+	if got := len(rail.matches()); got != maxResults {
+		t.Errorf("expected %d results at most, got %d", maxResults, got)
+	}
+}
+
+func TestHeadingsGetAnchorsThatSelectTheirSection(t *testing.T) {
+	cfg := Config{Key: "a", Path: "/a", Title: "A", Sections: []Section{
+		{Title: "Set", Body: func() []app.UI { return []app.UI{doc.H("Set"), doc.H("Get")} }},
+		{Title: "Other", Body: func() []app.UI { return []app.UI{doc.H("Get"), doc.H("Set")} }},
+	}}
+	l := NewLayout(cfg)
+	ids := [][]string{}
+	for _, s := range l.sections {
+		var row []string
+		for _, h := range s.Subs {
+			row = append(row, h.ID)
+		}
+		ids = append(ids, row)
+	}
+	if want := [][]string{{"set-2", "get"}, {"get-2", "set-3"}}; !slices.EqualFunc(ids, want, slices.Equal[[]string]) {
+		t.Fatalf("heading ids = %v, want %v", ids, want)
+	}
+	for fragment, want := range map[string]int{"set": 0, "other": 1, "get": 0, "set-3": 1, "nope": 0} {
+		at, known := l.find(fragment)
+		if at != want || known != (fragment != "nope") {
+			t.Errorf("find(%q) = %d, %v; want section %d", fragment, at, known, want)
+		}
+	}
+	out := app.HTMLString(l.section(1, 0))
+	for _, want := range []string{`id="get-2"`, `id="set-3"`, `tabindex="-1"`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected %q in the second section, got %s", want, out)
+		}
+	}
+}
+
+func TestFragmentOfAHeadingSelectsItsSection(t *testing.T) {
+	cfg := sectioned
+	cfg.Sections = []Section{
+		{Title: "Overview", Body: text("o")},
+		{Title: "Values", Body: func() []app.UI { return []app.UI{doc.H("Colour"), app.P().Text("v")} }},
+	}
+	screen, _, _ := mount(t, cfg, "/styling#colour")
+	if got := screen.model.State().Active; got != "values" {
+		t.Errorf("expected a heading fragment to open its section, got %q", got)
+	}
+}
+
+func TestPageTitleNamesTheSection(t *testing.T) {
+	screen, ctx, engine := mount(t, sectioned, "/styling#values")
+	if got := ctx.Page().Title(); got != "Values · Styling · WebGo" {
+		t.Errorf("title = %q", got)
+	}
+	screen.navigate = func(app.Context, *url.URL) {}
+	screen.Activate(ctx, "css")
+	engine.ConsumeAll()
+	if got := ctx.Page().Title(); got != "CSS() · Styling · WebGo" {
+		t.Errorf("title after switching = %q", got)
 	}
 }

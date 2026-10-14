@@ -183,3 +183,85 @@ func TestNoClassLiteralsInLayouts(t *testing.T) {
 		}
 	}
 }
+
+func TestDarkPaletteKeepsStructureVisible(t *testing.T) {
+	css := Root.CSS()
+	for _, want := range []string{
+		"--line: #9791AE;",
+		"--shadow-ink: #4A4760;",
+		"--focus: #F3F0EA;",
+		"--mint: #1F6B52;",
+		"--line: #15131A;",
+		"--focus: #15131A;",
+	} {
+		if !strings.Contains(css, want) {
+			t.Errorf("Root lacks %q:\n%s", want, css)
+		}
+	}
+	if strings.Contains(css, "#09090B") {
+		t.Errorf("the near-black dark line is back:\n%s", css)
+	}
+}
+
+func TestFocusRingUsesTheContrastToken(t *testing.T) {
+	for _, rule := range []*style.Rule{Button, NavLink, RailLink, PagerLink, DocLink} {
+		if want := "outline: 3px solid var(--focus);"; !strings.Contains(rule.CSS(), want) {
+			t.Errorf("%s lacks %q:\n%s", rule.Selector(), want, rule.CSS())
+		}
+	}
+	for _, rule := range []*style.Rule{ExampleTab, CopyButton} {
+		if want := "outline: 3px solid var(--on-fill);"; !strings.Contains(rule.CSS(), want) {
+			t.Errorf("%s lacks %q on the filled bar:\n%s", rule.Selector(), want, rule.CSS())
+		}
+	}
+}
+
+func TestHitAreaIsAnchoredToItsOwnControl(t *testing.T) {
+	for _, rule := range []*style.Rule{ExampleTab, CopyButton} {
+		if want := "position: relative;"; !strings.Contains(rule.CSS(), want) {
+			t.Errorf("%s lacks %q, so its hit area would cover the whole panel:\n%s", rule.Selector(), want, rule.CSS())
+		}
+	}
+}
+
+func TestSmallControlsKeepATouchSizedHitArea(t *testing.T) {
+	for _, rule := range []*style.Rule{ExampleTab, CopyButton} {
+		if want := "inset: -10px 0px;"; !strings.Contains(rule.CSS(), want) {
+			t.Errorf("%s lacks the hit area %q:\n%s", rule.Selector(), want, rule.CSS())
+		}
+	}
+	for _, rule := range []*style.Rule{RailLink, SideMenu, ShellToggle, Logo, RailSummary} {
+		if want := "min-height: 44px;"; !strings.Contains(rule.CSS(), want) {
+			t.Errorf("%s lacks %q:\n%s", rule.Selector(), want, rule.CSS())
+		}
+	}
+}
+
+func TestLongInlineCodeWrapsButCodeBlocksDoNot(t *testing.T) {
+	if want := "overflow-wrap: anywhere;"; !strings.Contains(DocCode.CSS(), want) {
+		t.Errorf("DocCode lacks %q:\n%s", want, DocCode.CSS())
+	}
+	if want := "overflow-wrap: normal;"; !strings.Contains(DocPreCode.CSS(), want) {
+		t.Errorf("DocPreCode lacks %q:\n%s", want, DocPreCode.CSS())
+	}
+}
+
+func TestSkipLinkIsHiddenUntilFocused(t *testing.T) {
+	css := Skip.CSS()
+	for _, want := range []string{"translateY(-200%)", ".skip:focus-visible {"} {
+		if !strings.Contains(css, want) {
+			t.Errorf("Skip lacks %q:\n%s", want, css)
+		}
+	}
+}
+
+func TestExampleCodeDropsTheGenericCodeBlockFrame(t *testing.T) {
+	for _, want := range []string{"border: 0px;", "box-shadow: none;", "border-radius: 0px;"} {
+		if !strings.Contains(ExamplePre.CSS(), want) {
+			t.Errorf("ExamplePre lacks %q:\n%s", want, ExamplePre.CSS())
+		}
+	}
+	if want := ".example .example-code {"; !strings.Contains(ExamplePre.CSS(), want) {
+		t.Errorf("ExamplePre must outrank the doc pre rule, want %q:\n%s", want, ExamplePre.CSS())
+	}
+}

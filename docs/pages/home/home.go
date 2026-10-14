@@ -34,6 +34,7 @@ func New() (*Screen, error) {
 
 func (s *Screen) OnMount(ctx app.Context) page.Screen {
 	s.Page.OnMount(ctx)
+	ctx.Page().SetTitle("WebGo · typed CSS, pages and state for go-app")
 	base.Activate(ctx, Route)
 	return s
 }

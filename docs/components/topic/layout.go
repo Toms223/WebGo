@@ -10,6 +10,7 @@ import (
 const (
 	topicID   = "topic"
 	sectionID = "section"
+	headingID = "section-title"
 )
 
 type Layout struct {
@@ -45,13 +46,16 @@ func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 		header = append(header, app.P().Class(theme.TopicLead.Name()).Text(l.lead))
 	}
 	children := []app.UI{app.Header().Class(theme.TopicHeader.Name()).Body(header...)}
+	var main []app.UI
 	if l.intro != nil {
-		children = append(children, app.Div().Class(theme.TopicIntro.Name(), theme.Doc.Name()).Body(l.intro()...))
+		main = append(main, app.Div().Class(theme.Doc.Name()).Body(l.intro()...))
 	}
 	if len(l.sections) > 0 {
 		at := l.index(state.Active)
-		children = append(children, l.rail(at), l.section(at, state.Turn), l.pager(at))
+		children = append(children, NewRail(l.sections, at, l.visit))
+		main = append(main, l.section(at, state.Turn), l.pager(at))
 	}
+	children = append(children, app.Div().Class(theme.TopicMain.Name()).Body(main...))
 	return app.Div().Class(theme.Topic.Name()).ID(topicID).Body(children...)
 }
 
@@ -64,19 +68,18 @@ func (l *Layout) index(slug string) int {
 	return 0
 }
 
-func (l *Layout) rail(at int) app.UI {
-	links := make([]app.UI, 0, len(l.sections))
+func (l *Layout) find(fragment string) (int, bool) {
 	for i, s := range l.sections {
-		link := app.A().Class(theme.RailLink.Name()).Href("#" + s.Slug).Text(s.Title).OnClick(l.choose(s.Slug))
-		if i == at {
-			link = link.Class(theme.RailLinkActive.Name()).Aria("current", "true")
+		if s.Slug == fragment {
+			return i, true
 		}
-		links = append(links, app.Li().Body(link))
+		for _, h := range s.Subs {
+			if h.ID == fragment {
+				return i, true
+			}
+		}
 	}
-	return app.Nav().Class(theme.Rail.Name()).Aria("label", "On this page").Body(
-		app.Span().Class(theme.RailLabel.Name()).Text("On this page"),
-		app.Ul().Body(links...),
-	)
+	return 0, false
 }
 
 func (l *Layout) section(at, turn int) app.UI {
@@ -85,7 +88,7 @@ func (l *Layout) section(at, turn int) app.UI {
 	if turn%2 == 1 {
 		classes = append(classes, theme.TurnB.Name())
 	}
-	body := append([]app.UI{app.H2().Class(theme.SectionHeading.Name()).Text(s.Title)}, s.Body()...)
+	body := append([]app.UI{app.H2().Class(theme.SectionHeading.Name()).ID(headingID).TabIndex(-1).Text(s.Title)}, anchor(s.Body(), s.Subs)...)
 	return app.Section().Class(classes...).ID(sectionID).Body(body...)
 }
 
@@ -97,7 +100,7 @@ func (l *Layout) pager(at int) app.UI {
 	if at < len(l.sections)-1 {
 		links = append(links, l.pagerLink(l.sections[at+1], "Next", true))
 	}
-	return app.Nav().Class(theme.Pager.Name()).Aria("label", "Sections").Body(links...)
+	return app.Nav().Class(theme.Pager.Name()).Aria("label", "Neighbouring sections").Body(links...)
 }
 
 func (l *Layout) pagerLink(s section, label string, next bool) app.UI {
@@ -105,17 +108,17 @@ func (l *Layout) pagerLink(s section, label string, next bool) app.UI {
 	if next {
 		classes = append(classes, theme.PagerNext.Name())
 	}
-	return app.A().Class(classes...).Href("#"+s.Slug).OnClick(l.choose(s.Slug)).Body(
+	return app.A().Class(classes...).Href("#"+s.Slug).OnClick(func(ctx app.Context, e app.Event) {
+		e.PreventDefault()
+		l.visit(ctx, s.Slug)
+	}).Body(
 		app.Span().Class(theme.PagerLabel.Name()).Text(label),
 		app.Span().Text(s.Title),
 	)
 }
 
-func (l *Layout) choose(slug string) app.EventHandler {
-	return func(ctx app.Context, e app.Event) {
-		e.PreventDefault()
-		if l.activate != nil {
-			l.activate(ctx, slug)
-		}
+func (l *Layout) visit(ctx app.Context, fragment string) {
+	if l.activate != nil {
+		l.activate(ctx, fragment)
 	}
 }

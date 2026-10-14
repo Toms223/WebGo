@@ -169,7 +169,7 @@ func footer() app.UI {
 func card(href string, fill *style.Rule, icon app.UI, title, text string) app.UI {
 	return app.A().Class(theme.Card.Name()).Href(href).Body(
 		app.Span().Class(theme.CardIcon.Name(), fill.Name()).Body(icon),
-		app.H3().Class(theme.CardTitle.Name()).Text(title),
+		app.H2().Class(theme.CardTitle.Name()).Text(title),
 		app.P().Class(theme.CardText.Name()).Text(text),
 	)
 }

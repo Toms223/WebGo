@@ -10,6 +10,8 @@ import (
 	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
+const mainID = "main"
+
 const (
 	HomeRoute  = "/"
 	Repository = "https://github.com/Toms223/WebGo"
@@ -47,6 +49,7 @@ func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 		classes = append(classes, theme.MenuOpen.Name())
 	}
 	return app.Div().Class(classes...).Body(
+		skip(),
 		app.Aside().Class(theme.Side.Name()).Body(
 			logo(),
 			app.Button().Type("button").Class(theme.SideMenu.Name()).
@@ -56,7 +59,7 @@ func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 			nav.Render(l.entries, state.Active),
 			l.toggleButton(state),
 		),
-		app.Main().Class(theme.Content.Name()).Body(l.body...),
+		app.Main().Class(theme.Content.Name()).ID(mainID).TabIndex(-1).Body(l.body...),
 	)
 }
 
@@ -70,11 +73,12 @@ func (l *Layout) landing(state *State) app.HTMLDiv {
 		l.toggleButton(state),
 	)
 	return app.Div().Class(theme.Landing.Name()).Body(
+		skip(),
 		app.Header().Class(theme.Topbar.Name()).Body(
 			logo(),
 			app.Nav().Class(theme.TopbarNav.Name()).Body(links...),
 		),
-		app.Main().Body(l.body...),
+		app.Main().ID(mainID).TabIndex(-1).Body(l.body...),
 	)
 }
 
@@ -84,6 +88,14 @@ func (l *Layout) toggleButton(state *State) app.UI {
 		label = "Light mode"
 	}
 	return app.Button().Type("button").Class(theme.ShellToggle.Name()).Text(label).OnClick(l.toggle)
+}
+
+func skip() app.UI {
+	return app.Button().Type("button").Class(theme.Skip.Name()).Text("Skip to content").OnClick(func(ctx app.Context, e app.Event) {
+		if main := app.Window().GetElementByID(mainID); main.Truthy() {
+			main.Call("focus")
+		}
+	})
 }
 
 func logo() app.UI {

@@ -14,7 +14,7 @@ func P(parts ...any) app.UI {
 }
 
 func H(title string) app.UI {
-	return app.H3().Class(theme.DocSubheading.Name()).Text(title)
+	return &Sub{Title: title}
 }
 
 func B(text string) app.UI {
@@ -56,31 +56,34 @@ func Rule() app.UI {
 }
 
 func Go(source string) app.UI {
-	return Code(theme.LangGo, Highlight(source)...)
+	return Code(theme.LangGo, source, Highlight(source)...)
 }
 
 func CSS(source string) app.UI {
-	return Code(theme.LangCSS, app.Text(source))
+	return Code(theme.LangCSS, source, HighlightCSS(source)...)
 }
 
 func Sh(source string) app.UI {
-	return Code(theme.LangShell, app.Text(source))
+	return Code(theme.LangShell, source, app.Text(source))
 }
 
 func Markdown(source string) app.UI {
-	return Code(theme.LangMarkdown, app.Text(source))
+	return Code(theme.LangMarkdown, source, app.Text(source))
 }
 
 func HTML(source string) app.UI {
-	return Code(theme.LangHTML, app.Text(source))
+	return Code(theme.LangHTML, source, app.Text(source))
 }
 
 func Plain(source string) app.UI {
-	return app.Pre().Body(app.Code().Text(source))
+	return Code(theme.LangPlain, source, app.Text(source))
 }
 
-func Code(lang *style.Rule, body ...app.UI) app.UI {
-	return app.Pre().Class(lang.Name()).Body(app.Code().Body(body...))
+func Code(lang *style.Rule, source string, body ...app.UI) app.UI {
+	return app.Div().Class(theme.CodeBlock.Name()).Body(
+		app.Pre().Class(lang.Name()).Body(app.Code().Body(body...)),
+		&Copy{Text: source, Float: true},
+	)
 }
 
 func Inline(parts ...any) []app.UI {

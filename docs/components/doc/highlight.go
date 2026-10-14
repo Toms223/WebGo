@@ -3,6 +3,7 @@ package doc
 import (
 	"go/scanner"
 	"go/token"
+	"strings"
 
 	"github.com/Toms223/WebGo/docs/theme"
 	"github.com/Toms223/WebGo/style"
@@ -91,4 +92,52 @@ func isTypePrefix(tok token.Token) bool {
 		return true
 	}
 	return false
+}
+
+func HighlightCSS(source string) []app.UI {
+	var out []app.UI
+	for _, line := range strings.SplitAfter(source, "\n") {
+		out = append(out, cssLine(line)...)
+	}
+	return out
+}
+
+func cssLine(line string) []app.UI {
+	body := strings.TrimRight(line, "\n")
+	indent := body[:len(body)-len(strings.TrimLeft(body, "\t "))]
+	text := strings.TrimLeft(body, "\t ")
+	rest := line[len(body):]
+	var out []app.UI
+	if indent != "" {
+		out = append(out, app.Text(indent))
+	}
+	switch {
+	case strings.HasPrefix(text, "@") && strings.HasSuffix(text, "{"):
+		out = append(out, app.Span().Class(theme.Keyword.Name()).Text(text))
+	case strings.HasSuffix(text, "{"):
+		out = append(out, app.Span().Class(theme.Fn.Name()).Text(text))
+	case strings.Contains(text, ": "):
+		name, value, _ := strings.Cut(text, ": ")
+		out = append(out, app.Span().Class(theme.Typ.Name()).Text(name), app.Text(": "))
+		out = append(out, cssValue(value)...)
+	default:
+		out = append(out, app.Text(text))
+	}
+	if rest != "" {
+		out = append(out, app.Text(rest))
+	}
+	return out
+}
+
+func cssValue(value string) []app.UI {
+	start := strings.IndexByte(value, '"')
+	end := strings.LastIndexByte(value, '"')
+	if start < 0 || end <= start {
+		return []app.UI{app.Text(value)}
+	}
+	return []app.UI{
+		app.Text(value[:start]),
+		app.Span().Class(theme.Str.Name()).Text(value[start : end+1]),
+		app.Text(value[end+1:]),
+	}
 }

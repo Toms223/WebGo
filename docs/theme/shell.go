@@ -64,7 +64,7 @@ var press = []css.Property{
 }
 
 var ring = []css.Property{
-	css.Outline(css.Px(3), kw.Solid, css.Var("coral")),
+	css.Outline(css.Px(3), kw.Solid, css.Var("focus")),
 	css.OutlineOffset(css.Px(3)),
 }
 
@@ -178,7 +178,7 @@ var Logo = style.Class("logo").
 		css.TextDecoration(kw.None),
 	).
 	FocusVisible(ring...).
-	Media(narrow, css.AlignSelf(kw.Center), css.MarginRight(kw.Auto))
+	Media(narrow, css.AlignSelf(kw.Center), css.MarginRight(kw.Auto), css.MinHeight(css.Px(44)))
 
 var LogoMark = style.Class("logo-mark").Set(
 	css.Display(kw.Grid),
@@ -199,7 +199,7 @@ var SideMenu = style.Class("side-menu").
 	Hover(lift...).
 	Active(press...).
 	FocusVisible(ring...).
-	Media(narrow, css.Display(kw.InlineFlex))
+	Media(narrow, css.Display(kw.InlineFlex), css.MinHeight(css.Px(44)))
 
 var ShellToggle = style.Class("shell-toggle").
 	Set(button...).
@@ -207,7 +207,7 @@ var ShellToggle = style.Class("shell-toggle").
 	Hover(lift...).
 	Active(press...).
 	FocusVisible(ring...).
-	Media(narrow, css.MarginTop(css.Px(0)), css.AlignSelf(kw.Center))
+	Media(narrow, css.MarginTop(css.Px(0)), css.AlignSelf(kw.Center), css.MinHeight(css.Px(44)))
 
 var Content = style.Class("content").
 	Set(
@@ -224,3 +224,17 @@ var ContentItem = Content.Child(style.Any()).Set(
 	css.GridColumnEnd(css.Int(-1)),
 	css.MinWidth(css.Px(0)),
 )
+
+var Skip = style.Class("skip").
+	Set(button...).
+	Set(
+		css.Position(kw.Absolute),
+		css.Top(css.Rem(0.75)),
+		css.Left(css.Rem(0.75)),
+		css.ZIndex(css.Int(100)),
+		css.Transform(css.Raw("translateY(-200%)")),
+		css.Background(css.Var("sun")),
+		css.Color(css.Var("on-fill")),
+	).
+	FocusVisible(css.Transform(kw.None)).
+	FocusVisible(ring...)

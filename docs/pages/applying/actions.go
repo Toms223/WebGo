@@ -46,6 +46,7 @@ func (t *toggle) onDark(ctx app.Context, a app.Action) {
 
 func actions() []app.UI {
 	return []app.UI{
+		doc.P("A bound item reacts to go-app actions. `Bind` takes a typed `Binding`: the action's value must be a `*T`, and the function receives it. `On` takes the v1 predicate over the raw `app.Action`. Each time an action with a bound name fires, the engine evaluates the item and inserts it, removes it, or replaces its text. An action whose name no item is bound to is ignored."),
 		doc.Go(`func When[T any](action string, when func(*T) bool) Binding
 func Compute[T any](action string, props func(*T) []css.Property) Binding
 func ComputeFrames[T any](action string, frames func(*T) []Frame) Binding
@@ -63,7 +64,6 @@ func (k *KeyframesRule) CSSFor(action string, v any) string
 func FrameAt(stop css.Percentage, props ...css.Property) Frame
 func FrameFrom(props ...css.Property) Frame
 func FrameTo(props ...css.Property) Frame`),
-		doc.P("A bound item reacts to go-app actions. `Bind` takes a typed `Binding`: the action's value must be a `*T`, and the function receives it. `On` takes the v1 predicate over the raw `app.Action`. Each time an action with a bound name fires, the engine evaluates the item and inserts it, removes it, or replaces its text. An action whose name no item is bound to is ignored."),
 		doc.P("Each demo below keeps its state in a `data.ViewModel` whose key is the action name. `OnAction` turns every change of that state into an action carrying the `*T`. See ", doc.A("#viewmodel-and-onaction", "ViewModel and OnAction"), "."),
 		doc.H("When"),
 		doc.P("`When` decides presence. Its function's result says whether the rule is present. The rule's declared blocks are what is inserted."),

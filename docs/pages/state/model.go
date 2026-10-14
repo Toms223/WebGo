@@ -8,10 +8,12 @@ import (
 
 func model() []app.UI {
 	return []app.UI{
+		doc.P("`ViewModel[T]` lives in the `data` package. A `ViewModel[T]` binds a state value of type `T` to a key in `go-app`'s state store."),
+		doc.P("The counter below is one `ViewModel` driving a component that observes it with `Get(ctx).Observe(ctx)` in `OnMount`. `+1` and `Reset` go through `Load(ctx).Apply(...).Set()`, so the count changes on screen but is not stored; `Save` goes through `SetAndPersist`, so the count survives a reload. Each piece is described below."),
+		doc.Example(demos.CounterExample),
 		doc.Go(`type ViewModel[T any] struct {
 	// unexported fields
 }`),
-		doc.P("`ViewModel[T]` lives in the `data` package. A `ViewModel[T]` binds a state value of type `T` to a key in `go-app`'s state store."),
 		doc.H("NewViewModel"),
 		doc.Go(`func NewViewModel[T any](key string, value *T) (*ViewModel[T], error)`),
 		doc.List(
@@ -66,8 +68,6 @@ func (a *Action[T]) Apply(verb func(ctx app.Context, state *T) *T) *Action[T]`),
 		doc.Go(`func (a *Action[T]) SetAndPersist(value *T) *ViewModel[T]`),
 		doc.P("`SetAndPersist` sets the model's in-memory state directly to `value` (ignoring whatever `Apply` may have built up), writes `value` to the state store, and persists a snapshot of `value` to local storage. It returns the model."),
 		doc.P("The local storage snapshot is fixed at the moment `SetAndPersist` runs. Later direct changes to the model's in-memory state do not change what was persisted."),
-		doc.P("The counter below is one `ViewModel` driving a component that observes it with `Get(ctx).Observe(ctx)` in `OnMount`. `+1` and `Reset` go through `Load(ctx).Apply(...).Set()`, so the count changes on screen but is not stored; `Save` goes through `SetAndPersist`, so the count survives a reload."),
-		doc.Example(demos.CounterExample),
 	}
 }
 

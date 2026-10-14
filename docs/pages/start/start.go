@@ -20,7 +20,6 @@ func New() (*topic.Screen, error) {
 		Lead:  "Install WebGo, write a minimal app, build it to WebAssembly and generate a static site.",
 		Intro: intro,
 		Sections: []topic.Section{
-			{Title: "Requirements", Body: requirements},
 			{Title: "Install", Body: install},
 			{Title: "Minimum main.go", Body: minimumMain},
 			{Title: "Register a route", Body: registerRoute},
@@ -34,18 +33,7 @@ func New() (*topic.Screen, error) {
 
 func intro() []app.UI {
 	return []app.UI{
-		doc.P("This page shows how to install WebGo, write a minimal app, build it to WebAssembly, and generate a static site."),
 		doc.Note("This guide targets `github.com/Toms223/WebGo v0.0.5`. `v0.0.1` and `v0.0.2` do not work and should not be used."),
-	}
-}
-
-func requirements() []app.UI {
-	return []app.UI{
-		doc.List(
-			doc.Item("Go, matching the version required by your `go.mod`."),
-			doc.Item("`github.com/Toms223/WebGo`, version `v0.0.5` or later."),
-			doc.Item("`github.com/maxence-charriere/go-app/v11`, pulled in as a dependency of WebGo. Your own code also imports it directly, for example to call `app.RunWhenOnBrowser` and `app.Route`."),
-		),
 	}
 }
 
@@ -54,6 +42,12 @@ func install() []app.UI {
 		doc.P("Run this in your module:"),
 		doc.Sh(`go get github.com/Toms223/WebGo@v0.0.5`),
 		doc.P("This adds WebGo to your `go.mod`. If you import `github.com/maxence-charriere/go-app/v11/pkg/app` directly in your own code, run `go mod tidy` afterward so it is added as a direct dependency too."),
+		doc.H("Requirements"),
+		doc.List(
+			doc.Item("Go, matching the version required by your `go.mod`."),
+			doc.Item("`github.com/Toms223/WebGo`, version `v0.0.5` or later."),
+			doc.Item("`github.com/maxence-charriere/go-app/v11`, pulled in as a dependency of WebGo. Your own code also imports it directly, for example to call `app.RunWhenOnBrowser` and `app.Route`."),
+		),
 	}
 }
 
