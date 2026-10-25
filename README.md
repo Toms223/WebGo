@@ -336,8 +336,64 @@ That sets go-app's resource resolver, so the generated HTML points at `/WebGo/ap
 
 The flag covers go-app's own assets only. The app's routing needs nothing: `Base` deduces its mount at runtime, so the same source serves correctly from `/` in the container and from `/WebGo/` on Pages, with no build-time switch and no environment variable.
 
+## Roadmap to v1
+
+WebGo is becoming its own framework instead of a layer on go-app. Some of what it needs can't be done from outside go-app, so WebGo is taking go-app's code over. Nothing here is released yet: `v0.0.5` is still the current tag.
+
+<p align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/roadmap-dark.svg">
+  <img alt="The roadmap in four steps: keep what works, new features, extras, ship v1" src=".github/readme/roadmap-light.svg">
+</picture>
+</p>
+
+The order is: keep what already works, then the new features, then the extras. v1 needs everything in the first two steps.
+
+### 1. Keep what works
+
+- Copy go-app v11 into this repository with its MIT licence and its tests. After that, WebGo imports nothing from go-app.
+- Move `page`, `data` and `style` into the core.
+- Behaviour stays exactly as it is. The existing tests pass, and the docs site builds and runs the same at `/` and under `/WebGo`.
+- Static generation keeps working the way go-app does it now: every registered route is rendered to HTML at build time.
+- This is the one breaking tag. The import path changes, and the release notes say how to update.
+
+### 2. New features
+
+Each one gets its own design before any code is written.
+
+**Load.** A page can declare a function that has to finish before its screen draws. While it runs, `Base` leaves the current screen up, so navigating never flashes a blank page. If it fails, the layout's `Error` is shown. It also runs at build time, which puts the data in the generated HTML. go-app's `OnPreRender` was meant for this, but it only ever ran on the server. The shape below is a proposal:
+
+```go
+page.NewPage[AppState]("/settings").
+	WithLayout(&settingsLayout{}).
+	WithModel(vm).
+	WithLoader(func(ctx app.Context, s *AppState) error {
+		user, err := fetchUser()
+		s.User = user
+		return err
+	})
+```
+
+One limit: the build has no user. Anything saved in the browser, like whether a sidebar is open, renders in its default state in the generated HTML and flips once WebAssembly starts. `Load` doesn't change that.
+
+**Scripts.** Declare scripts as local files or CDN URLs. They get a fixed entrypoint shape and a typed contract for the events and actions passed between them and the Go app, much like CSS lets you plug in your own implementations. The contract isn't designed yet.
+
+**OpenFeature.** An OpenFeature SDK written from scratch in Go that runs in the browser. The official Go one is server-only. You register your own providers with it. Flags are evaluated in the browser at runtime, and at build time only their default values exist.
+
+### 3. Extras
+
+**Dev server.** Once pages stop being served per request, WebGo needs its own way to run locally: a very small HTTP server for the built site, and a folder watcher that rebuilds when a file changes. Serving pages per request is removed only after this exists.
+
+### What v1 means
+
+The fork, the core move, `Load`, scripts and OpenFeature all ship. Each one is documented on the docs site with live examples, and every tag builds and passes its tests.
+
 ## Requirements
 
 - Go matching the version in your `go.mod`
 - `github.com/Toms223/WebGo` v0.0.5 or later
 - `github.com/maxence-charriere/go-app/v11`
+
+## License
+
+WebGo is licensed under the [GNU General Public License v3.0](LICENSE). Any project that includes WebGo, extends it or is built on it must also be released as open source under the GPL-3.0 when it is distributed. WebGo treats serving the compiled WebAssembly to a browser as distributing it.
