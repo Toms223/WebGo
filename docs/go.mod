@@ -3,8 +3,7 @@ module github.com/Toms223/WebGo/docs
 go 1.27.0
 
 require (
-	github.com/Toms223/WebGo v0.0.5
-	github.com/maxence-charriere/go-app/v11 v11.0.5
+	github.com/Toms223/WebGo v0.1.0
 	github.com/spf13/cobra v1.10.2
 )
 
