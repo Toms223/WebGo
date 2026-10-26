@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var Angle = style.Property("demo-angle",
@@ -23,5 +23,5 @@ var Turning = style.Class("demo-turning").
 	Hover(css.Custom(Angle.Name(), css.Deg(180)))
 
 func PropertyDemo() app.UI {
-	return app.Div().Class(Turning.Name())
+	return app.Div().Style(Turning)
 }

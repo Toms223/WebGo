@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/example"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func panel(source, css string) *Panel {

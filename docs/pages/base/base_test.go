@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/theme"
 	"github.com/Toms223/WebGo/page"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var entries = []nav.Entry{

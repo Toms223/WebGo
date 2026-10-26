@@ -1,10 +1,10 @@
 package markdown
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/components/topic"
 	"github.com/Toms223/WebGo/docs/pages/base"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (
@@ -17,7 +17,7 @@ func New() (*topic.Screen, error) {
 		Key:   "markdown",
 		Path:  Route,
 		Title: Title,
-		Lead:  "Render a safe subset of markdown into go-app elements, with live components in fences.",
+		Lead:  "Render a safe subset of markdown into app elements, with live components in fences.",
 		Intro: intro,
 		Sections: []topic.Section{
 			{Title: "RenderMarkdown", Body: renderMarkdown},
@@ -41,7 +41,7 @@ func New() (*topic.Screen, error) {
 
 func intro() []app.UI {
 	return []app.UI{
-		doc.P("The `markdown` package renders Markdown source into a tree of `go-app` `app.UI` elements. It is a subset renderer: it supports the constructs listed on this page and treats everything else as plain text."),
+		doc.P("The `markdown` package renders Markdown source into a tree of `app.UI` elements. It is a subset renderer: it supports the constructs listed on this page and treats everything else as plain text."),
 	}
 }
 
@@ -55,7 +55,7 @@ func renderMarkdown() []app.UI {
 
 import (
 	"github.com/Toms223/WebGo/markdown"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 func Body(source string) []app.UI {

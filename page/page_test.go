@@ -7,7 +7,7 @@ import (
 
 	"github.com/Toms223/WebGo/data"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 type appState struct {

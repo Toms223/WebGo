@@ -3,7 +3,7 @@ package page
 import (
 	"testing"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 func routes(paths ...string) []Screen {

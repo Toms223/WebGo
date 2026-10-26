@@ -2,6 +2,7 @@ package style
 
 import (
 	"errors"
+	"slices"
 	"testing"
 )
 
@@ -165,5 +166,31 @@ func TestNilOperandsLatchNoName(t *testing.T) {
 				t.Errorf("Selector() = %q, want %q", got, ".a")
 			}
 		})
+	}
+}
+
+func TestClassNames(t *testing.T) {
+	var none *Rule
+	cases := []struct {
+		name string
+		rule *Rule
+		want []string
+	}{
+		{"class", Class("a"), []string{"a"}},
+		{"compound classes", Class("a").And(Class("b")), []string{"a", "b"}},
+		{"class with hover block", Class("a").Hover(), []string{"a"}},
+		{"id", Id("x"), nil},
+		{"element", Element("div"), nil},
+		{"universal", Any(), nil},
+		{"class and id", Class("a").And(Id("x")), nil},
+		{"element and class", Element("p").And(Class("a")), nil},
+		{"descendant", Class("a").Descendant(Class("b")), nil},
+		{"nil rule", none, nil},
+	}
+	for _, c := range cases {
+		got := c.rule.ClassNames()
+		if !slices.Equal(got, c.want) || (c.want == nil && got != nil) {
+			t.Errorf("%s: ClassNames() = %#v, want %#v", c.name, got, c.want)
+		}
 	}
 }

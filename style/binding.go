@@ -7,9 +7,11 @@ import (
 
 	"github.com/Toms223/WebGo/css"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
+// Binding is a typed reaction to one action, attached with Bind. The action's value must be a *T; any
+// other value is logged and leaves the item unchanged.
 type Binding struct {
 	action string
 	props  func(any) ([]css.Property, bool)
@@ -17,14 +19,20 @@ type Binding struct {
 	when   func(any) (bool, bool)
 }
 
+// When returns a binding that inserts the item while when returns true for the action's *T and removes
+// it otherwise.
 func When[T any](action string, when func(*T) bool) Binding {
 	return Binding{action: action, when: typed(when)}
 }
 
+// Compute returns a binding whose function gives a Rule's base block for the action's *T. Pseudo,
+// conditional and nested blocks stay as declared, and a nil or empty result removes the rule.
 func Compute[T any](action string, props func(*T) []css.Property) Binding {
 	return Binding{action: action, props: typed(props)}
 }
 
+// ComputeFrames is Compute for a KeyframesRule: its function gives the frames, and no frame with
+// properties removes the keyframes.
 func ComputeFrames[T any](action string, frames func(*T) []Frame) Binding {
 	return Binding{action: action, frames: typed(frames)}
 }

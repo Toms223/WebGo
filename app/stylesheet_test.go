@@ -1,4 +1,6 @@
-package serve
+//go:build !wasm
+
+package app_test
 
 import (
 	"errors"
@@ -15,7 +17,7 @@ import (
 	"github.com/Toms223/WebGo/style"
 	"github.com/Toms223/WebGo/supports"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 func whenTrue(app.Action) bool { return true }
@@ -32,9 +34,9 @@ func plainRule(name string) *style.Rule {
 	return style.Class(name).Set(css.Custom("--w", css.Px(1)))
 }
 
-func handlerFor(t *testing.T, styles ...style.Style) *Handler {
+func handlerFor(t *testing.T, styles ...style.Style) *app.Handler {
 	t.Helper()
-	return &Handler{Styles: styles, WebDir: t.TempDir()}
+	return &app.Handler{Styles: styles, WebDir: t.TempDir()}
 }
 
 func putFile(t *testing.T, file, content string) {
@@ -94,15 +96,12 @@ func runBuildCases(t *testing.T, cases []buildCase) {
 			for _, f := range c.files {
 				putFile(t, filepath.Join(h.WebDir, f), "")
 			}
-			built, err := h.Build()
+			err := h.Build()
 			if !errors.Is(err, c.want) {
 				t.Fatalf("Build() error = %v, want %v", err, c.want)
 			}
-			if got := built != nil; got != (c.want == nil) {
-				t.Fatalf("Build() returned a handler = %v, want %v", got, c.want == nil)
-			}
-			if c.want == nil && !slices.Equal(built.Styles, c.links) {
-				t.Errorf("Styles = %q, want %q", built.Styles, c.links)
+			if c.want == nil && !slices.Equal(h.StyleLinks(), c.links) {
+				t.Errorf("Styles = %q, want %q", h.StyleLinks(), c.links)
 			}
 		})
 	}
@@ -110,9 +109,9 @@ func runBuildCases(t *testing.T, cases []buildCase) {
 
 func TestStaticVerifiesFile(t *testing.T) {
 	h := handlerFor(t, style.Static("/web/app.css"))
-	built, err := h.Build()
-	if !errors.Is(err, ErrMissingStyle) {
-		t.Fatalf("Build() error = %v, want %v", err, ErrMissingStyle)
+	err := h.Build()
+	if !errors.Is(err, app.ErrMissingStyle) {
+		t.Fatalf("Build() error = %v, want %v", err, app.ErrMissingStyle)
 	}
 	if !strings.Contains(err.Error(), "app.css") {
 		t.Errorf("Build() error = %q, want it to name app.css", err)
@@ -120,17 +119,14 @@ func TestStaticVerifiesFile(t *testing.T) {
 	if !errors.Is(err, os.ErrNotExist) {
 		t.Errorf("Build() error = %v, want it to keep the cause %v", err, os.ErrNotExist)
 	}
-	if built != nil {
-		t.Error("Build() returned a handler together with an error")
-	}
 
 	putFile(t, filepath.Join(h.WebDir, "app.css"), "")
-	built, err = h.Build()
+	err = h.Build()
 	if err != nil {
 		t.Fatalf("Build() error = %v, want nil", err)
 	}
-	if want := []string{"/web/app.css"}; !slices.Equal(built.Styles, want) {
-		t.Errorf("Styles = %q, want %q", built.Styles, want)
+	if want := []string{"/web/app.css"}; !slices.Equal(h.StyleLinks(), want) {
+		t.Errorf("Styles = %q, want %q", h.StyleLinks(), want)
 	}
 }
 
@@ -138,13 +134,13 @@ func TestStaticURLPassesThrough(t *testing.T) {
 	links := []string{"https://cdn/x.css", "http://cdn/x.css", "//cdn/x.css", "https://cdn/a/../x.css"}
 	for _, link := range links {
 		h := handlerFor(t, style.Static(link))
-		built, err := h.Build()
+		err := h.Build()
 		if err != nil {
 			t.Errorf("Build() of %q error = %v, want nil", link, err)
 			continue
 		}
-		if want := []string{link}; !slices.Equal(built.Styles, want) {
-			t.Errorf("Styles = %q, want %q", built.Styles, want)
+		if want := []string{link}; !slices.Equal(h.StyleLinks(), want) {
+			t.Errorf("Styles = %q, want %q", h.StyleLinks(), want)
 		}
 		if got := namesIn(t, h.WebDir); len(got) != 0 {
 			t.Errorf("web directory of %q holds %q, want it untouched", link, got)
@@ -158,14 +154,14 @@ func TestLinksAreCleaned(t *testing.T) {
 		fromStatic := handlerFor(t, style.Static(spelling))
 		putFile(t, filepath.Join(fromStatic.WebDir, "app.css"), "")
 		fromGenerated := handlerFor(t, style.Generated(spelling, plainRule("a")))
-		for _, h := range []*Handler{fromStatic, fromGenerated} {
-			built, err := h.Build()
+		for _, h := range []*app.Handler{fromStatic, fromGenerated} {
+			err := h.Build()
 			if err != nil {
 				t.Errorf("Build() of %q error = %v, want nil", spelling, err)
 				continue
 			}
-			if want := []string{"/web/app.css"}; !slices.Equal(built.Styles, want) {
-				t.Errorf("Styles of %q = %q, want %q", spelling, built.Styles, want)
+			if want := []string{"/web/app.css"}; !slices.Equal(h.StyleLinks(), want) {
+				t.Errorf("Styles of %q = %q, want %q", spelling, h.StyleLinks(), want)
 			}
 		}
 		if got, want := readFile(t, filepath.Join(fromGenerated.WebDir, "app.css")), ".a {\n\t--w: 1px;\n}\n"; got != want {
@@ -186,24 +182,24 @@ func TestPathsOutsideWebAreRejected(t *testing.T) {
 		style style.Style
 		want  error
 	}{
-		{"static outside web", style.Static("/other/x.css"), ErrPathOutsideWeb},
-		{"static escaping web", style.Static("/web/../x.css"), ErrPathOutsideWeb},
-		{"static escaping to an existing file", style.Static("/web/../secret.css"), ErrPathOutsideWeb},
-		{"static escaping through a subdirectory", style.Static("/web/a/../../x.css"), ErrPathOutsideWeb},
-		{"static without leading slash", style.Static("web/app.css"), ErrPathOutsideWeb},
-		{"static sharing only a name prefix", style.Static("/webapp/app.css"), ErrPathOutsideWeb},
-		{"static naming the web directory", style.Static("/web/"), ErrPathOutsideWeb},
-		{"static with no path", style.Static(""), ErrPathOutsideWeb},
-		{"generated escaping web", style.Generated("/web/../../x.css", plainRule("a")), ErrPathOutsideWeb},
-		{"generated outside web", style.Generated("/other/theme.css", plainRule("a")), ErrPathOutsideWeb},
-		{"generated at a url", style.Generated("https://cdn/theme.css", plainRule("a")), ErrPathOutsideWeb},
-		{"generated not css", style.Generated("/web/theme.txt", plainRule("a")), ErrNotCSSPath},
-		{"generated without extension", style.Generated("/web/theme", plainRule("a")), ErrNotCSSPath},
+		{"static outside web", style.Static("/other/x.css"), app.ErrPathOutsideWeb},
+		{"static escaping web", style.Static("/web/../x.css"), app.ErrPathOutsideWeb},
+		{"static escaping to an existing file", style.Static("/web/../secret.css"), app.ErrPathOutsideWeb},
+		{"static escaping through a subdirectory", style.Static("/web/a/../../x.css"), app.ErrPathOutsideWeb},
+		{"static without leading slash", style.Static("web/app.css"), app.ErrPathOutsideWeb},
+		{"static sharing only a name prefix", style.Static("/webapp/app.css"), app.ErrPathOutsideWeb},
+		{"static naming the web directory", style.Static("/web/"), app.ErrPathOutsideWeb},
+		{"static with no path", style.Static(""), app.ErrPathOutsideWeb},
+		{"generated escaping web", style.Generated("/web/../../x.css", plainRule("a")), app.ErrPathOutsideWeb},
+		{"generated outside web", style.Generated("/other/theme.css", plainRule("a")), app.ErrPathOutsideWeb},
+		{"generated at a url", style.Generated("https://cdn/theme.css", plainRule("a")), app.ErrPathOutsideWeb},
+		{"generated not css", style.Generated("/web/theme.txt", plainRule("a")), app.ErrNotCSSPath},
+		{"generated without extension", style.Generated("/web/theme", plainRule("a")), app.ErrNotCSSPath},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			h := &Handler{Styles: []style.Style{c.style}, WebDir: webDir}
-			if _, err := h.Build(); !errors.Is(err, c.want) {
+			h := &app.Handler{Styles: []style.Style{c.style}, WebDir: webDir}
+			if err := h.Build(); !errors.Is(err, c.want) {
 				t.Errorf("Build() error = %v, want %v", err, c.want)
 			}
 		})
@@ -222,7 +218,7 @@ func TestPathsOutsideWebAreRejected(t *testing.T) {
 
 func TestGeneratedWritesDeterministically(t *testing.T) {
 	h := handlerFor(t, style.Generated("/web/t/theme.css", style.Class("a").Set(css.Custom("--w", css.Px(1)))))
-	if _, err := h.Build(); err != nil {
+	if err := h.Build(); err != nil {
 		t.Fatalf("Build() error = %v, want nil", err)
 	}
 	file := filepath.Join(h.WebDir, "t", "theme.css")
@@ -233,7 +229,7 @@ func TestGeneratedWritesDeterministically(t *testing.T) {
 	first := modTime(t, file)
 
 	time.Sleep(20 * time.Millisecond)
-	built, err := h.Build()
+	err := h.Build()
 	if err != nil {
 		t.Fatalf("second Build() error = %v, want nil", err)
 	}
@@ -243,14 +239,14 @@ func TestGeneratedWritesDeterministically(t *testing.T) {
 	if second := modTime(t, file); !second.Equal(first) {
 		t.Errorf("ModTime after a second Build() = %v, want %v", second, first)
 	}
-	if want := []string{"/web/t/theme.css"}; !slices.Equal(built.Styles, want) {
-		t.Errorf("Styles = %q, want %q", built.Styles, want)
+	if want := []string{"/web/t/theme.css"}; !slices.Equal(h.StyleLinks(), want) {
+		t.Errorf("Styles = %q, want %q", h.StyleLinks(), want)
 	}
 }
 
 func TestEmptyGeneratedStylesheetIsStillWritten(t *testing.T) {
 	h := handlerFor(t, style.Generated("/web/none.css"), style.Generated("/web/bare.css", style.Class("doc")))
-	built, err := h.Build()
+	err := h.Build()
 	if err != nil {
 		t.Fatalf("Build() error = %v, want nil", err)
 	}
@@ -259,8 +255,8 @@ func TestEmptyGeneratedStylesheetIsStillWritten(t *testing.T) {
 			t.Errorf("%s = %q, want an empty file", name, got)
 		}
 	}
-	if want := []string{"/web/none.css", "/web/bare.css"}; !slices.Equal(built.Styles, want) {
-		t.Errorf("Styles = %q, want %q", built.Styles, want)
+	if want := []string{"/web/none.css", "/web/bare.css"}; !slices.Equal(h.StyleLinks(), want) {
+		t.Errorf("Styles = %q, want %q", h.StyleLinks(), want)
 	}
 }
 
@@ -384,37 +380,37 @@ func TestDuplicatePaths(t *testing.T) {
 		{
 			name:   "static twice",
 			styles: []style.Style{style.Static("/web/a.css"), style.Static("/web/a.css")},
-			want:   ErrDuplicatePath,
+			want:   app.ErrDuplicatePath,
 		},
 		{
 			name:   "static then generated",
 			styles: []style.Style{style.Static("/web/a.css"), style.Generated("/web/a.css", plainRule("a"))},
-			want:   ErrDuplicatePath,
+			want:   app.ErrDuplicatePath,
 		},
 		{
 			name:   "generated then static",
 			styles: []style.Style{style.Generated("/web/a.css", plainRule("a")), style.Static("/web/a.css")},
-			want:   ErrDuplicatePath,
+			want:   app.ErrDuplicatePath,
 		},
 		{
 			name:   "generated twice",
 			styles: []style.Style{style.Generated("/web/a.css", plainRule("a")), style.Generated("/web/a.css", plainRule("b"))},
-			want:   ErrDuplicatePath,
+			want:   app.ErrDuplicatePath,
 		},
 		{
 			name:   "same file spelled with a dot segment",
 			styles: []style.Style{style.Static("/web/a.css"), style.Static("/web/./a.css")},
-			want:   ErrDuplicatePath,
+			want:   app.ErrDuplicatePath,
 		},
 		{
 			name:   "same file spelled through a parent",
 			styles: []style.Style{style.Static("/web/a.css"), style.Generated("/web/x/../a.css", plainRule("a"))},
-			want:   ErrDuplicatePath,
+			want:   app.ErrDuplicatePath,
 		},
 		{
 			name:   "same url twice",
 			styles: []style.Style{style.Static("https://cdn/x.css"), style.Static("https://cdn/x.css")},
-			want:   ErrDuplicatePath,
+			want:   app.ErrDuplicatePath,
 		},
 		{
 			name:   "different files",
@@ -436,45 +432,37 @@ func TestDuplicatePaths(t *testing.T) {
 	})
 }
 
-func TestBaseStylesAreKept(t *testing.T) {
-	original := []string{"/web/base.css"}
-	h := &Handler{
-		Handler: app.Handler{Styles: original},
-		Styles:  []style.Style{style.Static("/web/app.css")},
-		WebDir:  t.TempDir(),
+func TestBuildIsIdempotent(t *testing.T) {
+	h := &app.Handler{
+		Styles: []style.Style{style.Static("/web/app.css")},
+		WebDir: t.TempDir(),
 	}
 	putFile(t, filepath.Join(h.WebDir, "app.css"), "")
 
-	want := []string{"/web/app.css", "/web/base.css"}
+	want := []string{"/web/app.css"}
 	for call := 1; call <= 3; call++ {
-		built, err := h.Build()
-		if err != nil {
+		if err := h.Build(); err != nil {
 			t.Fatalf("Build() call %d error = %v, want nil", call, err)
 		}
-		if built != &h.Handler {
-			t.Errorf("Build() call %d returned a handler other than &h.Handler", call)
+		if !slices.Equal(h.StyleLinks(), want) {
+			t.Errorf("links after call %d = %q, want %q", call, h.StyleLinks(), want)
 		}
-		if !slices.Equal(built.Styles, want) {
-			t.Errorf("Styles after call %d = %q, want %q", call, built.Styles, want)
-		}
-		original[0] = "/web/changed.css"
 	}
 
 	h.Styles = nil
-	built, err := h.Build()
-	if err != nil {
+	if err := h.Build(); err != nil {
 		t.Fatalf("Build() without styles error = %v, want nil", err)
 	}
-	if wantBase := []string{"/web/base.css"}; !slices.Equal(built.Styles, wantBase) {
-		t.Errorf("Styles without styles = %q, want %q", built.Styles, wantBase)
+	if got := h.StyleLinks(); len(got) != 0 {
+		t.Errorf("links without styles = %q, want none", got)
 	}
 }
 
 func TestDefaultWebDir(t *testing.T) {
-	h := &Handler{Styles: []style.Style{style.Static("/web/app.css")}}
-	_, err := h.Build()
-	if !errors.Is(err, ErrMissingStyle) {
-		t.Fatalf("Build() error = %v, want %v", err, ErrMissingStyle)
+	h := &app.Handler{Styles: []style.Style{style.Static("/web/app.css")}}
+	err := h.Build()
+	if !errors.Is(err, app.ErrMissingStyle) {
+		t.Fatalf("Build() error = %v, want %v", err, app.ErrMissingStyle)
 	}
 	relative := filepath.Join("web", "app.css")
 	if got := err.Error(); !strings.Contains(got, relative) || strings.Contains(got, "/"+relative) {
@@ -489,17 +477,17 @@ func TestPathErrorsNameThePath(t *testing.T) {
 		want   error
 		path   string
 	}{
-		{"outside web", []style.Style{style.Static("/other/x.css")}, ErrPathOutsideWeb, "/other/x.css"},
-		{"escaping web", []style.Style{style.Static("/web/../x.css")}, ErrPathOutsideWeb, "/web/../x.css"},
-		{"generated outside web", []style.Style{style.Generated("/other/t.css", plainRule("a"))}, ErrPathOutsideWeb, "/other/t.css"},
-		{"not css", []style.Style{style.Generated("/web/theme.txt", plainRule("a"))}, ErrNotCSSPath, "/web/theme.txt"},
-		{"duplicate url", []style.Style{style.Static("https://cdn/x.css"), style.Static("https://cdn/x.css")}, ErrDuplicatePath, "https://cdn/x.css"},
-		{"duplicate file", []style.Style{style.Static("/web/a.css"), style.Static("/web/./a.css")}, ErrDuplicatePath, "/web/a.css"},
+		{"outside web", []style.Style{style.Static("/other/x.css")}, app.ErrPathOutsideWeb, "/other/x.css"},
+		{"escaping web", []style.Style{style.Static("/web/../x.css")}, app.ErrPathOutsideWeb, "/web/../x.css"},
+		{"generated outside web", []style.Style{style.Generated("/other/t.css", plainRule("a"))}, app.ErrPathOutsideWeb, "/other/t.css"},
+		{"not css", []style.Style{style.Generated("/web/theme.txt", plainRule("a"))}, app.ErrNotCSSPath, "/web/theme.txt"},
+		{"duplicate url", []style.Style{style.Static("https://cdn/x.css"), style.Static("https://cdn/x.css")}, app.ErrDuplicatePath, "https://cdn/x.css"},
+		{"duplicate file", []style.Style{style.Static("/web/a.css"), style.Static("/web/./a.css")}, app.ErrDuplicatePath, "/web/a.css"},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			h := handlerFor(t, c.styles...)
-			_, err := h.Build()
+			err := h.Build()
 			if !errors.Is(err, c.want) {
 				t.Fatalf("Build() error = %v, want %v", err, c.want)
 			}
@@ -536,7 +524,7 @@ func TestRuleErrorsNameTheSelector(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			h := handlerFor(t, c.style)
-			_, err := h.Build()
+			err := h.Build()
 			if !errors.Is(err, c.want) {
 				t.Fatalf("Build() error = %v, want %v", err, c.want)
 			}
@@ -549,7 +537,7 @@ func TestRuleErrorsNameTheSelector(t *testing.T) {
 
 func TestUnnamedClassMessageHasTheSelector(t *testing.T) {
 	h := handlerFor(t, style.Generated("/web/t.css", style.Class("")))
-	_, err := h.Build()
+	err := h.Build()
 	if want := style.ErrNoName.Error() + ": ."; err == nil || err.Error() != want {
 		t.Errorf("Build() error = %v, want %q", err, want)
 	}
@@ -562,27 +550,23 @@ func TestInvalidHandlerWritesNothing(t *testing.T) {
 		want  error
 	}{
 		{"unnamed rule", style.Generated("/web/bad.css", style.Class("")), style.ErrNoName},
-		{"missing static file", style.Static("/web/missing.css"), ErrMissingStyle},
-		{"duplicate path", style.Generated("/web/ok.css", plainRule("b")), ErrDuplicatePath},
-		{"outside web", style.Static("/other/x.css"), ErrPathOutsideWeb},
+		{"missing static file", style.Static("/web/missing.css"), app.ErrMissingStyle},
+		{"duplicate path", style.Generated("/web/ok.css", plainRule("b")), app.ErrDuplicatePath},
+		{"outside web", style.Static("/other/x.css"), app.ErrPathOutsideWeb},
 		{"dynamic rule without On", style.Dynamic(plainRule("c")), style.ErrNotDynamic},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			h := handlerFor(t, style.Generated("/web/t/ok.css", plainRule("a")), style.Generated("/web/ok.css", plainRule("a")), c.later)
-			h.Handler.Styles = []string{"/web/base.css"}
-			built, err := h.Build()
+			err := h.Build()
 			if !errors.Is(err, c.want) {
 				t.Fatalf("Build() error = %v, want %v", err, c.want)
-			}
-			if built != nil {
-				t.Error("Build() returned a handler together with an error")
 			}
 			if got := namesIn(t, h.WebDir); len(got) != 0 {
 				t.Errorf("web directory holds %q after a failed Build(), want it empty", got)
 			}
-			if want := []string{"/web/base.css"}; !slices.Equal(h.Handler.Styles, want) {
-				t.Errorf("Styles after a failed Build() = %q, want %q", h.Handler.Styles, want)
+			if got := h.StyleLinks(); len(got) != 0 {
+				t.Errorf("links after a failed Build() = %q, want none", got)
 			}
 		})
 	}
@@ -591,20 +575,16 @@ func TestInvalidHandlerWritesNothing(t *testing.T) {
 func TestWriteFailureIsReported(t *testing.T) {
 	h := handlerFor(t, style.Generated("/web/blocker/theme.css", plainRule("a")))
 	putFile(t, filepath.Join(h.WebDir, "blocker"), "")
-	h.Handler.Styles = []string{"/web/base.css"}
 
-	built, err := h.Build()
+	err := h.Build()
 	if err == nil {
 		t.Fatal("Build() error = nil, want the failed write")
 	}
-	if built != nil {
-		t.Error("Build() returned a handler together with an error")
+	if !strings.HasPrefix(err.Error(), "app: ") {
+		t.Errorf("Build() error = %q, want it to start with %q", err, "app: ")
 	}
-	if !strings.HasPrefix(err.Error(), "serve: ") {
-		t.Errorf("Build() error = %q, want it to start with %q", err, "serve: ")
-	}
-	if want := []string{"/web/base.css"}; !slices.Equal(h.Handler.Styles, want) {
-		t.Errorf("Styles after a failed Build() = %q, want %q", h.Handler.Styles, want)
+	if got := h.StyleLinks(); len(got) != 0 {
+		t.Errorf("links after a failed Build() = %q, want none", got)
 	}
 }
 
@@ -616,12 +596,12 @@ func TestNilStylesAndRulesAreIgnored(t *testing.T) {
 		style.Dynamic(none, plainRule("b").On("x", whenTrue)),
 		style.Dynamic(none),
 	)
-	built, err := h.Build()
+	err := h.Build()
 	if err != nil {
 		t.Fatalf("Build() error = %v, want nil", err)
 	}
-	if want := []string{"/web/t.css"}; !slices.Equal(built.Styles, want) {
-		t.Errorf("Styles = %q, want %q", built.Styles, want)
+	if want := []string{"/web/t.css"}; !slices.Equal(h.StyleLinks(), want) {
+		t.Errorf("Styles = %q, want %q", h.StyleLinks(), want)
 	}
 	if got, want := readFile(t, filepath.Join(h.WebDir, "t.css")), ".a {\n\t--w: 1px;\n}\n"; got != want {
 		t.Errorf("t.css = %q, want %q", got, want)
@@ -634,7 +614,7 @@ func TestStylesKeepTheirOwnRules(t *testing.T) {
 	rules[0], rules[1] = rules[1], rules[0]
 
 	h := handlerFor(t, generatedStyle)
-	if _, err := h.Build(); err != nil {
+	if err := h.Build(); err != nil {
 		t.Fatalf("Build() error = %v, want nil", err)
 	}
 	if got, want := readFile(t, filepath.Join(h.WebDir, "t.css")), ".a {\n\t--w: 1px;\n}\n\n.b {\n\t--w: 1px;\n}\n"; got != want {
@@ -675,21 +655,21 @@ func TestWebPath(t *testing.T) {
 		{"", ""},
 	}
 	for _, c := range cases {
-		got, err := webPath("site", c.given)
+		got, err := app.WebPath("site", c.given)
 		if c.want == "" {
-			if !errors.Is(err, ErrPathOutsideWeb) {
-				t.Errorf("webPath(%q) error = %v, want %v", c.given, err, ErrPathOutsideWeb)
+			if !errors.Is(err, app.ErrPathOutsideWeb) {
+				t.Errorf("app.WebPath(%q) error = %v, want %v", c.given, err, app.ErrPathOutsideWeb)
 			}
 			if got != "" {
-				t.Errorf("webPath(%q) = %q alongside an error, want empty", c.given, got)
+				t.Errorf("app.WebPath(%q) = %q alongside an error, want empty", c.given, got)
 			}
 			continue
 		}
 		if err != nil {
-			t.Errorf("webPath(%q) error = %v, want nil", c.given, err)
+			t.Errorf("app.WebPath(%q) error = %v, want nil", c.given, err)
 		}
 		if got != c.want {
-			t.Errorf("webPath(%q) = %q, want %q", c.given, got, c.want)
+			t.Errorf("app.WebPath(%q) = %q, want %q", c.given, got, c.want)
 		}
 	}
 }
@@ -714,15 +694,15 @@ func TestIsURL(t *testing.T) {
 		{"", false},
 	}
 	for _, c := range cases {
-		if got := isURL(c.given); got != c.want {
-			t.Errorf("isURL(%q) = %v, want %v", c.given, got, c.want)
+		if got := app.IsURL(c.given); got != c.want {
+			t.Errorf("app.IsURL(%q) = %v, want %v", c.given, got, c.want)
 		}
 	}
 }
 
 func TestWriteIfChanged(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "a", "b", "c.css")
-	if err := writeIfChanged(file, []byte("one")); err != nil {
+	if err := app.WriteIfChanged(file, []byte("one")); err != nil {
 		t.Fatalf("first write error = %v, want nil", err)
 	}
 	if got := readFile(t, file); got != "one" {
@@ -735,14 +715,14 @@ func TestWriteIfChanged(t *testing.T) {
 	}
 	pinned := modTime(t, file)
 
-	if err := writeIfChanged(file, []byte("one")); err != nil {
+	if err := app.WriteIfChanged(file, []byte("one")); err != nil {
 		t.Fatalf("unchanged write error = %v, want nil", err)
 	}
 	if got := modTime(t, file); !got.Equal(pinned) {
 		t.Errorf("ModTime after identical bytes = %v, want %v", got, pinned)
 	}
 
-	if err := writeIfChanged(file, []byte("two")); err != nil {
+	if err := app.WriteIfChanged(file, []byte("two")); err != nil {
 		t.Fatalf("changed write error = %v, want nil", err)
 	}
 	if got := readFile(t, file); got != "two" {
@@ -752,7 +732,7 @@ func TestWriteIfChanged(t *testing.T) {
 		t.Errorf("ModTime after changed bytes = %v, want it after %v", got, pinned)
 	}
 
-	if err := writeIfChanged(file, nil); err != nil {
+	if err := app.WriteIfChanged(file, nil); err != nil {
 		t.Fatalf("emptying write error = %v, want nil", err)
 	}
 	if got := readFile(t, file); got != "" {
@@ -764,10 +744,10 @@ func TestWriteIfChangedReportsFailures(t *testing.T) {
 	dir := t.TempDir()
 	blocker := filepath.Join(dir, "blocker")
 	putFile(t, blocker, "")
-	if err := writeIfChanged(filepath.Join(blocker, "x.css"), []byte("x")); err == nil {
+	if err := app.WriteIfChanged(filepath.Join(blocker, "x.css"), []byte("x")); err == nil {
 		t.Error("write below a regular file error = nil, want an error")
 	}
-	if err := writeIfChanged(dir, []byte("x")); err == nil {
+	if err := app.WriteIfChanged(dir, []byte("x")); err == nil {
 		t.Error("write onto a directory error = nil, want an error")
 	}
 }
@@ -783,12 +763,12 @@ func TestGeneratedAcceptsItems(t *testing.T) {
 		style.LayerOrder("base", "components"),
 	}
 	h := handlerFor(t, style.Generated("/web/t.css", items...))
-	built, err := h.Build()
+	err := h.Build()
 	if err != nil {
 		t.Fatalf("Build() error = %v, want nil", err)
 	}
-	if want := []string{"/web/t.css"}; !slices.Equal(built.Styles, want) {
-		t.Errorf("Styles = %q, want %q", built.Styles, want)
+	if want := []string{"/web/t.css"}; !slices.Equal(h.StyleLinks(), want) {
+		t.Errorf("Styles = %q, want %q", h.StyleLinks(), want)
 	}
 	got := readFile(t, filepath.Join(h.WebDir, "t.css"))
 	source, err := style.Resolve(style.Generated("/web/t.css", items...))
@@ -807,7 +787,7 @@ func TestGeneratedTakesRulesAndItems(t *testing.T) {
 	r1, r2 := plainRule("a"), plainRule("b")
 	items := []style.Item{plainRule("a"), plainRule("b")}
 	h := handlerFor(t, style.Generated("/web/rules.css", r1, r2), style.Generated("/web/items.css", items...))
-	if _, err := h.Build(); err != nil {
+	if err := h.Build(); err != nil {
 		t.Fatalf("Build() error = %v, want nil", err)
 	}
 	want := ".a {\n\t--w: 1px;\n}\n\n.b {\n\t--w: 1px;\n}\n"
@@ -819,7 +799,7 @@ func TestGeneratedTakesRulesAndItems(t *testing.T) {
 }
 
 func TestDynamicRejectsFontFace(t *testing.T) {
-	_, err := handlerFor(t, style.Dynamic(interFace())).Build()
+	err := handlerFor(t, style.Dynamic(interFace())).Build()
 	if !errors.Is(err, style.ErrNotDynamic) {
 		t.Fatalf("Build() error = %v, want %v", err, style.ErrNotDynamic)
 	}
@@ -829,7 +809,7 @@ func TestDynamicRejectsFontFace(t *testing.T) {
 }
 
 func TestGeneratedRejectsBoundKeyframes(t *testing.T) {
-	_, err := handlerFor(t, style.Generated("/web/t.css", style.Keyframes("pulse").From(css.Opacity(css.Num(0))).On("x", whenTrue))).Build()
+	err := handlerFor(t, style.Generated("/web/t.css", style.Keyframes("pulse").From(css.Opacity(css.Num(0))).On("x", whenTrue))).Build()
 	if !errors.Is(err, style.ErrDynamicInGenerated) {
 		t.Fatalf("Build() error = %v, want %v", err, style.ErrDynamicInGenerated)
 	}
@@ -993,7 +973,7 @@ func TestItemErrorsNameTheItem(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			_, err := handlerFor(t, c.style).Build()
+			err := handlerFor(t, c.style).Build()
 			if err == nil || err.Error() != c.want {
 				t.Errorf("Build() error = %v, want %q", err, c.want)
 			}
@@ -1086,7 +1066,7 @@ func TestNestingErrorsNameTheRule(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			_, err := handlerFor(t, c.style).Build()
+			err := handlerFor(t, c.style).Build()
 			if want := c.want.Error() + ": " + c.subject; err == nil || err.Error() != want {
 				t.Errorf("Build() error = %v, want %q", err, want)
 			}
@@ -1099,7 +1079,7 @@ func TestGeneratedWritesNestedRules(t *testing.T) {
 		plainRule("a"),
 		style.Class("card").Set(css.Custom("--w", css.Px(2))).Nest(plainRule("title")),
 	))
-	if _, err := h.Build(); err != nil {
+	if err := h.Build(); err != nil {
 		t.Fatal(err)
 	}
 	want := ".a {\n\t--w: 1px;\n}\n\n.card {\n\t--w: 2px;\n\t& .title {\n\t\t--w: 1px;\n\t}\n}\n"

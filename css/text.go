@@ -34,6 +34,8 @@ func (i IdentValue) CSS() string { return i.text }
 
 type RawValue struct{ text string }
 
+// Raw writes s as given and is accepted by every property function, for values the typed grammar does
+// not cover. It is not checked: text that breaks the block makes the browser drop it.
 func Raw(s string) RawValue { return RawValue{text: s} }
 
 func (r RawValue) CSS() string { return r.text }

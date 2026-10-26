@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 var entries = []Entry{
@@ -47,5 +47,17 @@ func TestRenderIsASidebarList(t *testing.T) {
 	}
 	if count := strings.Count(out, `class="nav-link`); count != len(entries) {
 		t.Errorf("expected %d nav links, found %d in %s", len(entries), count, out)
+	}
+}
+
+func TestRenderLabelsEachGroupOnce(t *testing.T) {
+	grouped := []Entry{
+		{Title: "A", Route: "/a"},
+		{Title: "B", Route: "/b", Group: "Core"},
+		{Title: "C", Route: "/c", Group: "Core"},
+	}
+	out := app.HTMLString(Render(grouped, "/a"))
+	if strings.Count(out, ">Guides<") != 1 || strings.Count(out, ">Core<") != 1 || strings.Count(out, "<ul") != 2 {
+		t.Errorf("expected one Guides and one Core group, got %s", out)
 	}
 }

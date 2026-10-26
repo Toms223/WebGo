@@ -88,7 +88,8 @@ var DocLink = Doc.Descendant(style.Element("a")).
 		css.TextDecoration(kw.Underline),
 		css.TextDecorationColor(css.Var("coral")),
 		css.TextDecorationThickness(css.Px(3)),
-		css.TextUnderlineOffset(css.Px(3)),
+		css.TextUnderlineOffset(css.Em(0.3)),
+		css.TextDecorationSkipInk(kw.None),
 	).
 	FocusVisible(ring...).
 	Nest(style.Self().

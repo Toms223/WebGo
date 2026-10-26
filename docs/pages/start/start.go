@@ -1,10 +1,10 @@
 package start
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/components/topic"
 	"github.com/Toms223/WebGo/docs/pages/base"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (
@@ -33,20 +33,19 @@ func New() (*topic.Screen, error) {
 
 func intro() []app.UI {
 	return []app.UI{
-		doc.Note("This guide targets `github.com/Toms223/WebGo v0.0.5`. `v0.0.1` and `v0.0.2` do not work and should not be used."),
+		doc.Note("This guide targets `github.com/Toms223/WebGo v0.1.0`. `v0.0.1` and `v0.0.2` do not work and should not be used."),
 	}
 }
 
 func install() []app.UI {
 	return []app.UI{
 		doc.P("Run this in your module:"),
-		doc.Sh(`go get github.com/Toms223/WebGo@v0.0.5`),
-		doc.P("This adds WebGo to your `go.mod`. If you import `github.com/maxence-charriere/go-app/v11/pkg/app` directly in your own code, run `go mod tidy` afterward so it is added as a direct dependency too."),
+		doc.Sh(`go get github.com/Toms223/WebGo@v0.1.0`),
+		doc.P("This adds WebGo to your `go.mod`. Everything comes from this one module, including the `app` package at `github.com/Toms223/WebGo/app`."),
 		doc.H("Requirements"),
 		doc.List(
 			doc.Item("Go, matching the version required by your `go.mod`."),
-			doc.Item("`github.com/Toms223/WebGo`, version `v0.0.5` or later."),
-			doc.Item("`github.com/maxence-charriere/go-app/v11`, pulled in as a dependency of WebGo. Your own code also imports it directly, for example to call `app.RunWhenOnBrowser` and `app.Route`."),
+			doc.Item("`github.com/Toms223/WebGo`, version `v0.1.0` or later."),
 		),
 	}
 }
@@ -59,7 +58,7 @@ func minimumMain() []app.UI {
 import (
 	"net/http"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 type hello struct {
@@ -106,6 +105,7 @@ func buildWasm() []app.UI {
 func generateStatic() []app.UI {
 	return []app.UI{
 		doc.P("A WebGo app can also be exported as a set of static files, for hosting without a Go server. Replace the `http.Handle` and `http.ListenAndServe` calls with `app.GenerateStaticWebsite`:"),
+		staticDiagram(),
 		doc.Go(`func main() {
 	app.Route("/", func() app.Composer { return &hello{} })
 	app.RunWhenOnBrowser()
@@ -134,7 +134,7 @@ func nextSteps() []app.UI {
 			doc.Item("See the ", doc.A("/state", "pages and state guide"), " for building pages with `Page`, `Base`, and `ViewModel`."),
 			doc.Item("See the ", doc.A("/markdown", "markdown guide"), " for rendering markdown content inside a page."),
 			doc.Item("See the ", doc.A("/styling", "Styling page"), " for writing typed CSS rules with the `style`, `css`, `kw`, `media`, `container` and `supports` packages: selectors, nesting, at-rules and `!important`."),
-			doc.Item("See the ", doc.A("/applying", "Applying page"), " for delivering those rules: stylesheets, `serve.Handler`, `style.Run`, and rules driven by actions and `ViewModel.OnAction`."),
+			doc.Item("See the ", doc.A("/applying", "Applying page"), " for delivering those rules: stylesheets, `app.Handler`, `style.Run`, and rules driven by actions and `ViewModel.OnAction`."),
 		),
 	}
 }

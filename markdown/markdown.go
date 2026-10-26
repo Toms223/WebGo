@@ -1,9 +1,11 @@
+// Package markdown renders a safe subset of Markdown into app elements, with live components in
+// demo fences.
 package markdown
 
 import (
 	"strings"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	textm "github.com/yuin/goldmark/text"
@@ -11,6 +13,9 @@ import (
 
 var markdownParser = goldmark.New().Parser()
 
+// Style sets the CSS classes RenderMarkdown puts on headings and demo panels. Demos maps a demo
+// name to the function that builds its live component: a fence whose info string names a registered
+// demo as its second word renders as a panel holding the code and the component.
 type Style struct {
 	Heading      string
 	Subheading   string
@@ -21,6 +26,9 @@ type Style struct {
 	ExampleLabel string
 }
 
+// RenderMarkdown returns one element per top-level block of source, or nil for blank source. Raw HTML
+// renders as escaped text, an image as its alt text, and a link only to an http, https, mailto,
+// root-relative or fragment destination; any other link becomes a span.
 func RenderMarkdown(source string, style Style) []app.UI {
 	if strings.TrimSpace(source) == "" {
 		return nil
@@ -91,6 +99,8 @@ func listItem(node *ast.ListItem, src []byte, style Style) app.UI {
 	return app.Li().Body(body...)
 }
 
+// DemoNames returns the demo name of every fence in source that names one, in document order,
+// registered or not.
 func DemoNames(source string) []string {
 	src := []byte(source)
 	var names []string

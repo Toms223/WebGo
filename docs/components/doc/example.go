@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/example"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const clampLines = 18
@@ -31,34 +31,34 @@ func (p *Panel) Render() app.UI {
 
 	tools := []app.UI{}
 	if e.CSS != "" {
-		tools = append(tools, app.Div().Class(theme.ExampleTabs.Name()).Body(
+		tools = append(tools, app.Div().Style(theme.ExampleTabs).Body(
 			p.tab("Go", false),
 			p.tab("CSS", true),
 		))
 	}
 	tools = append(tools, &Copy{Text: shown})
 
-	codeClasses := []string{theme.ExampleCode.Name()}
+	codeClasses := []app.ClassRule{theme.ExampleCode}
 	if long && !p.expanded {
-		codeClasses = append(codeClasses, theme.ExampleCodeClamped.Name())
+		codeClasses = append(codeClasses, theme.ExampleCodeClamped)
 	}
 	children := []app.UI{
-		app.Div().Class(theme.ExampleBar.Name()).Body(
-			app.Span().Class(theme.ExampleName.Name()).Text(p.name()),
-			app.Div().Class(theme.ExampleTools.Name()).Body(tools...),
+		app.Div().Style(theme.ExampleBar).Body(
+			app.Span().Style(theme.ExampleName).Text(p.name()),
+			app.Div().Style(theme.ExampleTools).Body(tools...),
 		),
-		app.Pre().Class(codeClasses...).Body(app.Code().Body(body...)),
+		app.Pre().Style(codeClasses...).Body(app.Code().Body(body...)),
 	}
 	if long {
 		children = append(children, p.more(lines))
 	}
 	if e.Live != nil {
 		children = append(children,
-			app.Div().Class(theme.ExampleLabel.Name()).Text("Result"),
-			app.Div().Class(theme.ExampleLive.Name()).Body(e.Live()),
+			app.Div().Style(theme.ExampleLabel).Text("Result"),
+			app.Div().Style(theme.ExampleLive).Body(e.Live()),
 		)
 	}
-	return app.Div().Class(theme.Example.Name()).Body(children...)
+	return app.Div().Style(theme.Example).Body(children...)
 }
 
 func (p *Panel) name() string {
@@ -83,15 +83,15 @@ func (p *Panel) more(lines int) app.UI {
 	if p.expanded {
 		label = "Show less"
 	}
-	return app.Button().Type("button").Class(theme.ExampleMore.Name()).Aria("expanded", strconv.FormatBool(p.expanded)).Text(label).
+	return app.Button().Type("button").Style(theme.ExampleMore).Aria("expanded", strconv.FormatBool(p.expanded)).Text(label).
 		OnClick(func(ctx app.Context, e app.Event) { p.expanded = !p.expanded })
 }
 
 func (p *Panel) tab(label string, css bool) app.UI {
-	classes := []string{theme.ExampleTab.Name()}
+	classes := []app.ClassRule{theme.ExampleTab}
 	if p.showCSS == css {
-		classes = append(classes, theme.ExampleTabOn.Name())
+		classes = append(classes, theme.ExampleTabOn)
 	}
-	return app.Button().Type("button").Class(classes...).Aria("pressed", strconv.FormatBool(p.showCSS == css)).Text(label).
+	return app.Button().Type("button").Style(classes...).Aria("pressed", strconv.FormatBool(p.showCSS == css)).Text(label).
 		OnClick(func(ctx app.Context, e app.Event) { p.showCSS = css })
 }

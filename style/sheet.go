@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 var errNoSheet = errors.New("the browser created no sheet for the style element (a Content-Security-Policy that blocks inline styles does this)")

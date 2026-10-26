@@ -1,3 +1,4 @@
+// Package supports builds @supports conditions for style.Rule.Supports and style.IfSupports.
 package supports
 
 import (
@@ -7,8 +8,12 @@ import (
 	"github.com/Toms223/WebGo/css"
 )
 
+// ErrBadQuery is carried by a condition built from a nil or empty argument. Operations on a query keep
+// its first error.
 var ErrBadQuery = errors.New("supports: query cannot be expressed")
 
+// Query is an @supports condition. And, Or and Not parenthesize joined operands, and the zero Query
+// carries ErrBadQuery.
 type Query struct {
 	text     string
 	compound bool

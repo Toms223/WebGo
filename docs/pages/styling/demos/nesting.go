@@ -1,11 +1,11 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/media"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var PanelTitle = style.Class("demo-panel-title").
@@ -21,8 +21,8 @@ var Panel = style.Class("demo-panel").
 	)
 
 func NestingDemo() app.UI {
-	return app.Div().Class(Panel.Name()).Body(
-		app.P().Class(PanelTitle.Name()).Text("A nested title"),
+	return app.Div().Style(Panel).Body(
+		app.P().Style(PanelTitle).Text("A nested title"),
 		app.A().Href("#nesting").Text("A nested link"),
 	)
 }

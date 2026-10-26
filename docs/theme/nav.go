@@ -27,6 +27,8 @@ var SideNavList = SideNav.Child(style.Element("ul")).Set(
 	css.ListStyle(kw.None),
 )
 
+var NavGroupGap = SideNavList.Next(NavLabel).Set(css.MarginTop(css.Rem(0.75)))
+
 var NavLink = style.Class("nav-link").
 	Set(
 		css.Display(kw.Flex),

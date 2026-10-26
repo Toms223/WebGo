@@ -6,7 +6,7 @@ import (
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/media"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 type settings struct {

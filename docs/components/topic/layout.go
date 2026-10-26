@@ -1,10 +1,10 @@
 package topic
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/theme"
 	"github.com/Toms223/WebGo/page"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (
@@ -27,11 +27,11 @@ func NewLayout(cfg Config) *Layout {
 }
 
 func (l *Layout) Loading() app.UI {
-	return app.Div().Class(theme.Topic.Name(), theme.TopicLoading.Name()).Text("Loading")
+	return app.Div().Style(theme.Topic, theme.TopicLoading).Text("Loading")
 }
 
 func (l *Layout) Error(err error) app.UI {
-	return app.Div().Class(theme.Topic.Name(), theme.TopicError.Name()).Text(err.Error())
+	return app.Div().Style(theme.Topic, theme.TopicError).Text(err.Error())
 }
 
 func (l *Layout) Body(content ...app.UI) page.Layout[State] {
@@ -41,22 +41,22 @@ func (l *Layout) Body(content ...app.UI) page.Layout[State] {
 
 func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 	state := m.State()
-	header := []app.UI{app.H1().Class(theme.TopicTitle.Name()).Text(l.title)}
+	header := []app.UI{app.H1().Style(theme.TopicTitle).Text(l.title)}
 	if l.lead != "" {
-		header = append(header, app.P().Class(theme.TopicLead.Name()).Text(l.lead))
+		header = append(header, app.P().Style(theme.TopicLead).Text(l.lead))
 	}
-	children := []app.UI{app.Header().Class(theme.TopicHeader.Name()).Body(header...)}
+	children := []app.UI{app.Header().Style(theme.TopicHeader).Body(header...)}
 	var main []app.UI
 	if l.intro != nil {
-		main = append(main, app.Div().Class(theme.Doc.Name()).Body(l.intro()...))
+		main = append(main, app.Div().Style(theme.Doc).Body(l.intro()...))
 	}
 	if len(l.sections) > 0 {
 		at := l.index(state.Active)
 		children = append(children, NewRail(l.sections, at, l.visit))
 		main = append(main, l.section(at, state.Turn), l.pager(at))
 	}
-	children = append(children, app.Div().Class(theme.TopicMain.Name()).Body(main...))
-	return app.Div().Class(theme.Topic.Name()).ID(topicID).Body(children...)
+	children = append(children, app.Div().Style(theme.TopicMain).Body(main...))
+	return app.Div().Style(theme.Topic).ID(topicID).Body(children...)
 }
 
 func (l *Layout) index(slug string) int {
@@ -84,12 +84,12 @@ func (l *Layout) find(fragment string) (int, bool) {
 
 func (l *Layout) section(at, turn int) app.UI {
 	s := l.sections[at]
-	classes := []string{theme.TopicSection.Name(), theme.Doc.Name()}
+	classes := []app.ClassRule{theme.TopicSection, theme.Doc}
 	if turn%2 == 1 {
-		classes = append(classes, theme.TurnB.Name())
+		classes = append(classes, theme.TurnB)
 	}
-	body := append([]app.UI{app.H2().Class(theme.SectionHeading.Name()).ID(headingID).TabIndex(-1).Text(s.Title)}, anchor(s.Body(), s.Subs)...)
-	return app.Section().Class(classes...).ID(sectionID).Body(body...)
+	body := append([]app.UI{app.H2().Style(theme.SectionHeading).ID(headingID).TabIndex(-1).Text(s.Title)}, anchor(s.Body(), s.Subs)...)
+	return app.Section().Style(classes...).ID(sectionID).Body(body...)
 }
 
 func (l *Layout) pager(at int) app.UI {
@@ -100,19 +100,19 @@ func (l *Layout) pager(at int) app.UI {
 	if at < len(l.sections)-1 {
 		links = append(links, l.pagerLink(l.sections[at+1], "Next", true))
 	}
-	return app.Nav().Class(theme.Pager.Name()).Aria("label", "Neighbouring sections").Body(links...)
+	return app.Nav().Style(theme.Pager).Aria("label", "Neighbouring sections").Body(links...)
 }
 
 func (l *Layout) pagerLink(s section, label string, next bool) app.UI {
-	classes := []string{theme.PagerLink.Name()}
+	classes := []app.ClassRule{theme.PagerLink}
 	if next {
-		classes = append(classes, theme.PagerNext.Name())
+		classes = append(classes, theme.PagerNext)
 	}
-	return app.A().Class(classes...).Href("#"+s.Slug).OnClick(func(ctx app.Context, e app.Event) {
+	return app.A().Style(classes...).Href("#"+s.Slug).OnClick(func(ctx app.Context, e app.Event) {
 		e.PreventDefault()
 		l.visit(ctx, s.Slug)
 	}).Body(
-		app.Span().Class(theme.PagerLabel.Name()).Text(label),
+		app.Span().Style(theme.PagerLabel).Text(label),
 		app.Span().Text(s.Title),
 	)
 }

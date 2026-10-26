@@ -5,9 +5,9 @@ import (
 	"go/token"
 	"strings"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/theme"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 type piece struct {
@@ -29,7 +29,7 @@ func Highlight(source string) []app.UI {
 			out = append(out, app.Text(source[last:p.start]))
 		}
 		if class := classify(pieces, i); class != nil {
-			out = append(out, app.Span().Class(class.Name()).Text(p.text))
+			out = append(out, app.Span().Style(class).Text(p.text))
 		} else {
 			out = append(out, app.Text(p.text))
 		}
@@ -113,12 +113,12 @@ func cssLine(line string) []app.UI {
 	}
 	switch {
 	case strings.HasPrefix(text, "@") && strings.HasSuffix(text, "{"):
-		out = append(out, app.Span().Class(theme.Keyword.Name()).Text(text))
+		out = append(out, app.Span().Style(theme.Keyword).Text(text))
 	case strings.HasSuffix(text, "{"):
-		out = append(out, app.Span().Class(theme.Fn.Name()).Text(text))
+		out = append(out, app.Span().Style(theme.Fn).Text(text))
 	case strings.Contains(text, ": "):
 		name, value, _ := strings.Cut(text, ": ")
-		out = append(out, app.Span().Class(theme.Typ.Name()).Text(name), app.Text(": "))
+		out = append(out, app.Span().Style(theme.Typ).Text(name), app.Text(": "))
 		out = append(out, cssValue(value)...)
 	default:
 		out = append(out, app.Text(text))
@@ -137,7 +137,7 @@ func cssValue(value string) []app.UI {
 	}
 	return []app.UI{
 		app.Text(value[:start]),
-		app.Span().Class(theme.Str.Name()).Text(value[start : end+1]),
+		app.Span().Style(theme.Str).Text(value[start : end+1]),
 		app.Text(value[end+1:]),
 	}
 }

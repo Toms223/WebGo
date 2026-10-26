@@ -3,10 +3,10 @@ package doc
 import (
 	"strings"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/theme"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func P(parts ...any) app.UI {
@@ -48,7 +48,7 @@ func Item(parts ...any) app.UI {
 }
 
 func Note(parts ...any) app.UI {
-	return app.Div().Class(theme.Note.Name()).Body(app.P().Body(Inline(parts...)...))
+	return app.Div().Style(theme.Note).Body(app.P().Body(Inline(parts...)...))
 }
 
 func Rule() app.UI {
@@ -80,8 +80,8 @@ func Plain(source string) app.UI {
 }
 
 func Code(lang *style.Rule, source string, body ...app.UI) app.UI {
-	return app.Div().Class(theme.CodeBlock.Name()).Body(
-		app.Pre().Class(lang.Name()).Body(app.Code().Body(body...)),
+	return app.Div().Style(theme.CodeBlock).Body(
+		app.Pre().Style(lang).Body(app.Code().Body(body...)),
 		&Copy{Text: source, Float: true},
 	)
 }

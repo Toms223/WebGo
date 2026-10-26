@@ -3,12 +3,12 @@ package demos
 import (
 	"strconv"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/components/example"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var CounterBox = style.Class("demo-counter").Set(
@@ -37,7 +37,7 @@ func (d *counterDemo) OnMount(ctx app.Context) {
 
 func (d *counterDemo) Render() app.UI {
 	return app.Div().Body(
-		app.Div().Class(CounterBox.Name()).Body(
+		app.Div().Style(CounterBox).Body(
 			app.Text("Count "),
 			app.Output().Text(strconv.Itoa(counter.State().Count)),
 		),
@@ -93,7 +93,7 @@ func (d *counterDemo) OnMount(ctx app.Context) {
 
 func (d *counterDemo) Render() app.UI {
 	return app.Div().Body(
-		app.Div().Class(CounterBox.Name()).Body(
+		app.Div().Style(CounterBox).Body(
 			app.Text("Count "),
 			app.Output().Text(strconv.Itoa(counter.State().Count)),
 		),

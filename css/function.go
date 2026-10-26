@@ -2,6 +2,8 @@ package css
 
 import "strings"
 
+// Expr is an operand of Calc, Min, Max and Clamp: a dimension, number, percentage, Var, Calc, or the
+// result of Add, Sub, Mul or Div.
 type Expr interface{ expr() string }
 
 func (l Length) expr() string     { return l.CSS() }
@@ -20,6 +22,8 @@ type VarValue struct {
 	fallback []Value
 }
 
+// Var refers to the custom property name, adding the leading -- when missing. Fallback values are
+// written after it, separated by commas.
 func Var(name string, fallback ...Value) VarValue {
 	return VarValue{name: dashed(name), fallback: fallback}
 }
@@ -35,6 +39,7 @@ type CalcValue struct{ text string }
 
 func (c CalcValue) CSS() string { return c.text }
 
+// Calc wraps e in calc(). Build e with Add, Sub, Mul and Div.
 func Calc(e Expr) CalcValue {
 	return mathFunction("calc", e)
 }
@@ -66,18 +71,22 @@ func mathFunction(name string, first Expr, rest ...Expr) CalcValue {
 
 type binary struct{ text string }
 
+// Add returns a + b.
 func Add(a, b Expr) Expr {
 	return binary{text: exprText(a) + " + " + exprText(b)}
 }
 
+// Sub returns a - b, parenthesizing b when it is itself an operation.
 func Sub(a, b Expr) Expr {
 	return binary{text: exprText(a) + " - " + operand(b)}
 }
 
+// Mul returns a * n, parenthesizing a when it is itself an operation.
 func Mul(a Expr, n Number) Expr {
 	return binary{text: operand(a) + " * " + n.CSS()}
 }
 
+// Div returns a / n, parenthesizing a when it is itself an operation.
 func Div(a Expr, n Number) Expr {
 	return binary{text: operand(a) + " / " + n.CSS()}
 }

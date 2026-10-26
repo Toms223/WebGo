@@ -3,8 +3,8 @@ package nav
 import (
 	"strings"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const ID = "side-nav"
@@ -12,6 +12,7 @@ const ID = "side-nav"
 type Entry struct {
 	Title string
 	Route string
+	Group string
 }
 
 func Href(route string) string {
@@ -19,18 +20,32 @@ func Href(route string) string {
 }
 
 func Render(entries []Entry, active string) app.UI {
-	items := make([]app.UI, 0, len(entries))
+	var groups []app.UI
+	var items []app.UI
+	group := ""
+	flush := func() {
+		if items != nil {
+			groups = append(groups, app.Span().Style(theme.NavLabel).Text(group), app.Ul().Body(items...))
+		}
+		items = nil
+	}
 	for _, entry := range entries {
-		classes := []string{theme.NavLink.Name()}
+		name := entry.Group
+		if name == "" {
+			name = "Guides"
+		}
+		if name != group {
+			flush()
+			group = name
+		}
+		classes := []app.ClassRule{theme.NavLink}
 		if entry.Route == active {
-			classes = append(classes, theme.NavLinkActive.Name())
+			classes = append(classes, theme.NavLinkActive)
 		}
 		items = append(items, app.Li().Body(
-			app.A().Class(classes...).Href(Href(entry.Route)).Text(entry.Title),
+			app.A().Style(classes...).Href(Href(entry.Route)).Text(entry.Title),
 		))
 	}
-	return app.Nav().ID(ID).Class(theme.SideNav.Name()).Body(
-		app.Span().Class(theme.NavLabel.Name()).Text("Guides"),
-		app.Ul().Body(items...),
-	)
+	flush()
+	return app.Nav().ID(ID).Style(theme.SideNav).Body(groups...)
 }

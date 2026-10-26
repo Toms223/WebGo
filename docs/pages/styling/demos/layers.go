@@ -1,9 +1,9 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var LayeredId = style.Id("demo-layered").
@@ -17,5 +17,5 @@ var Under = style.Layer("demo-under", LayeredId)
 var Over = style.Layer("demo-over", Layered)
 
 func LayersDemo() app.UI {
-	return app.Div().ID(LayeredId.Name()).Class(Layered.Name()).Text("The id says pink, the later layer says mint")
+	return app.Div().ID(LayeredId.Name()).Style(Layered).Text("The id says pink, the later layer says mint")
 }

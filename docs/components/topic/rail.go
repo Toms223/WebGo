@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (
@@ -45,25 +45,25 @@ func (r *Rail) OnResize(ctx app.Context) {
 
 func (r *Rail) Render() app.UI {
 	if r.wide {
-		return app.Nav().Class(theme.Rail.Name()).Aria("label", "Sections").Body(r.panel()...)
+		return app.Nav().Style(theme.Rail).Aria("label", "Sections").Body(r.panel()...)
 	}
-	classes := []string{theme.Rail.Name()}
+	classes := []app.ClassRule{theme.Rail}
 	if r.open {
-		classes = append(classes, theme.RailOpen.Name())
+		classes = append(classes, theme.RailOpen)
 	}
 	body := []app.UI{
-		app.Button().Type("button").Class(theme.RailSummary.Name()).
+		app.Button().Type("button").Style(theme.RailSummary).
 			Aria("expanded", strconv.FormatBool(r.open)).Aria("controls", railPanel).
 			OnClick(func(ctx app.Context, e app.Event) { r.open = !r.open }).
 			Body(
 				app.Span().Text(r.Sections[r.Active].Title),
-				app.Span().Class(theme.RailCount.Name()).Text(strconv.Itoa(r.Active+1)+" of "+strconv.Itoa(len(r.Sections))),
+				app.Span().Style(theme.RailCount).Text(strconv.Itoa(r.Active+1)+" of "+strconv.Itoa(len(r.Sections))),
 			),
 	}
 	if r.open {
-		body = append(body, app.Div().ID(railPanel).Class(theme.RailPanel.Name()).Body(r.panel()...))
+		body = append(body, app.Div().ID(railPanel).Style(theme.RailPanel).Body(r.panel()...))
 	}
-	return app.Nav().Class(classes...).Aria("label", "Sections").Body(body...)
+	return app.Nav().Style(classes...).Aria("label", "Sections").Body(body...)
 }
 
 func (r *Rail) panel() []app.UI {
@@ -71,15 +71,15 @@ func (r *Rail) panel() []app.UI {
 	if strings.TrimSpace(r.query) != "" {
 		return append(items, r.results())
 	}
-	items = append(items, app.Span().Class(theme.RailLabel.Name()).Text("Sections"), r.sectionList())
+	items = append(items, app.Span().Style(theme.RailLabel).Text("Sections"), r.sectionList())
 	if subs := r.Sections[r.Active].Subs; len(subs) > 0 {
-		items = append(items, app.Span().Class(theme.RailLabel.Name()).Text("In this section"), r.subList(subs))
+		items = append(items, app.Span().Style(theme.RailLabel).Text("In this section"), r.subList(subs))
 	}
 	return items
 }
 
 func (r *Rail) search() app.UI {
-	return app.Input().Type("search").Class(theme.RailSearch.Name()).
+	return app.Input().Type("search").Style(theme.RailSearch).
 		Aria("label", "Search sections and headings").Placeholder("Search sections").
 		Value(r.query).OnInput(r.input).OnKeyDown(r.key)
 }
@@ -100,9 +100,9 @@ func (r *Rail) key(ctx app.Context, e app.Event) {
 func (r *Rail) sectionList() app.UI {
 	links := make([]app.UI, 0, len(r.Sections))
 	for i, s := range r.Sections {
-		link := r.link(s.Slug, s.Title, theme.RailLink.Name())
+		link := r.link(s.Slug, s.Title, theme.RailLink)
 		if i == r.Active {
-			link = link.Class(theme.RailLinkActive.Name()).Aria("current", "true")
+			link = link.Style(theme.RailLinkActive).Aria("current", "true")
 		}
 		links = append(links, app.Li().Body(link))
 	}
@@ -112,7 +112,7 @@ func (r *Rail) sectionList() app.UI {
 func (r *Rail) subList(subs []sub) app.UI {
 	links := make([]app.UI, 0, len(subs))
 	for _, h := range subs {
-		links = append(links, app.Li().Body(r.link(h.ID, h.Title, theme.RailLink.Name(), theme.RailLinkSub.Name())))
+		links = append(links, app.Li().Body(r.link(h.ID, h.Title, theme.RailLink, theme.RailLinkSub)))
 	}
 	return app.Ul().Body(links...)
 }
@@ -145,21 +145,21 @@ func (r *Rail) matches() []match {
 func (r *Rail) results() app.UI {
 	found := r.matches()
 	if len(found) == 0 {
-		return app.P().Class(theme.RailEmpty.Name()).Text("No section or heading matches \"" + strings.TrimSpace(r.query) + "\".")
+		return app.P().Style(theme.RailEmpty).Text("No section or heading matches \"" + strings.TrimSpace(r.query) + "\".")
 	}
 	links := make([]app.UI, 0, len(found))
 	for _, m := range found {
-		link := r.link(m.ID, m.Title, theme.RailLink.Name())
+		link := r.link(m.ID, m.Title, theme.RailLink)
 		if m.Where != "" {
-			link = link.Body(app.Span().Text(m.Title), app.Span().Class(theme.RailWhere.Name()).Text(m.Where))
+			link = link.Body(app.Span().Text(m.Title), app.Span().Style(theme.RailWhere).Text(m.Where))
 		}
 		links = append(links, app.Li().Body(link))
 	}
 	return app.Ul().Aria("label", "Search results").Body(links...)
 }
 
-func (r *Rail) link(id, title string, classes ...string) app.HTMLA {
-	return app.A().Class(classes...).Href("#" + id).Text(title).OnClick(func(ctx app.Context, e app.Event) {
+func (r *Rail) link(id, title string, classes ...app.ClassRule) app.HTMLA {
+	return app.A().Style(classes...).Href("#" + id).Text(title).OnClick(func(ctx app.Context, e app.Event) {
 		e.PreventDefault()
 		r.pick(ctx, id)
 	})

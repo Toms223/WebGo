@@ -1,9 +1,9 @@
 package styling
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/pages/styling/demos"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func mediaQueries() []app.UI {

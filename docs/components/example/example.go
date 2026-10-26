@@ -1,6 +1,6 @@
 package example
 
-import "github.com/maxence-charriere/go-app/v11/pkg/app"
+import "github.com/Toms223/WebGo/app"
 
 type Example struct {
 	Name   string

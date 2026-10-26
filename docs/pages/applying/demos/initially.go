@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const BannerKey = "demo/banner"
@@ -41,7 +41,7 @@ func (d *initiallyDemo) Render() app.UI {
 	}
 	return app.Div().Body(
 		app.Button().Type("button").Text(label).OnClick(d.toggle),
-		app.Div().Class(DemoBanner.Name()).Text("Present from the start"),
+		app.Div().Style(DemoBanner).Text("Present from the start"),
 	)
 }
 

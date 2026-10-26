@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var Swatch = style.Class("demo-swatch").
@@ -17,5 +17,5 @@ var Swatch = style.Class("demo-swatch").
 	)
 
 func ValuesDemo() app.UI {
-	return app.Div().Class(Swatch.Name())
+	return app.Div().Style(Swatch)
 }

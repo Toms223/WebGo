@@ -3,10 +3,10 @@ package demos
 import (
 	"strconv"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const SpeedKey = "demo/speed"
@@ -59,7 +59,7 @@ func (d *framesDemo) Render() app.UI {
 			app.Text("Beats per cycle "),
 			app.Input().Type("range").Min(1).Max(5).Value(speed.State().Beats).OnInput(d.change),
 		),
-		app.Div().Class(DemoPulseBox.Name()),
+		app.Div().Style(DemoPulseBox),
 	)
 }
 

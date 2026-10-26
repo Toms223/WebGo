@@ -1,5 +1,7 @@
 package css
 
+// Descriptor is one declaration inside @font-face or @property, made by a descriptor function such as
+// Src or Syntax.
 type Descriptor interface {
 	Name() string
 	Value() string

@@ -14,7 +14,7 @@
   </a>
 </p>
 
-WebGo sits on top of [go-app](https://github.com/maxence-charriere/go-app) and adds four things: a `Page` that pairs a layout with a view model, a `Base` that swaps pages by route, a `ViewModel` that holds the state a page reads and writes, and typed styling, which writes CSS as Go values that the compiler checks. A markdown renderer is included for pages whose content is written as text.
+WebGo is built from [go-app](https://github.com/maxence-charriere/go-app), whose code it now includes as the `app` package (MIT, see [NOTICE](NOTICE)), and adds four things: a `Page` that pairs a layout with a view model, a `Base` that swaps pages by route, a `ViewModel` that holds the state a page reads and writes, and typed styling, which writes CSS as Go values that the compiler checks. A markdown renderer is included for pages whose content is written as text.
 
 <p align="center">
 <picture>
@@ -30,12 +30,12 @@ The docs site is itself a WebGo app — it is built with the packages it documen
 ## Install
 
 ```sh
-go get github.com/Toms223/WebGo@v0.0.5
+go get github.com/Toms223/WebGo@v0.1.0
 ```
 
-`v0.0.5` is the current release. `v0.0.3` added `ViewModel.State()`; `v0.0.4` made `Base` work when the app is mounted under a subpath rather than at the domain root; `v0.0.5` renamed the `model` package to `data`. `v0.0.1` and `v0.0.2` do not work and should not be used.
+`v0.1.0` is the current release. It brings go-app into WebGo as the `app` package, adds typed `Style(rules...)` on elements, folds `serve.Handler` into `app.Handler`, and fixes app updates. `v0.0.3` added `ViewModel.State()`; `v0.0.4` made `Base` work when the app is mounted under a subpath rather than at the domain root; `v0.0.5` renamed the `model` package to `data`. `v0.0.1` and `v0.0.2` do not work and should not be used.
 
-You will import `github.com/maxence-charriere/go-app/v11/pkg/app` directly too, so run `go mod tidy` afterwards to record it as a direct dependency.
+Everything comes from this one module: `app` is `github.com/Toms223/WebGo/app`.
 
 ## Quick start
 
@@ -47,7 +47,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 type hello struct {
@@ -90,7 +90,7 @@ go run .
 | `style.KeyframesRule` and friends | `@keyframes`, `@font-face`, `@property`, `@import` and `@layer` as Go values, made by `Keyframes`, `FontFace`, `Property`, `Import`, `Layer` and `LayerOrder` |
 | `style.Binding` | A typed link from an action to a rule: `When` decides presence, `Compute` and `ComputeFrames` decide the properties or frames |
 | `style.Style` | How items reach the browser: a `Static` file, a `Generated` file, or `Dynamic` items switched by actions |
-| `serve.Handler` | go-app's `app.Handler` with `Styles []style.Style`; `Build()` checks them, writes the generated files and returns the `*app.Handler` |
+| `app.Handler` | The one handler: `Styles []style.Style`, `WebDir`, `DisableAutoUpdate`; `Build()` checks the styles and writes the generated files, and runs by itself on the first request |
 | `css` | Typed values (`Px`, `Hex`, `Var`, `Calc`, `Raw`), one function per CSS property, and `Important()` on every property |
 | `css.Descriptor` | One declaration inside `@font-face` or `@property`, such as `css.Src` or `css.Syntax` |
 | `kw` | One typed constant per CSS keyword and named color, such as `kw.Underline` |
@@ -255,23 +255,22 @@ func Styles() []style.Style {
 }
 ```
 
-A rule is used by name: `app.Div().Class(theme.Card.Name())`.
+Pass a rule to an element with `Style`: `app.Div().Style(theme.Card)`. `RawStyle(k, v)` still sets one inline property by string.
 
-`serve.Handler` is go-app's `app.Handler` with `Styles` taking `style.Style` values, each in one of three modes. `Static` links a `.css` file you wrote, `Generated` writes a `.css` file from your rules, and `Dynamic` inserts and removes rules in the browser in response to go-app actions. `Build` checks the styles, writes the generated files and returns the `*app.Handler`:
+`app.Handler.Styles` takes `style.Style` values, each in one of three modes. `Static` links a `.css` file you wrote or a URL, `Generated` writes a `.css` file from your rules, and `Dynamic` inserts and removes rules in the browser in response to actions. `Build` checks the styles and writes the generated files:
 
 ```go
-handler := &serve.Handler{
-	Handler: app.Handler{Name: "Hello"},
-	Styles:  theme.Styles(),
+handler := &app.Handler{
+	Name:   "Hello",
+	Styles: theme.Styles(),
 }
-built, err := handler.Build()
-if err != nil {
+if err := handler.Build(); err != nil {
 	log.Fatal(err)
 }
-http.Handle("/", built)
+http.Handle("/", handler)
 ```
 
-`Build` writes `web/theme.css` only when its bytes change, so building twice leaves the file alone. On a composite literal, call it as `(&serve.Handler{…}).Build()`: it has a pointer receiver.
+`Build` writes `web/theme.css` only when its bytes change, so building twice leaves the file alone. Calling it is optional: the first request and `app.GenerateStaticWebsite` build the handler if nobody did. A server that fails to build logs the error and answers every request with a 500.
 
 <p align="center">
 <picture>
@@ -293,7 +292,7 @@ The property functions, keywords, media features and pseudo-class and pseudo-ele
 go run ./internal/cssgen
 ```
 
-`Build` returns sentinel errors such as `serve.ErrMissingStyle` and `style.ErrDuplicateRule`. Match them with `errors.Is`. Every error is listed on the [Applying](https://toms223.github.io/WebGo/applying) page.
+`Build` returns sentinel errors such as `app.ErrMissingStyle` and `style.ErrDuplicateRule`. Match them with `errors.Is`. Every error is listed on the [Applying](https://toms223.github.io/WebGo/applying) page.
 
 ## Shipping a static site
 
@@ -391,8 +390,7 @@ The fork, the core move, `Load`, scripts and OpenFeature all ship. Each one is d
 ## Requirements
 
 - Go matching the version in your `go.mod`
-- `github.com/Toms223/WebGo` v0.0.5 or later
-- `github.com/maxence-charriere/go-app/v11`
+- `github.com/Toms223/WebGo` v0.1.0 or later
 
 ## License
 

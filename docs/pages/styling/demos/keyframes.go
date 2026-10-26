@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var Pulse = style.Keyframes("demo-pulse").
@@ -23,5 +23,5 @@ var Pulsing = style.Class("demo-pulsing").
 	)
 
 func KeyframesDemo() app.UI {
-	return app.Div().Class(Pulsing.Name())
+	return app.Div().Style(Pulsing)
 }

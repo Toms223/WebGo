@@ -4,9 +4,9 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/page"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (

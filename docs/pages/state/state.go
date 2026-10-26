@@ -1,10 +1,10 @@
 package state
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/components/topic"
 	"github.com/Toms223/WebGo/docs/pages/base"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (
@@ -34,7 +34,7 @@ func New() (*topic.Screen, error) {
 func intro() []app.UI {
 	return []app.UI{
 		doc.P("The `page` package builds screens out of a `Layout` and a `data.ViewModel`, and assembles them under a `Base` component that switches between screens by route. The `data` package holds the state each screen reads and writes."),
-		doc.P("This page covers `github.com/Toms223/WebGo` from `v0.0.5` onward. `v0.0.5` renamed the `model` package to `data` (the API is otherwise identical)."),
+		doc.P("This page covers `github.com/Toms223/WebGo` from `v0.1.0` onward. `v0.0.5` renamed the `model` package to `data`, and `v0.1.0` moved `app` into WebGo; the state API is otherwise unchanged."),
 	}
 }
 
@@ -54,7 +54,7 @@ func NewPage[T any](path string) *Page[T]`),
 import (
 	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/page"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 type AppState struct {

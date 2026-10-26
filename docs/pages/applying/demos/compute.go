@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const AccentKey = "demo/accent"
@@ -43,7 +43,7 @@ func (d *computeDemo) Render() app.UI {
 		app.Button().Type("button").Text("Red").OnClick(d.pick(Red)),
 		app.Button().Type("button").Text("Blue").OnClick(d.pick(Blue)),
 		app.Button().Type("button").Text("Green").OnClick(d.pick(Green)),
-		app.P().Class(DemoAccent.Name()).Text("This text takes the chosen colour"),
+		app.P().Style(DemoAccent).Text("This text takes the chosen colour"),
 	)
 }
 

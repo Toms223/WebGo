@@ -1,11 +1,11 @@
 package styling
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/components/topic"
 	"github.com/Toms223/WebGo/docs/pages/base"
 	"github.com/Toms223/WebGo/docs/pages/styling/demos"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (
@@ -47,19 +47,19 @@ func intro() []app.UI {
 		doc.P("This page covers writing rules. The ", doc.A("/applying", "Applying"), " page covers delivering them: stylesheets, the handler, the browser engine, actions and errors."),
 		doc.List(
 			doc.Item("`style` holds `Rule` and the at-rule types, `Style` and `Resolve`, and `Run`."),
-			doc.Item("`serve` holds `Handler`, which turns a list of styles into go-app's handler."),
+			doc.Item("`app` holds `Handler`, whose `Styles` takes a list of styles."),
 			doc.Item("`css` holds the value types (`Px`, `Rem`, `Hex`, `Var`, `Calc`, `Raw` and the rest), one function per CSS property, such as `css.Padding`, and one function per at-rule descriptor, such as `css.Src`."),
 			doc.Item("`kw` holds one constant per CSS keyword and per named color, such as `kw.Underline` and `kw.Rebeccapurple`."),
 			doc.Item("`media`, `container` and `supports` hold the queries of `@media`, `@container` and `@supports`."),
 		),
-		doc.P("The import paths are `github.com/Toms223/WebGo/style`, `github.com/Toms223/WebGo/serve`, `github.com/Toms223/WebGo/css`, `github.com/Toms223/WebGo/kw`, `github.com/Toms223/WebGo/media`, `github.com/Toms223/WebGo/container` and `github.com/Toms223/WebGo/supports`. None of them imports `page`, `data` or `markdown`, so they work in any go-app application."),
+		doc.P("The import paths are `github.com/Toms223/WebGo/style`, `github.com/Toms223/WebGo/css`, `github.com/Toms223/WebGo/kw`, `github.com/Toms223/WebGo/media`, `github.com/Toms223/WebGo/container` and `github.com/Toms223/WebGo/supports`. None of them imports `page`, `data` or `markdown`, so they work in any WebGo application."),
 		doc.P("Every example on this page is rendered live by the rule shown. Its CSS tab is that rule's `CSS()` output."),
 	}
 }
 
 func rules() []app.UI {
 	return []app.UI{
-		doc.P("A `Rule` is one selector and an ordered list of blocks of properties. It has no exported fields. It is normally a package-level variable, and its `Name()` is the class or id you pass to a go-app element."),
+		doc.P("A `Rule` is one selector and an ordered list of blocks of properties. It has no exported fields. It is normally a package-level variable. Pass a class rule straight to an element with `Style`, as in `app.Div().Style(card)`; for an id rule, `Name()` gives the id to pass to `ID`."),
 		doc.Go(`func (r *Rule) Set(props ...css.Property) *Rule
 func (r *Rule) Media(q media.Query, props ...css.Property) *Rule
 func (r *Rule) Container(q container.Query, props ...css.Property) *Rule
@@ -68,7 +68,7 @@ func (r *Rule) Nest(children ...*Rule) *Rule
 func (r *Rule) CSS() string
 func (r *Rule) Err() error`),
 		doc.Example(demos.CardExample),
-		doc.P("The element is `app.Div().Class(Card.Name())`."),
+		doc.P("The element is `app.Div().Style(Card)`."),
 		doc.List(
 			doc.Item("`Set` adds properties to the base block, the one written under the bare selector."),
 			doc.Item("A pseudo method adds properties to a block for the selector plus that pseudo-class or pseudo-element: `Hover` writes `.demo-card:hover`."),
@@ -77,6 +77,7 @@ func (r *Rule) Err() error`),
 			doc.Item("`Set`, `Media`, `Container`, `Supports`, `Nest`, the pseudo methods and the binding methods change the rule they are called on and return it, so calls chain. The combinators return a new rule."),
 		),
 		doc.H("Block order"),
+		blocksDiagram(),
 		doc.List(
 			doc.Item("A rule owns the base block, then one block per pseudo in the order each was first called, then the `Container` blocks, the `Supports` blocks and the `Media` blocks, each kind in the order its query was first called."),
 			doc.Item("Calling the same pseudo method, or a conditional method with the same query, again appends to that block."),
@@ -133,7 +134,7 @@ func (r *Rule) And(o *Rule) *Rule`),
 		doc.H("Name and Selector"),
 		doc.Go(`func (r *Rule) Name() string
 func (r *Rule) Selector() string`),
-		doc.P("`Name` returns the class of a `Class` rule and the id of an `Id` rule: `app.Div().Class(card.Name())`, `app.Nav().ID(menu.Name())`. It returns `\"\"` for an element rule, for `Any`, for `Self()`, and for any rule built with a combinator or `And`: those are matched by structure, not applied by name."),
+		doc.P("`Name` returns the class of a `Class` rule and the id of an `Id` rule, for places that take a string, such as `app.Nav().ID(menu.Name())`. Class rules go straight to `Style`: `app.Div().Style(card)`. It returns `\"\"` for an element rule, for `Any`, for `Self()`, and for any rule built with a combinator or `And`: those are matched by structure, not applied by name."),
 		doc.P("`Selector` returns the selector text:"),
 		doc.List(
 			doc.Item("`style.Class(\"card\").Selector()` is `.card`."),
@@ -185,7 +186,7 @@ func Self() *Rule`),
 			doc.Item("A child built with `And` on the parent renders `&.on`: `card.Nest(card.And(style.Class(\"on\")))` writes `&.on { … }`."),
 			doc.Item("A combinator child built from the parent drops the parent's part: `card.Nest(card.Child(style.Element(\"a\")))` writes `& > a { … }`. Any other child selector gets `& ` in front."),
 			doc.Item("`Self()` outside `Nest`, or `Self()` with `Set`, is `ErrBadSelector`."),
-			doc.Item("A nested child is claimed by its parent. Its `Name()` is unchanged, so `PanelTitle.Name()` still gives the class for the element. Passing a claimed child to `Generated`, `Dynamic`, another `Nest`, or a combinator is `ErrNested`."),
+			doc.Item("A nested child is claimed by its parent. Its name is unchanged, so `.Style(PanelTitle)` still puts its class on the element. Passing a claimed child to `Generated`, `Dynamic`, another `Nest`, or a combinator is `ErrNested`."),
 			doc.Item("A nested child cannot carry bindings: `ErrNestedBinding`. Bindings belong to the root."),
 			doc.Item("A rule with no children is written flat, as `.x:hover { … }` and a top-level `@media` block."),
 		),

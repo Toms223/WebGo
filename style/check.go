@@ -3,38 +3,49 @@ package style
 import (
 	"fmt"
 	"slices"
+
+	"github.com/Toms223/WebGo/app"
 )
 
-type Kind int
+// Kind is app.StyleKind: whether a resolved style is static, generated or dynamic.
+type Kind = app.StyleKind
 
 const (
-	StaticStyle Kind = iota + 1
-	GeneratedStyle
-	DynamicStyle
+	StaticStyle    = app.StaticStyle
+	GeneratedStyle = app.GeneratedStyle
+	DynamicStyle   = app.DynamicStyle
 )
 
-type Source struct {
-	Kind    Kind
-	Path    string
-	Content []byte
+// Source is app.StyleSource: a resolved style's kind, its path and, for a Generated style, the
+// rendered bytes.
+type Source = app.StyleSource
+
+// Resolve checks a style's items and returns its Source, as app.Handler does for each style. A nil
+// style resolves to a zero Source; on an error the Source is zero and the error wraps one of the Err
+// sentinels and names the offending item.
+func Resolve(s Style) (Source, error) {
+	if s == nil {
+		return Source{}, nil
+	}
+	return s.StyleSource()
 }
 
-func Resolve(s Style) (Source, error) {
-	switch s := s.(type) {
-	case static:
-		return Source{Kind: StaticStyle, Path: s.path}, nil
-	case generated:
-		if err := checkGenerated(s.items); err != nil {
-			return Source{}, err
-		}
-		return Source{Kind: GeneratedStyle, Path: s.path, Content: []byte(render(s.items))}, nil
-	case dynamic:
-		if err := checkDynamic(s.items); err != nil {
-			return Source{}, err
-		}
-		return Source{Kind: DynamicStyle}, nil
+func (s static) StyleSource() (Source, error) {
+	return Source{Kind: StaticStyle, Path: s.path}, nil
+}
+
+func (s generated) StyleSource() (Source, error) {
+	if err := checkGenerated(s.items); err != nil {
+		return Source{}, err
 	}
-	return Source{}, nil
+	return Source{Kind: GeneratedStyle, Path: s.path, Content: []byte(render(s.items))}, nil
+}
+
+func (s dynamic) StyleSource() (Source, error) {
+	if err := checkDynamic(s.items); err != nil {
+		return Source{}, err
+	}
+	return Source{Kind: DynamicStyle}, nil
 }
 
 type bindable interface{ dynamic() bool }

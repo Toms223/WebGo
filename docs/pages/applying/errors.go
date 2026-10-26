@@ -1,13 +1,13 @@
 package applying
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func errs() []app.UI {
 	return []app.UI{
-		doc.P("Builders never panic on bad input. Each item keeps the first error a call produced, and `Err` returns it. `serve.Handler.Build`, `style.Resolve` and the item's own `Err` report it. Match errors with `errors.Is`, for example `errors.Is(err, style.ErrDuplicateRule)` or `errors.Is(err, serve.ErrMissingStyle)`."),
+		doc.P("Builders never panic on bad input. Each item keeps the first error a call produced, and `Err` returns it. `app.Handler.Build`, `style.Resolve` and the item's own `Err` report it. Match errors with `errors.Is`, for example `errors.Is(err, style.ErrDuplicateRule)` or `errors.Is(err, app.ErrMissingStyle)`."),
 		doc.H("Item errors"),
 		doc.List(
 			doc.Item("`ErrNoName`: `Class(\"\")`, `Id(\"\")`, `Element(\"\")`, `Keyframes(\"\")`, `Property(\"\")`, `Layer(\"\")`, `LayerOrder()` or a `LayerOrder` holding `\"\"`, `Import(nil)`, `InLayer(\"\")`; a zero `Rule`; a combinator or `Nest` given a nil rule."),
@@ -20,13 +20,13 @@ func errs() []app.UI {
 		),
 		doc.P("Once an item holds an error, later calls never replace it. A combinator's new rule takes the first error of its receiver, or else of its argument."),
 		doc.H("Build errors"),
-		doc.P("Each error `Build` returns wraps one sentinel and names the offending path or item, in the form `<sentinel message>: <path or item>`. The item is its selector, or `@keyframes name`, `@font-face`, `@property --name`, `@import url(…)` or `@layer name`. For example, `Static(\"/other/x.css\")` gives `serve: path is not under /web/: /other/x.css`."),
-		doc.P("The path and file sentinels belong to `serve`:"),
+		doc.P("Each error `Build` returns wraps one sentinel and names the offending path or item, in the form `<sentinel message>: <path or item>`. The item is its selector, or `@keyframes name`, `@font-face`, `@property --name`, `@import url(…)` or `@layer name`. For example, `Static(\"/other/x.css\")` gives `app: path is not under /web/: /other/x.css`."),
+		doc.P("The path and file sentinels belong to `app`:"),
 		doc.List(
-			doc.Item("`serve.ErrMissingStyle`: a Static file under `/web/` does not exist in `WebDir`. The message continues with the operating system's error, which `errors.Is` also matches, for example `os.ErrNotExist`."),
-			doc.Item("`serve.ErrPathOutsideWeb`: a Static path that is not a URL, or a Generated path, does not start with `/web/`, or leaves it once cleaned."),
-			doc.Item("`serve.ErrNotCSSPath`: a Generated path does not end in `.css`."),
-			doc.Item("`serve.ErrDuplicatePath`: two Static or Generated styles in one handler use the same path. Paths are compared after cleaning, and URLs as given."),
+			doc.Item("`app.ErrMissingStyle`: a Static file under `/web/` does not exist in `WebDir`. The message continues with the operating system's error, which `errors.Is` also matches, for example `os.ErrNotExist`."),
+			doc.Item("`app.ErrPathOutsideWeb`: a Static path that is not a URL, or a Generated path, does not start with `/web/`, or leaves it once cleaned."),
+			doc.Item("`app.ErrNotCSSPath`: a Generated path does not end in `.css`."),
+			doc.Item("`app.ErrDuplicatePath`: two Static or Generated styles in one handler use the same path. Paths are compared after cleaning, and URLs as given."),
 		),
 		doc.P("The sentinels about items belong to `style`, and `style.Resolve` returns them too:"),
 		doc.List(
@@ -37,7 +37,7 @@ func errs() []app.UI {
 		),
 		doc.P("A Generated base and a Dynamic override may share a selector, and so may two Dynamic rules."),
 		doc.P("For one item, its placement error (`ErrNested`, or `ErrBadSelector` for a bare `Self()`) and its own error are reported before `ErrDynamicInGenerated`, `ErrNotDynamic` and `ErrDuplicateRule`. In `Dynamic`, an item of a type it does not accept is `ErrNotDynamic` first."),
-		doc.P("A failure to write a generated file is not one of these sentinels. It is returned as an error that starts with `serve: ` and wraps the operating system's error."),
+		doc.P("A failure to write a generated file is not one of these sentinels. It is returned as an error that starts with `app: ` and wraps the operating system's error."),
 		doc.H("Query errors"),
 		doc.P("`media`, `container` and `supports` each export one sentinel:"),
 		doc.Go(`var ErrBadQuery error`),

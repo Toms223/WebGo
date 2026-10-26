@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 type contextProbe struct {

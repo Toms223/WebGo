@@ -2,17 +2,17 @@ package theme
 
 import (
 	"io/fs"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"reflect"
-	"slices"
 	"strings"
 	"testing"
 
+	"github.com/Toms223/WebGo/app"
 	applying "github.com/Toms223/WebGo/docs/pages/applying/demos"
-	"github.com/Toms223/WebGo/serve"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func TestStylesBuild(t *testing.T) {
@@ -25,13 +25,16 @@ func TestStylesBuild(t *testing.T) {
 		t.Fatalf("copying the static sheet failed: %v", err)
 	}
 
-	handler := &serve.Handler{Styles: Styles(), WebDir: dir}
-	built, err := handler.Build()
-	if err != nil {
+	handler := &app.Handler{Styles: Styles(), WebDir: dir}
+	if err := handler.Build(); err != nil {
 		t.Fatalf("Build() error = %v", err)
 	}
-	if want := []string{"/web/app.css", "/web/theme.css"}; !slices.Equal(built.Styles, want) {
-		t.Errorf("Styles = %q, want %q", built.Styles, want)
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/app-worker.js", nil))
+	for _, link := range []string{`"/web/app.css"`, `"/web/theme.css"`} {
+		if !strings.Contains(w.Body.String(), link) {
+			t.Errorf("app-worker.js does not cache %s", link)
+		}
 	}
 
 	generated, err := os.ReadFile(filepath.Join(dir, "theme.css"))

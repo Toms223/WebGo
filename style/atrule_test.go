@@ -10,7 +10,7 @@ import (
 	"github.com/Toms223/WebGo/media"
 	"github.com/Toms223/WebGo/supports"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 func interFace() *FontFaceRule {

@@ -2,6 +2,8 @@ package style
 
 import "errors"
 
+// Errors latched by the builders and returned by Err, Resolve and app.Handler.Build. The errors
+// Resolve returns wrap one of them and name the offending item; match them with errors.Is.
 var (
 	ErrNoName             = errors.New("style: rule has no class, id or tag")
 	ErrBadSelector        = errors.New("style: selector cannot be expressed")

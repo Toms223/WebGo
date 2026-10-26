@@ -1,9 +1,9 @@
 package applying
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/pages/applying/demos"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func run() []app.UI {
@@ -19,8 +19,8 @@ func run() []app.UI {
 		doc.P("A second call collides with the first. `app.Handle` keeps one global handler per action name, so a second `Run` with an item bound to an action name the first one used replaces the first engine's handler for that name, and the items the first engine bound to it stop reacting. Give `Run` every `Dynamic` style the app has, in one call."),
 		doc.P("On the client, `Run` does this:"),
 		doc.List(
-			doc.Item("It registers one global go-app action handler per distinct action name bound in the `Dynamic` styles, through `app.Handle`. The engine fans out to every item bound to that name, in the order the items were passed to `Run`."),
-			doc.Item("go-app runs `app.Handle` handlers off the UI goroutine, so the handler only calls `ctx.Dispatch`. Evaluating a binding and changing the page happen there, one action at a time."),
+			doc.Item("It registers one global action handler per distinct action name bound in the `Dynamic` styles, through `app.Handle`. The engine fans out to every item bound to that name, in the order the items were passed to `Run`."),
+			doc.Item("The engine runs `app.Handle` handlers off the UI goroutine, so the handler only calls `ctx.Dispatch`. Evaluating a binding and changing the page happen there, one action at a time."),
 			doc.Item("The engine owns exactly one `<style data-webgo=\"dynamic\">` element. It is created in `document.head` on the first insertion attempt, and the engine uses its `.sheet`."),
 			doc.Item("Inserting an item inserts each block of its text at the end of that sheet, with `insertRule`, as one CSSOM rule per block: a flat rule with a base block, a `Hover` block and a `Media` block is three. A rule with nested children is one block, and so is a `KeyframesRule`. Removing an item deletes its CSSOM rules with `deleteRule`, and every other item's position stays correct."),
 			doc.Item("The browser can refuse a block: `insertRule` throws a `SyntaxError` when the block does not parse as one rule, for example for a selector or pseudo-class the browser does not accept, or a `css.Raw` value that closes the block early. A merely invalid value is dropped by the browser without an exception. The engine logs the exception through `app.Logf` and leaves that block out. The item's other blocks stay. An item with no inserted block is absent and is tried again the next time an action asks for it. The app does not crash."),
@@ -28,7 +28,7 @@ func run() []app.UI {
 		),
 		doc.P("Dynamic items need the page's Content-Security-Policy to allow inline styles, with a `style-src` that permits the injected `<style>`. When the browser gives the element no sheet, every insertion attempt is logged through `app.Logf` and the app keeps running with the item absent. `Static` and `Generated` stylesheets are linked files and are unaffected."),
 		doc.H("Action names belong to WebGo"),
-		doc.P("`app.Handle` is a plain map assignment in go-app v11.0.5. A later `app.Handle` call on the same name silently replaces an earlier one, in either direction. Action names bound through `On` and `Bind` belong to WebGo: do not register your own handler for them with `app.Handle`. Whichever call runs last wins and the other handler is lost."),
+		doc.P("`app.Handle` is a plain map assignment. A later `app.Handle` call on the same name silently replaces an earlier one, in either direction. Action names bound through `On` and `Bind` belong to WebGo: do not register your own handler for them with `app.Handle`. Whichever call runs last wins and the other handler is lost."),
 		doc.P("Register your own handlers for those names with `ctx.Handle` from a component. Component-level handlers are keyed separately from the global map, so they run alongside the engine's. With `theme.DarkAction` and the `toggle` component from Two-way toggle under ", doc.A("#actions", "Actions"), ":"),
 		doc.Go(`func (t *toggle) OnMount(ctx app.Context) {
 	ctx.Handle(theme.DarkAction, t.onDark)
@@ -40,13 +40,14 @@ func (t *toggle) onDark(ctx app.Context, a app.Action) {
 		ctx.Update()
 	}
 }`),
-		doc.P("The global map is read once, when go-app's engine loads, and `app.RunWhenOnBrowser` does not return in the browser. Call `Run` before it."),
+		doc.P("The global map is read once, when the engine loads, and `app.RunWhenOnBrowser` does not return in the browser. Call `Run` before it."),
 	}
 }
 
 func actions() []app.UI {
 	return []app.UI{
-		doc.P("A bound item reacts to go-app actions. `Bind` takes a typed `Binding`: the action's value must be a `*T`, and the function receives it. `On` takes the v1 predicate over the raw `app.Action`. Each time an action with a bound name fires, the engine evaluates the item and inserts it, removes it, or replaces its text. An action whose name no item is bound to is ignored."),
+		doc.P("A bound item reacts to app actions. `Bind` takes a typed `Binding`: the action's value must be a `*T`, and the function receives it. `On` takes the v1 predicate over the raw `app.Action`. Each time an action with a bound name fires, the engine evaluates the item and inserts it, removes it, or replaces its text. An action whose name no item is bound to is ignored."),
+		bindingDiagram(),
 		doc.Go(`func When[T any](action string, when func(*T) bool) Binding
 func Compute[T any](action string, props func(*T) []css.Property) Binding
 func ComputeFrames[T any](action string, frames func(*T) []Frame) Binding
@@ -97,7 +98,7 @@ import (
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/media"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 const DarkAction = "theme/dark"
@@ -189,7 +190,7 @@ func viewModel() []app.UI {
 		ctx.NewActionWithValue(v.key, v.state)
 	})
 }`),
-		doc.P("`OnAction` observes the ViewModel's key in the go-app state store. Each `Set` or `SetAndPersist` through the ViewModel fires an action named after the key, whose value is the ViewModel's `*T`. A typed binding on that name receives the pointer."),
+		doc.P("`OnAction` observes the ViewModel's key in the app state store. Each `Set` or `SetAndPersist` through the ViewModel fires an action named after the key, whose value is the ViewModel's `*T`. A typed binding on that name receives the pointer."),
 		doc.List(
 			doc.Item("Call it in `OnMount`. Call it from lifecycle hooks only, never from `Render`."),
 			doc.Item("Use the ViewModel's key as the action name in `When` and `Compute`."),
@@ -221,7 +222,7 @@ func (d *whenDemo) Render() app.UI {
 			app.Input().Type("checkbox").Checked(compact.State().On).OnChange(d.toggle),
 			app.Text(" Compact"),
 		),
-		app.Div().Class(DemoCompact.Name()).Text("The padding follows the checkbox"),
+		app.Div().Style(DemoCompact).Text("The padding follows the checkbox"),
 	)
 }
 

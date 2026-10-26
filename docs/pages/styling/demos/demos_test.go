@@ -4,17 +4,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Toms223/WebGo/serve"
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func TestItemsBuild(t *testing.T) {
-	handler := &serve.Handler{
+	handler := &app.Handler{
 		Styles: []style.Style{style.Generated("/web/demos.css", Items()...)},
 		WebDir: t.TempDir(),
 	}
-	if _, err := handler.Build(); err != nil {
+	if err := handler.Build(); err != nil {
 		t.Fatalf("Build() error = %v", err)
 	}
 }

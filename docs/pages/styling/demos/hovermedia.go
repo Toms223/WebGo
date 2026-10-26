@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/media"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var Tile = style.Class("demo-tile").
@@ -16,5 +16,5 @@ var Tile = style.Class("demo-tile").
 	)
 
 func HoverMediaDemo() app.UI {
-	return app.Div().Class(Tile.Name()).Text("Hover: pink on a wide screen, yellow at 48rem and below")
+	return app.Div().Style(Tile).Text("Hover: pink on a wide screen, yellow at 48rem and below")
 }

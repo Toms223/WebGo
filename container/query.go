@@ -1,3 +1,5 @@
+// Package container builds @container queries for style.Rule.Container from generated size and
+// orientation features.
 package container
 
 import (
@@ -7,8 +9,12 @@ import (
 	"strings"
 )
 
+// ErrBadQuery is carried by a combination that cannot be written as one container query. Operations on
+// a query keep its first error.
 var ErrBadQuery = errors.New("container: query cannot be expressed as one container query")
 
+// Query is a container query, optionally naming the container it targets. The zero Query carries
+// ErrBadQuery.
 type Query struct {
 	name    string
 	clauses []clause
@@ -20,6 +26,8 @@ type clause struct {
 	features []string
 }
 
+// Named targets the container called name; add conditions with And. It must come first, and an empty
+// name gives ErrBadQuery.
 func Named(name string) Query {
 	if name == "" {
 		return Query{err: ErrBadQuery}
@@ -31,6 +39,7 @@ func features(texts ...string) Query {
 	return Query{clauses: []clause{{features: texts}}}
 }
 
+// And joins conditions with and. A Named argument or an Or list on either side gives ErrBadQuery.
 func (q Query) And(o Query) Query {
 	err := cmp.Or(q.Err(), o.Err())
 	if o.name != "" || len(q.clauses) > 1 || len(o.clauses) > 1 {
@@ -45,6 +54,7 @@ func (q Query) And(o Query) Query {
 	return Query{name: q.name, clauses: merged, err: err}
 }
 
+// Or joins conditions with or. A named query on either side gives ErrBadQuery.
 func (q Query) Or(o Query) Query {
 	err := cmp.Or(q.Err(), o.Err())
 	if q.name != "" || o.name != "" {
@@ -53,6 +63,7 @@ func (q Query) Or(o Query) Query {
 	return Query{name: q.name, clauses: slices.Concat(q.clauses, o.clauses), err: err}
 }
 
+// Not negates a single condition; an Or list gives ErrBadQuery.
 func Not(q Query) Query {
 	if len(q.clauses) != 1 {
 		return Query{name: q.name, clauses: q.clauses, err: cmp.Or(q.Err(), ErrBadQuery)}

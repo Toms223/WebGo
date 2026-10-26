@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/style"
 	"github.com/Toms223/WebGo/supports"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var Mixed = style.Class("demo-mixed").
@@ -15,5 +15,5 @@ var Mixed = style.Class("demo-mixed").
 	)
 
 func SupportsDemo() app.UI {
-	return app.Div().Class(Mixed.Name()).Text("Mint, or mint mixed with pink where color-mix is supported")
+	return app.Div().Style(Mixed).Text("Mint, or mint mixed with pink where color-mix is supported")
 }

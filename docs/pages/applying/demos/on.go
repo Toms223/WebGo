@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const OutlineAction = "demo/outline"
@@ -41,7 +41,7 @@ func (d *onDemo) Render() app.UI {
 			app.Input().Type("checkbox").OnChange(d.toggle),
 			app.Text(" Outline"),
 		),
-		app.Div().Class(DemoOutline.Name()).Text("Outlined while the box is checked"),
+		app.Div().Style(DemoOutline).Text("Outlined while the box is checked"),
 	)
 }
 

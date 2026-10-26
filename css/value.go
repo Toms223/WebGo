@@ -1,9 +1,15 @@
+// Package css provides typed CSS values, one function per CSS property and one per at-rule descriptor.
+// A property function accepts only the value kinds its grammar allows, plus Var and Raw, so a wrong
+// value fails to compile.
 package css
 
 import "strings"
 
+// Value is any CSS value. CSS returns its text as written into a stylesheet.
 type Value interface{ CSS() string }
 
+// Property is one declaration, made by a property function or Custom; only this package makes them.
+// Important returns a copy written with !important.
 type Property interface {
 	Name() string
 	Value() string
@@ -38,6 +44,7 @@ func declare(name, value string, prefixes ...string) Property {
 	return declaration{name: name, value: value, prefixes: prefixes}
 }
 
+// Custom declares the custom property name, adding the leading -- when missing. Read it back with Var.
 func Custom(name string, v Value) Property {
 	return declare(dashed(name), valueText(v))
 }

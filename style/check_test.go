@@ -5,8 +5,8 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func whenTrue(app.Action) bool { return true }

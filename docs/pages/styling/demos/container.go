@@ -1,11 +1,11 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/container"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var Frame = style.Class("demo-frame").
@@ -31,13 +31,13 @@ var Cell = Row.Child(style.Element("span")).
 
 func ContainerDemo() app.UI {
 	return app.Div().Body(
-		app.Div().Class(Frame.Name()).Body(cells()),
-		app.Div().Class(Frame.Name(), Narrow.Name()).Body(cells()),
+		app.Div().Style(Frame).Body(cells()),
+		app.Div().Style(Frame, Narrow).Body(cells()),
 	)
 }
 
 func cells() app.UI {
-	return app.Div().Class(Row.Name()).Body(
+	return app.Div().Style(Row).Body(
 		app.Span().Text("One"),
 		app.Span().Text("Two"),
 		app.Span().Text("Three"),

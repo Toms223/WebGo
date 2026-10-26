@@ -10,9 +10,12 @@ import (
 	"github.com/Toms223/WebGo/media"
 	"github.com/Toms223/WebGo/supports"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
+// Rule is a selector with blocks of properties, written as the base block, the pseudo blocks, then the
+// Container, Supports and Media blocks. Builder methods change the rule and return it, latching the
+// first error for Err instead of panicking; combinators return a new rule.
 type Rule struct {
 	sel        selector
 	blocks     []*block
@@ -48,20 +51,28 @@ type query interface {
 	Err() error
 }
 
+// Self returns a rule for the parent selector & inside Nest: Self().Hover(...) writes &:hover. Used
+// outside Nest, or given Set, it is ErrBadSelector.
 func Self() *Rule { return &Rule{self: true} }
 
+// Set adds properties to the base block, written under the bare selector. Nil properties are skipped.
 func (r *Rule) Set(props ...css.Property) *Rule {
 	return r.extend(block{}, props)
 }
 
+// Media adds properties to a block for the rule's selector wrapped in @media q. A query carrying an
+// error latches ErrBadMediaQuery and leaves the block out. On a Self rule, the block attaches under
+// the pseudo method called last.
 func (r *Rule) Media(q media.Query, props ...css.Property) *Rule {
 	return r.conditional(mediaKind, q, ErrBadMediaQuery, props)
 }
 
+// Container is Media for @container; a bad query latches ErrBadContainerQuery.
 func (r *Rule) Container(q container.Query, props ...css.Property) *Rule {
 	return r.conditional(containerKind, q, ErrBadContainerQuery, props)
 }
 
+// Supports is Media for @supports; a bad query latches ErrBadSupportsQuery.
 func (r *Rule) Supports(q supports.Query, props ...css.Property) *Rule {
 	return r.conditional(supportsKind, q, ErrBadSupportsQuery, props)
 }
@@ -78,6 +89,9 @@ func (r *Rule) conditional(kind blockKind, q query, bad error, props []css.Prope
 	return r.extend(key, props)
 }
 
+// Nest writes children inside r with CSS nesting and claims them. Passing a claimed child to another
+// Nest, a combinator, Generated or Dynamic is ErrNested, and a child carrying a binding is
+// ErrNestedBinding.
 func (r *Rule) Nest(children ...*Rule) *Rule {
 	for _, c := range children {
 		switch {
@@ -93,23 +107,31 @@ func (r *Rule) Nest(children ...*Rule) *Rule {
 	return r
 }
 
+// On binds r to the action named action: each time it fires, the engine inserts r when when returns
+// true and removes it otherwise. Bind is the typed form.
 func (r *Rule) On(action string, when func(app.Action) bool) *Rule {
 	r.bindings, r.err = bind(r.bindings, r.err, binding{action: action, when: when}, true)
 	return r
 }
 
+// Bind attaches a Binding from When or Compute; one from ComputeFrames is ErrBadBinding. For one
+// action name, the last binding wins.
 func (r *Rule) Bind(b Binding) *Rule {
 	r.bindings, r.err = bind(r.bindings, r.err, binding{action: b.action, typed: &b}, b.frames == nil)
 	return r
 }
 
+// CSSFor returns the CSS the engine would insert for r when the action named action carries v, or ""
+// when r would be absent.
 func (r *Rule) CSSFor(action string, v any) string { return cssFor(r, action, v) }
 
+// Initially sets whether Run inserts the bound rule before any action fires. The default is absent.
 func (r *Rule) Initially(present bool) *Rule {
 	r.initially = present
 	return r
 }
 
+// Err returns the first error latched on r or on any nested child.
 func (r *Rule) Err() error {
 	if err := r.ownErr(); err != nil {
 		return err

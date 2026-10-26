@@ -3,8 +3,8 @@ package doc
 import (
 	"time"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const copiedFor = 1500 * time.Millisecond
@@ -18,14 +18,14 @@ type Copy struct {
 
 func (c *Copy) Render() app.UI {
 	label := "Copy"
-	classes := []string{theme.CopyButton.Name()}
+	classes := []app.ClassRule{theme.CopyButton}
 	if c.Float {
-		classes = append(classes, theme.CopyFloat.Name())
+		classes = append(classes, theme.CopyFloat)
 	}
 	if c.done {
 		label = "Copied"
 	}
-	return app.Button().Type("button").Class(classes...).Aria("live", "polite").Text(label).OnClick(c.copy)
+	return app.Button().Type("button").Style(classes...).Aria("live", "polite").Text(label).OnClick(c.copy)
 }
 
 func (c *Copy) copy(ctx app.Context, e app.Event) {

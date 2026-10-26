@@ -1,14 +1,15 @@
 package state
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/pages/state/demos"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func model() []app.UI {
 	return []app.UI{
-		doc.P("`ViewModel[T]` lives in the `data` package. A `ViewModel[T]` binds a state value of type `T` to a key in `go-app`'s state store."),
+		doc.P("`ViewModel[T]` lives in the `data` package. A `ViewModel[T]` binds a state value of type `T` to a key in the app's state store, described under ", doc.A("/actions#state", "State and actions"), "."),
+		modelDiagram(),
 		doc.P("The counter below is one `ViewModel` driving a component that observes it with `Get(ctx).Observe(ctx)` in `OnMount`. `+1` and `Reset` go through `Load(ctx).Apply(...).Set()`, so the count changes on screen but is not stored; `Save` goes through `SetAndPersist`, so the count survives a reload. Each piece is described below."),
 		doc.Example(demos.CounterExample),
 		doc.Go(`type ViewModel[T any] struct {
@@ -44,7 +45,7 @@ func model() []app.UI {
 		ctx.NewActionWithValue(v.key, v.state)
 	})
 }`),
-		doc.P("`OnAction` turns state changes into go-app actions. Each `Set` or `SetAndPersist` through the model fires an action named after the model's key, whose value is the model's `*T`. A direct write to the in-memory state fires nothing."),
+		doc.P("`OnAction` turns state changes into app actions. Each `Set` or `SetAndPersist` through the model fires an action named after the model's key, whose value is the model's `*T`. A direct write to the in-memory state fires nothing."),
 		doc.List(
 			doc.Item("Call it in `OnMount`."),
 			doc.Item("Use the same key in `style.When` and `style.Compute`: the key is the action name, and `*T` is the type the binding receives."),
@@ -92,7 +93,7 @@ func fetchingExample() []app.UI {
 import (
 	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/page"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 type AppState struct {

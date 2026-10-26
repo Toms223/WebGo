@@ -1,3 +1,5 @@
+// Package page builds app screens from a Layout and a data.ViewModel and hosts them under a Base
+// component that switches screens by route.
 package page
 
 import (
@@ -6,9 +8,10 @@ import (
 
 	"github.com/Toms223/WebGo/data"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
+// Errors reported by Page and Base; match them with errors.Is.
 var (
 	ErrNoLayout  = errors.New("page: no layout")
 	ErrNoModel   = errors.New("page: no model")
@@ -16,6 +19,9 @@ var (
 	ErrNoRoute   = errors.New("page: no screen matches the current route")
 )
 
+// Layout draws a Page or Base: Loading before it mounts, Error when it has an error, and Draw
+// otherwise. Base calls Body on every render, so Body must replace the content it stored, not append
+// to it.
 type Layout[T any] interface {
 	Loading() app.UI
 	Error(error) app.UI
@@ -23,6 +29,8 @@ type Layout[T any] interface {
 	Body(...app.UI) Layout[T]
 }
 
+// Screen is one routed view of a Base. Base calls OnMount when the screen becomes selected and
+// OnDismount when it stops being selected. *Page implements it, and a custom type can too.
 type Screen interface {
 	Content() app.UI
 	Route() string
@@ -31,6 +39,8 @@ type Screen interface {
 	Mounted() bool
 }
 
+// Page is a Screen that draws a ViewModel through a Layout. The first builder error is latched and
+// every later builder call is ignored. Only *Page implements Screen.
 type Page[T any] struct {
 	Path    string
 	model   *data.ViewModel[T]
@@ -39,6 +49,8 @@ type Page[T any] struct {
 	mounted bool
 }
 
+// NewPage returns a page at path with no layout or model; set both with WithLayout and WithModel
+// before use.
 func NewPage[T any](path string) *Page[T] {
 	return &Page[T]{Path: path}
 }
@@ -75,6 +87,8 @@ func (p *Page[T]) WithModel(m *data.ViewModel[T]) *Page[T] {
 	return p
 }
 
+// Err returns the error a builder latched, or else ErrNoLayout or ErrNoModel when the layout or model
+// is missing.
 func (p *Page[T]) Err() error {
 	if p.err != nil {
 		return p.err
@@ -107,6 +121,8 @@ func (p *Page[T]) Mounted() bool {
 	return p.mounted
 }
 
+// Content draws the page through its layout: Error on an error, Loading until mounted, then Draw. It
+// panics with ErrNoLayout when there is no layout.
 func (p *Page[T]) Content() app.UI {
 	if p.layout == nil {
 		panic(ErrNoLayout)

@@ -1,0 +1,40 @@
+name: Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Vet and test WebGo
+        run: |
+          go vet ./...
+          GOOS=js GOARCH=wasm go vet ./...
+          go test ./...
+
+      - name: Vet and test the docs against this checkout
+        working-directory: docs
+        run: |
+          go mod edit -replace github.com/Toms223/WebGo=../
+          go mod tidy
+          go vet ./...
+          go test ./...

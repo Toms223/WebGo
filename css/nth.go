@@ -2,6 +2,7 @@ package css
 
 import "strconv"
 
+// Nth is the argument of the NthChild family of pseudo methods: An, Odd or Even.
 type Nth struct {
 	a, b    int
 	keyword string
@@ -12,6 +13,7 @@ var (
 	Even = Nth{keyword: "even"}
 )
 
+// An returns the pattern an+b, written as b alone when a is 0.
 func An(a, b int) Nth { return Nth{a: a, b: b} }
 
 func (n Nth) CSS() string {

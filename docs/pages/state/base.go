@@ -1,8 +1,8 @@
 package state
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func baseSection() []app.UI {
@@ -13,7 +13,8 @@ func baseSection() []app.UI {
 	Screens    []Screen
 	// unexported fields
 }`),
-		doc.P("`Base` is a `go-app` component that hosts a set of `Screen`s under one shared `Layout` and one shared model, and switches between them by URL route. It implements `go-app`'s `app.Mounter` and `app.Navigator`, but it does not itself satisfy `Screen` — it is meant to be the root component, not a screen nested inside another `Base`."),
+		doc.P("`Base` is an `app` component that hosts a set of `Screen`s under one shared `Layout` and one shared model, and switches between them by URL route. It implements `app.Mounter` and `app.Navigator`, but it does not itself satisfy `Screen` — it is meant to be the root component, not a screen nested inside another `Base`."),
+		baseDiagram(),
 		doc.H("NewBase"),
 		doc.Go(`func NewBase[U any](layout Layout[U], model *data.ViewModel[U], screens []Screen) (*Base[U], error)`),
 		doc.P("`NewBase` requires all three arguments:"),

@@ -1,8 +1,8 @@
 package doc
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 type Sub struct {
@@ -12,7 +12,7 @@ type Sub struct {
 }
 
 func (s *Sub) Render() app.UI {
-	heading := app.H3().Class(theme.DocSubheading.Name()).TabIndex(-1).Text(s.Title)
+	heading := app.H3().Style(theme.DocSubheading).TabIndex(-1).Text(s.Title)
 	if s.ID != "" {
 		heading = heading.ID(s.ID)
 	}

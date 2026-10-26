@@ -6,18 +6,24 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/example"
+	actions "github.com/Toms223/WebGo/docs/pages/actions/demos"
 	applying "github.com/Toms223/WebGo/docs/pages/applying/demos"
+	browser "github.com/Toms223/WebGo/docs/pages/browser/demos"
+	components "github.com/Toms223/WebGo/docs/pages/components/demos"
 	state "github.com/Toms223/WebGo/docs/pages/state/demos"
 	styling "github.com/Toms223/WebGo/docs/pages/styling/demos"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 func examplePackages() map[string][]example.Example {
 	return map[string][]example.Example{
-		"styling/demos":  styling.Examples(),
-		"applying/demos": applying.Examples(),
-		"state/demos":    state.Examples(),
+		"styling/demos":    styling.Examples(),
+		"applying/demos":   applying.Examples(),
+		"state/demos":      state.Examples(),
+		"components/demos": components.Examples(),
+		"actions/demos":    actions.Examples(),
+		"browser/demos":    browser.Examples(),
 	}
 }
 

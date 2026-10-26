@@ -1,6 +1,7 @@
 package home
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/pages/base"
@@ -11,19 +12,18 @@ import (
 	"github.com/Toms223/WebGo/docs/theme"
 	"github.com/Toms223/WebGo/page"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
-const install = "go get github.com/Toms223/WebGo@v0.0.5"
+const install = "go get github.com/Toms223/WebGo@v0.1.0"
 
 type Layout struct{}
 
 func (l *Layout) Loading() app.UI {
-	return app.Div().Class(theme.Wrap.Name(), theme.ShellLoading.Name()).Text("Loading")
+	return app.Div().Style(theme.Wrap, theme.ShellLoading).Text("Loading")
 }
 
 func (l *Layout) Error(err error) app.UI {
-	return app.Div().Class(theme.Wrap.Name(), theme.ShellError.Name()).Text(err.Error())
+	return app.Div().Style(theme.Wrap, theme.ShellError).Text(err.Error())
 }
 
 func (l *Layout) Body(content ...app.UI) page.Layout[State] {
@@ -31,7 +31,7 @@ func (l *Layout) Body(content ...app.UI) page.Layout[State] {
 }
 
 func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
-	return app.Div().Class(theme.Wrap.Name()).Body(
+	return app.Div().Style(theme.Wrap).Body(
 		hero(),
 		features(),
 		band(),
@@ -43,25 +43,25 @@ func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 }
 
 func hero() app.UI {
-	return app.Section().Class(theme.Hero.Name()).Body(
-		app.Div().Class(theme.HeroCopy.Name()).Body(
-			app.Span().Class(theme.Chip.Name()).Text("v0.0.5 · built on go-app"),
-			app.H1().Class(theme.HeroTitle.Name()).Body(
+	return app.Section().Style(theme.Hero).Body(
+		app.Div().Style(theme.HeroCopy).Body(
+			app.Span().Style(theme.Chip).Text("v0.1.0 · built from go-app"),
+			app.H1().Style(theme.HeroTitle).Body(
 				app.Text("Build the "),
-				app.Span().Class(theme.Highlight.Name()).Text("whole"),
+				app.Span().Style(theme.Highlight).Text("whole"),
 				app.Text(" web app in Go."),
 			),
-			app.P().Class(theme.Lead.Name()).Text("WebGo adds pages, view models, markdown and typed CSS to go-app. Routing, state and stylesheets are plain Go that compiles to WebAssembly, so the compiler checks your UI the way it checks your server."),
-			app.Div().Class(theme.Actions.Name()).Body(
-				app.A().Class(theme.Button.Name(), theme.ButtonPrimary.Name()).Href(nav.Href(start.Route)).Body(app.Text("Get started"), arrow()),
-				app.A().Class(theme.Button.Name()).Href(base.Repository).Text("Star on GitHub"),
+			app.P().Style(theme.Lead).Text("WebGo adds pages, view models, markdown and typed CSS to go-app. Routing, state and stylesheets are plain Go that compiles to WebAssembly, so the compiler checks your UI the way it checks your server."),
+			app.Div().Style(theme.Actions).Body(
+				app.A().Style(theme.Button, theme.ButtonPrimary).Href(nav.Href(start.Route)).Body(app.Text("Get started"), arrow()),
+				app.A().Style(theme.Button).Href(base.Repository).Text("Star on GitHub"),
 			),
-			app.Div().Class(theme.Code.Name(), theme.CodeQuiet.Name()).Body(
+			app.Div().Style(theme.Code, theme.CodeQuiet).Body(
 				app.Pre().Body(dim("$ "), app.Text(install)),
 			),
 		),
-		app.Div().Class(theme.HeroSample.Name()).Body(
-			sample("theme.go", theme.CodeTilt.Name(),
+		app.Div().Style(theme.HeroSample).Body(
+			sample("theme.go", theme.CodeTilt,
 				kw("var"), tx(" Button = style."), fn("Class"), tx("("), str(`"button"`), tx(").\n"),
 				tx("\t"), fn("Set"), tx("(\n"),
 				tx("\t\tcss."), fn("Padding"), tx("(css."), fn("Rem"), tx("(0.6), css."), fn("Rem"), tx("(1.1)),\n"),
@@ -71,7 +71,7 @@ func hero() app.UI {
 				tx("\t"), fn("Hover"), tx("(css."), fn("Transform"), tx("(css."), fn("Raw"), tx("("), str(`"translate(-2px, -2px)"`), tx("))).\n"),
 				tx("\t"), fn("Media"), tx("(media."), fn("MaxWidth"), tx("(css."), fn("Rem"), tx("(48)), css."), fn("Width"), tx("(css."), fn("Pct"), tx("(100)))\n\n"),
 				kw("func"), tx(" (b *Buy) "), fn("Render"), tx("() app.UI {\n"),
-				tx("\t"), kw("return"), tx(" app."), fn("Button"), tx("()."), fn("Class"), tx("(Button."), fn("Name"), tx("())."), fn("Text"), tx("("), str(`"Buy"`), tx(")\n"),
+				tx("\t"), kw("return"), tx(" app."), fn("Button"), tx("()."), fn("Style"), tx("(Button)."), fn("Text"), tx("("), str(`"Buy"`), tx(")\n"),
 				tx("}"),
 			),
 		),
@@ -79,9 +79,9 @@ func hero() app.UI {
 }
 
 func features() app.UI {
-	return app.Section().Class(theme.Section.Name()).Body(
-		app.Span().Class(theme.Eyebrow.Name()).Text("What you get"),
-		app.Div().Class(theme.Tiles.Name()).Body(
+	return app.Section().Style(theme.Section).Body(
+		app.Span().Style(theme.Eyebrow).Text("What you get"),
+		app.Div().Style(theme.Tiles).Body(
 			card(nav.Href(state.Route), theme.FillSun, iconPages(), "Pages and routing", "A Base shell hosts Screens. Routes, base paths and fragments resolve in the browser, with no server round trip."),
 			card(nav.Href(state.Route), theme.FillLime, iconState(), "View models", "Typed state with Load, Apply and Set. Observe it from any component, or react to it from a stylesheet."),
 			card(nav.Href(styling.Route), theme.FillLilac, iconBrush(), "Typed CSS", "Properties, keywords, media and container queries, keyframes, nesting and layers as Go values. Dead rules never ship."),
@@ -91,8 +91,8 @@ func features() app.UI {
 }
 
 func band() app.UI {
-	return app.Div().Class(theme.Band.Name()).Body(
-		app.Ul().Class(theme.Marquee.Name()).Body(
+	return app.Div().Style(theme.Band).Body(
+		app.Ul().Style(theme.Marquee).Body(
 			app.Li().Text("Go all the way down"),
 			separator(),
 			app.Li().Text("Compiles to WebAssembly"),
@@ -107,19 +107,19 @@ func band() app.UI {
 }
 
 func feel() app.UI {
-	return app.Section().Class(theme.Two.Name()).Body(
-		app.Div().Class(theme.TwoText.Name()).Body(
-			app.Span().Class(theme.Sticker.Name()).Text("How it feels"),
-			app.H2().Class(theme.SectionTitle.Name()).Text("One language, one mental model."),
-			app.P().Class(theme.Lead.Name()).Text("A screen is a Page with a Layout and a ViewModel. The layout draws from the model, handlers apply changes, and the page re-renders. Styles are values you can pass around, test and reuse."),
-			app.Ul().Class(theme.Points.Name()).Body(
+	return app.Section().Style(theme.Two).Body(
+		app.Div().Style(theme.TwoText).Body(
+			app.Span().Style(theme.Sticker).Text("How it feels"),
+			app.H2().Style(theme.SectionTitle).Text("One language, one mental model."),
+			app.P().Style(theme.Lead).Text("A screen is a Page with a Layout and a ViewModel. The layout draws from the model, handlers apply changes, and the page re-renders. Styles are values you can pass around, test and reuse."),
+			app.Ul().Style(theme.Points).Body(
 				app.Li().Text("Rename a CSS property and the build breaks, not the page."),
 				app.Li().Text("Bind a class to state and the dynamic sheet recomputes on its own."),
 				app.Li().Text("Ship the generated site to any static host, GitHub Pages included."),
 			),
 		),
-		app.Div().Class(theme.TwoCode.Name()).Body(
-			sample("counter.go", "",
+		app.Div().Style(theme.TwoCode).Body(
+			sample("counter.go", nil,
 				kw("type"), tx(" "), typ("Counter"), tx(" "), kw("struct"), tx("{ Count "), typ("int"), tx(" }\n\n"),
 				kw("var"), tx(" model, _ = data."), fn("NewViewModel"), tx("("), str(`"counter"`), tx(", &"), typ("Counter"), tx("{})\n\n"),
 				kw("func"), tx(" (l *Layout) "), fn("Draw"), tx("(m *data.ViewModel["), typ("Counter"), tx("]) app.HTMLDiv {\n"),
@@ -138,10 +138,10 @@ func feel() app.UI {
 }
 
 func steps() app.UI {
-	return app.Section().Class(theme.Section.Name()).Body(
-		app.Span().Class(theme.Eyebrow.Name()).Text("Three steps"),
-		app.H2().Class(theme.SectionTitle.Name()).Text("From go get to a running page"),
-		app.Div().Class(theme.Steps.Name()).Body(
+	return app.Section().Style(theme.Section).Body(
+		app.Span().Style(theme.Eyebrow).Text("Three steps"),
+		app.H2().Style(theme.SectionTitle).Text("From go get to a running page"),
+		app.Div().Style(theme.Steps).Body(
 			step("1", theme.FillSun, "Install", "Add WebGo to your module. go-app comes with it.", install),
 			step("2", theme.FillLime, "Write a page", "A component, a route and app.RunWhenOnBrowser. Then grow into Pages and ViewModels.", `app.Route("/", func() app.Composer { return &hello{} })`),
 			step("3", theme.FillLilac, "Build and ship", "Compile to wasm and generate a static site, or serve it from the same binary.", "GOARCH=wasm GOOS=js go build -o web/app.wasm ."),
@@ -150,63 +150,63 @@ func steps() app.UI {
 }
 
 func closing() app.UI {
-	return app.Section().Class(theme.Closing.Name()).Body(
-		app.Div().Class(theme.ClosingText.Name()).Body(
-			app.H2().Class(theme.SectionTitle.Name()).Text("Ready when you are."),
-			app.P().Class(theme.ClosingLead.Name()).Text("The getting started guide takes you from an empty module to a static site. Every example on this site is live."),
+	return app.Section().Style(theme.Closing).Body(
+		app.Div().Style(theme.ClosingText).Body(
+			app.H2().Style(theme.SectionTitle).Text("Ready when you are."),
+			app.P().Style(theme.ClosingLead).Text("The getting started guide takes you from an empty module to a static site. Every example on this site is live."),
 		),
-		app.A().Class(theme.Button.Name()).Href(nav.Href(start.Route)).Body(app.Text("Open the docs"), arrow()),
+		app.A().Style(theme.Button).Href(nav.Href(start.Route)).Body(app.Text("Open the docs"), arrow()),
 	)
 }
 
 func footer() app.UI {
-	return app.Footer().Class(theme.Footer.Name()).Body(
+	return app.Footer().Style(theme.Footer).Body(
 		app.Span().Text("Built with WebGo and go-app. Docs written in Go, styled with typed CSS."),
-		app.A().Class(theme.Pill.Name()).Href(base.Repository).Text("github.com/Toms223/WebGo"),
+		app.A().Style(theme.Pill).Href(base.Repository).Text("github.com/Toms223/WebGo"),
 	)
 }
 
 func card(href string, fill *style.Rule, icon app.UI, title, text string) app.UI {
-	return app.A().Class(theme.Card.Name()).Href(href).Body(
-		app.Span().Class(theme.CardIcon.Name(), fill.Name()).Body(icon),
-		app.H2().Class(theme.CardTitle.Name()).Text(title),
-		app.P().Class(theme.CardText.Name()).Text(text),
+	return app.A().Style(theme.Card).Href(href).Body(
+		app.Span().Style(theme.CardIcon, fill).Body(icon),
+		app.H2().Style(theme.CardTitle).Text(title),
+		app.P().Style(theme.CardText).Text(text),
 	)
 }
 
 func step(number string, fill *style.Rule, title, text, code string) app.UI {
-	return app.Div().Class(theme.Step.Name()).Body(
-		app.Span().Class(theme.StepNumber.Name(), fill.Name()).Text(number),
-		app.H3().Class(theme.StepTitle.Name()).Text(title),
-		app.P().Class(theme.StepText.Name()).Text(text),
-		app.Div().Class(theme.Code.Name(), theme.CodeQuiet.Name()).Body(app.Pre().Text(code)),
+	return app.Div().Style(theme.Step).Body(
+		app.Span().Style(theme.StepNumber, fill).Text(number),
+		app.H3().Style(theme.StepTitle).Text(title),
+		app.P().Style(theme.StepText).Text(text),
+		app.Div().Style(theme.Code, theme.CodeQuiet).Body(app.Pre().Text(code)),
 	)
 }
 
-func sample(name, extra string, body ...app.UI) app.UI {
-	classes := []string{theme.Code.Name()}
-	if extra != "" {
+func sample(name string, extra app.ClassRule, body ...app.UI) app.UI {
+	classes := []app.ClassRule{theme.Code}
+	if extra != nil {
 		classes = append(classes, extra)
 	}
-	return app.Div().Class(classes...).Body(
-		app.Div().Class(theme.CodeBar.Name()).Text(name),
+	return app.Div().Style(classes...).Body(
+		app.Div().Style(theme.CodeBar).Text(name),
 		app.Pre().Body(body...),
 	)
 }
 
 func separator() app.UI {
-	return app.Li().Class(theme.MarqueeDot.Name()).Aria("hidden", "true").Text("·")
+	return app.Li().Style(theme.MarqueeDot).Aria("hidden", "true").Text("·")
 }
 
-func kw(text string) app.UI { return app.Span().Class(theme.Keyword.Name()).Text(text) }
+func kw(text string) app.UI { return app.Span().Style(theme.Keyword).Text(text) }
 
-func fn(text string) app.UI { return app.Span().Class(theme.Fn.Name()).Text(text) }
+func fn(text string) app.UI { return app.Span().Style(theme.Fn).Text(text) }
 
-func str(text string) app.UI { return app.Span().Class(theme.Str.Name()).Text(text) }
+func str(text string) app.UI { return app.Span().Style(theme.Str).Text(text) }
 
-func typ(text string) app.UI { return app.Span().Class(theme.Typ.Name()).Text(text) }
+func typ(text string) app.UI { return app.Span().Style(theme.Typ).Text(text) }
 
-func dim(text string) app.UI { return app.Span().Class(theme.Dim.Name()).Text(text) }
+func dim(text string) app.UI { return app.Span().Style(theme.Dim).Text(text) }
 
 func tx(text string) app.UI { return app.Text(text) }
 

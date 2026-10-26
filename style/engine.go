@@ -3,7 +3,7 @@ package style
 import (
 	"slices"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
 type dynamicItem interface {
@@ -122,6 +122,10 @@ func (e *engine) handler() app.ActionHandler {
 	}
 }
 
+// Run starts the browser engine for the Dynamic styles among styles: it registers one app.Handle
+// handler per bound action name and inserts the items set Initially(true). It returns at once on the
+// server. Call it once, before app.RunWhenOnBrowser, with every Dynamic style, since a second call
+// replaces the first one's handlers for shared action names.
 func Run(styles ...Style) {
 	if app.IsServer {
 		return

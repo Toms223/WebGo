@@ -1,10 +1,10 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const CompactKey = "demo/compact"
@@ -38,7 +38,7 @@ func (d *whenDemo) Render() app.UI {
 			app.Input().Type("checkbox").Checked(compact.State().On).OnChange(d.toggle),
 			app.Text(" Compact"),
 		),
-		app.Div().Class(DemoCompact.Name()).Text("The padding follows the checkbox"),
+		app.Div().Style(DemoCompact).Text("The padding follows the checkbox"),
 	)
 }
 

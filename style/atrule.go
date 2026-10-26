@@ -10,9 +10,11 @@ import (
 	"github.com/Toms223/WebGo/media"
 	"github.com/Toms223/WebGo/supports"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
+// KeyframesRule is an @keyframes at-rule. It goes into Generated, or once bound into Dynamic; On,
+// Bind, Initially and CSSFor work as on Rule, and Bind takes When or ComputeFrames.
 type KeyframesRule struct {
 	name      string
 	frames    []Frame
@@ -46,8 +48,10 @@ func withinStops(stop css.Percentage) bool {
 	return err == nil && n >= 0 && n <= 100
 }
 
+// Keyframes returns an empty @keyframes rule called name. An empty name gives ErrNoName.
 func Keyframes(name string) *KeyframesRule { return &KeyframesRule{name: name} }
 
+// At adds a frame at stop. A stop outside 0% to 100% is ErrBadAtRule.
 func (k *KeyframesRule) At(stop css.Percentage, props ...css.Property) *KeyframesRule {
 	if !withinStops(stop) {
 		k.err = cmp.Or(k.err, ErrBadAtRule)
@@ -117,6 +121,8 @@ func (k *KeyframesRule) dynamic() bool { return len(k.bindings) > 0 }
 
 type FontFaceRule struct{ descs []css.Descriptor }
 
+// FontFace returns an @font-face rule. It needs css.FaceFontFamily and css.Src; without either, Err is
+// ErrBadAtRule.
 func FontFace(descs ...css.Descriptor) *FontFaceRule { return (&FontFaceRule{}).Set(descs...) }
 
 func (f *FontFaceRule) Set(descs ...css.Descriptor) *FontFaceRule {
@@ -137,6 +143,8 @@ type PropertyRule struct {
 	descs []css.Descriptor
 }
 
+// Property returns an @property rule registering the custom property name, adding the leading -- when
+// missing. It needs css.Syntax and css.Inherits; without either, Err is ErrBadAtRule.
 func Property(name string, descs ...css.Descriptor) *PropertyRule {
 	if !strings.HasPrefix(name, "--") {
 		name = "--" + name
@@ -174,6 +182,8 @@ type ImportRule struct {
 
 type ImportOption func(*ImportRule)
 
+// Import returns an @import rule for a css.Url or css.String target; any other target is ErrBadAtRule.
+// Options are written in the order layer, supports, media.
 func Import(target css.Value, opts ...ImportOption) *ImportRule {
 	r := &ImportRule{target: target}
 	switch target.(type) {
@@ -257,6 +267,8 @@ type LayerRule struct {
 	items []Item
 }
 
+// Layer returns an @layer block called name holding items, which may include other layers. An Import
+// or LayerOrder inside it is ErrBadAtRule.
 func Layer(name string, items ...Item) *LayerRule {
 	return &LayerRule{name: name, items: withoutNil(items)}
 }
@@ -303,6 +315,8 @@ func (l *LayerRule) subject() string { return atName("@layer", l.name) }
 
 type LayerOrderRule struct{ names []string }
 
+// LayerOrder returns an @layer statement fixing the order of the named layers. A stylesheet writes
+// every LayerOrder first, then every Import, then the rest.
 func LayerOrder(names ...string) *LayerOrderRule {
 	return &LayerOrderRule{names: slices.Clone(names)}
 }

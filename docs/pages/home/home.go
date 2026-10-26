@@ -1,10 +1,10 @@
 package home
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/pages/base"
 	"github.com/Toms223/WebGo/page"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const (
@@ -34,7 +34,7 @@ func New() (*Screen, error) {
 
 func (s *Screen) OnMount(ctx app.Context) page.Screen {
 	s.Page.OnMount(ctx)
-	ctx.Page().SetTitle("WebGo · typed CSS, pages and state for go-app")
+	ctx.Page().SetTitle("WebGo · web apps in Go with typed CSS, pages and state")
 	base.Activate(ctx, Route)
 	return s
 }

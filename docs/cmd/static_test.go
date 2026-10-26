@@ -2,13 +2,15 @@ package cmd
 
 import (
 	"errors"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"slices"
+	"strings"
 	"testing"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/pages"
-	"github.com/Toms223/WebGo/serve"
 )
 
 func stubWebDir(t *testing.T) string {
@@ -37,8 +39,8 @@ func TestGenerateWritesIndex(t *testing.T) {
 
 func TestGenerateFailsWithoutTheStaticSheet(t *testing.T) {
 	err := Generate(t.TempDir(), "", t.TempDir())
-	if !errors.Is(err, serve.ErrMissingStyle) {
-		t.Errorf("Generate error = %v, want %v", err, serve.ErrMissingStyle)
+	if !errors.Is(err, app.ErrMissingStyle) {
+		t.Errorf("Generate error = %v, want %v", err, app.ErrMissingStyle)
 	}
 }
 
@@ -53,8 +55,12 @@ func TestHandlerCarriesSiteMetadata(t *testing.T) {
 	if h.Title == "" {
 		t.Error("handler Title must be set")
 	}
-	if want := []string{"/web/app.css", "/web/theme.css"}; !slices.Equal(h.Styles, want) {
-		t.Errorf("handler Styles = %q, want %q", h.Styles, want)
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/app-worker.js", nil))
+	for _, link := range []string{`"/web/app.css"`, `"/web/theme.css"`} {
+		if !strings.Contains(w.Body.String(), link) {
+			t.Errorf("app-worker.js does not cache %s", link)
+		}
 	}
 }
 

@@ -1,9 +1,9 @@
 package demos
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
 	"github.com/Toms223/WebGo/style"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 var Card = style.Class("demo-card").
@@ -11,5 +11,5 @@ var Card = style.Class("demo-card").
 	Hover(css.Background(css.Var("--pink")))
 
 func CardDemo() app.UI {
-	return app.Div().Class(Card.Name()).Text("Hover this card")
+	return app.Div().Style(Card).Text("Hover this card")
 }

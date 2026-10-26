@@ -6,9 +6,11 @@ import (
 
 	"github.com/Toms223/WebGo/data"
 
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
+	"github.com/Toms223/WebGo/app"
 )
 
+// Base is the root app component. It hosts Screens under one layout and model and shows the screen
+// whose Route matches the URL, also when the app is served under a subpath.
 type Base[U any] struct {
 	app.Compo
 	BaseLayout Layout[U]
@@ -20,6 +22,8 @@ type Base[U any] struct {
 	baseKnown  bool
 }
 
+// NewBase returns a base with the first screen selected. A nil layout, model or screens slice gives
+// ErrNoLayout, ErrNoModel or ErrNoScreens, checked in that order; an empty screens slice is accepted.
 func NewBase[U any](layout Layout[U], model *data.ViewModel[U], screens []Screen) (*Base[U], error) {
 	if layout == nil {
 		return nil, ErrNoLayout
@@ -37,6 +41,7 @@ func NewBase[U any](layout Layout[U], model *data.ViewModel[U], screens []Screen
 	}, nil
 }
 
+// Err reports ErrNoLayout or ErrNoModel when BaseLayout or Model is nil.
 func (b *Base[U]) Err() error {
 	if b.BaseLayout == nil {
 		return ErrNoLayout
@@ -47,10 +52,14 @@ func (b *Base[U]) Err() error {
 	return nil
 }
 
+// BasePath returns the subpath the app is served under, deduced from the URL on the first mount, or ""
+// at the root.
 func (b *Base[U]) BasePath() string {
 	return b.basePath
 }
 
+// OnNav selects the screen whose route matches the URL path below the base path, dismounting the
+// previous screen and mounting the new one. With no match, Render shows ErrNoRoute.
 func (b *Base[U]) OnNav(ctx app.Context) {
 	path := b.screenPath(ctx)
 	for index, screen := range b.Screens {
@@ -97,6 +106,8 @@ func (b *Base[U]) browserPath(route string) string {
 	return b.basePath + route
 }
 
+// OnMount reads the model's state, deduces the base path and mounts the selected screen. It does
+// nothing when Err reports an error.
 func (b *Base[U]) OnMount(ctx app.Context) {
 	if b.Err() != nil {
 		return
@@ -114,6 +125,8 @@ func (b *Base[U]) OnMount(ctx app.Context) {
 	b.mounted = true
 }
 
+// Render draws the selected screen's content through the layout: Loading before mount,
+// Error(ErrNoRoute) when no screen matches. It panics with ErrNoLayout when BaseLayout is nil.
 func (b *Base[U]) Render() app.UI {
 	if b.BaseLayout == nil {
 		panic(ErrNoLayout)

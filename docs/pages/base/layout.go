@@ -3,11 +3,11 @@ package base
 import (
 	"strconv"
 
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/theme"
 	"github.com/Toms223/WebGo/page"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const mainID = "main"
@@ -27,11 +27,11 @@ func NewLayout(entries []nav.Entry) *Layout {
 }
 
 func (l *Layout) Loading() app.UI {
-	return app.Div().Class(theme.Shell.Name(), theme.ShellLoading.Name()).Text("Loading")
+	return app.Div().Style(theme.Shell, theme.ShellLoading).Text("Loading")
 }
 
 func (l *Layout) Error(err error) app.UI {
-	return app.Div().Class(theme.Shell.Name(), theme.ShellError.Name()).Text(err.Error())
+	return app.Div().Style(theme.Shell, theme.ShellError).Text(err.Error())
 }
 
 func (l *Layout) Body(content ...app.UI) page.Layout[State] {
@@ -44,39 +44,39 @@ func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 	if state.Active == HomeRoute {
 		return l.landing(state)
 	}
-	classes := []string{theme.Shell.Name()}
+	classes := []app.ClassRule{theme.Shell}
 	if state.Menu {
-		classes = append(classes, theme.MenuOpen.Name())
+		classes = append(classes, theme.MenuOpen)
 	}
-	return app.Div().Class(classes...).Body(
+	return app.Div().Style(classes...).Body(
 		skip(),
-		app.Aside().Class(theme.Side.Name()).Body(
+		app.Aside().Style(theme.Side).Body(
 			logo(),
-			app.Button().Type("button").Class(theme.SideMenu.Name()).
+			app.Button().Type("button").Style(theme.SideMenu).
 				Aria("expanded", strconv.FormatBool(state.Menu)).
 				Aria("controls", nav.ID).
 				Text("Menu").OnClick(l.toggleMenu),
 			nav.Render(l.entries, state.Active),
 			l.toggleButton(state),
 		),
-		app.Main().Class(theme.Content.Name()).ID(mainID).TabIndex(-1).Body(l.body...),
+		app.Main().Style(theme.Content).ID(mainID).TabIndex(-1).Body(l.body...),
 	)
 }
 
 func (l *Layout) landing(state *State) app.HTMLDiv {
 	links := []app.UI{}
 	if len(l.entries) > 0 {
-		links = append(links, app.A().Class(theme.Pill.Name()).Href(nav.Href(l.entries[0].Route)).Text("Docs"))
+		links = append(links, app.A().Style(theme.Pill).Href(nav.Href(l.entries[0].Route)).Text("Docs"))
 	}
 	links = append(links,
-		app.A().Class(theme.Pill.Name()).Href(Repository).Text("GitHub"),
+		app.A().Style(theme.Pill).Href(Repository).Text("GitHub"),
 		l.toggleButton(state),
 	)
-	return app.Div().Class(theme.Landing.Name()).Body(
+	return app.Div().Style(theme.Landing).Body(
 		skip(),
-		app.Header().Class(theme.Topbar.Name()).Body(
+		app.Header().Style(theme.Topbar).Body(
 			logo(),
-			app.Nav().Class(theme.TopbarNav.Name()).Body(links...),
+			app.Nav().Style(theme.TopbarNav).Body(links...),
 		),
 		app.Main().ID(mainID).TabIndex(-1).Body(l.body...),
 	)
@@ -87,11 +87,11 @@ func (l *Layout) toggleButton(state *State) app.UI {
 	if state.IsDark() {
 		label = "Light mode"
 	}
-	return app.Button().Type("button").Class(theme.ShellToggle.Name()).Text(label).OnClick(l.toggle)
+	return app.Button().Type("button").Style(theme.ShellToggle).Text(label).OnClick(l.toggle)
 }
 
 func skip() app.UI {
-	return app.Button().Type("button").Class(theme.Skip.Name()).Text("Skip to content").OnClick(func(ctx app.Context, e app.Event) {
+	return app.Button().Type("button").Style(theme.Skip).Text("Skip to content").OnClick(func(ctx app.Context, e app.Event) {
 		if main := app.Window().GetElementByID(mainID); main.Truthy() {
 			main.Call("focus")
 		}
@@ -99,8 +99,8 @@ func skip() app.UI {
 }
 
 func logo() app.UI {
-	return app.A().Class(theme.Logo.Name()).Href(nav.Href(HomeRoute)).Body(
-		app.Span().Class(theme.LogoMark.Name()).Text("W"),
+	return app.A().Style(theme.Logo).Href(nav.Href(HomeRoute)).Body(
+		app.Span().Style(theme.LogoMark).Text("W"),
 		app.Text("WebGo"),
 	)
 }

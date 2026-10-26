@@ -1,10 +1,10 @@
 package markdown
 
 import (
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/example"
 	"github.com/Toms223/WebGo/docs/theme"
 	md "github.com/Toms223/WebGo/markdown"
-	"github.com/maxence-charriere/go-app/v11/pkg/app"
 )
 
 const tick = "`"
@@ -19,7 +19,7 @@ var docStyle = md.Style{
 }
 
 func render(source string, style md.Style) app.UI {
-	return app.Div().Class(theme.Doc.Name()).Body(md.RenderMarkdown(source, style)...)
+	return app.Div().Style(theme.Doc).Body(md.RenderMarkdown(source, style)...)
 }
 
 func mdExample(name, source string) example.Example {
