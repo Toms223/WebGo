@@ -394,4 +394,4 @@ The fork, the core move, `Load`, scripts and OpenFeature all ship. Each one is d
 
 ## License
 
-WebGo is licensed under the [GNU General Public License v3.0](LICENSE). Any project that includes WebGo, extends it or is built on it must also be released as open source under the GPL-3.0 when it is distributed. WebGo treats serving the compiled WebAssembly to a browser as distributing it.
+WebGo is licensed under the [GNU General Public License v3.0](LICENSE). Any project that includes WebGo, extends it or is built on it must also be released as open source under the GPL-3.0 when it is distributed. WebGo DOES NOT treat serving the compiled WebAssembly to a browser as distributing it.
