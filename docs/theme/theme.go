@@ -46,6 +46,12 @@ var Components = style.Layer("components", withDemos(
 	Band, Marquee, MarqueeDot, Two, TwoText, TwoCode, Sticker, Points, PointsItem,
 	Steps, Step, StepNumber, StepTitle, StepText, StepCode, StepCodeBody,
 	Closing, ClosingText, ClosingLead, Footer,
+	News, NewsHead, NewsMasthead, NewsIntro, NewsCover, NewsCoverWide, NewsCoverVersion, NewsCoverWideVersion, NewsCoverName, NewsCoverWideName, NewsCoverCard, NewsCoverWideCard,
+	NewsMeta, NewsFeature, NewsStory, NewsHeadline, NewsTeaser, NewsGo, NewsCatchUp, NewsSectionTitle, NewsAsk, NewsAskText, NewsPicks, NewsPick, NewsPickOn,
+	NewsAnswer, NewsAnswerTitle, NewsMissed, NewsMissedLink, NewsCommand, NewsCommandText, NewsEarlier, NewsRow, NewsRowTitle,
+	NewsArticle, NewsColumn, NewsBack, NewsTitle, NewsShort, NewsShortTitle, NewsShortList, NewsBody, NewsSign, NewsPager, NewsPagerLink, NewsPagerLabel, NewsPagerTitle, NewsCompare,
+	LatestNews, LatestNewsCover, LatestNewsTitle, LatestNewsTitleLink,
+	NewsMastheadIn, NewsIntroIn, NewsMissedNote, NewsCoverIn, NewsTitleIn, NewsLeadIn, NewsShortIn, NewsBodyIn, LatestNewsIn,
 	ReducedMotion,
 )...)
 

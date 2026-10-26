@@ -12,6 +12,7 @@ import (
 	"github.com/Toms223/WebGo/docs/pages/home"
 	"github.com/Toms223/WebGo/docs/pages/markdown"
 	"github.com/Toms223/WebGo/docs/pages/migrating"
+	"github.com/Toms223/WebGo/docs/pages/news"
 	"github.com/Toms223/WebGo/docs/pages/routing"
 	"github.com/Toms223/WebGo/docs/pages/start"
 	"github.com/Toms223/WebGo/docs/pages/state"
@@ -42,7 +43,7 @@ func Routes() []string {
 	for _, entry := range Entries() {
 		routes = append(routes, entry.Route)
 	}
-	return routes
+	return append(routes, news.Routes()...)
 }
 
 func Screens() ([]page.Screen, error) {
@@ -98,7 +99,11 @@ func Screens() ([]page.Screen, error) {
 	if err != nil {
 		return nil, err
 	}
-	return []page.Screen{homeScreen, startScreen, markdownScreen, stateScreen, stylingScreen, applyingScreen, componentsScreen, routingScreen, actionsScreen, browserScreen, deployScreen, testsScreen, migratingScreen}, nil
+	newsScreens, err := news.Screens()
+	if err != nil {
+		return nil, err
+	}
+	return append([]page.Screen{homeScreen, startScreen, markdownScreen, stateScreen, stylingScreen, applyingScreen, componentsScreen, routingScreen, actionsScreen, browserScreen, deployScreen, testsScreen, migratingScreen}, newsScreens...), nil
 }
 
 func Register() {

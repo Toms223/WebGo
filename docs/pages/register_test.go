@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/Toms223/WebGo/docs/components/nav"
+	"github.com/Toms223/WebGo/docs/pages/news"
 )
 
 func TestEntriesAndScreensAgree(t *testing.T) {
@@ -13,8 +14,8 @@ func TestEntriesAndScreensAgree(t *testing.T) {
 		t.Fatalf("building the screens failed: %v", err)
 	}
 	entries := Entries()
-	if len(screens) != len(entries)+1 {
-		t.Fatalf("expected one navigation entry per screen plus the landing page, got %d entries and %d screens", len(entries), len(screens))
+	if want := len(entries) + 1 + len(news.Routes()); len(screens) != want {
+		t.Fatalf("expected one screen per navigation entry, the landing page and %d news pages, got %d entries and %d screens", len(news.Routes()), len(entries), len(screens))
 	}
 	routes := map[string]bool{}
 	for _, screen := range screens {
@@ -61,11 +62,17 @@ func TestScreensCoverEveryPage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("building the screens failed: %v", err)
 	}
-	if len(screens) != 13 {
-		t.Fatalf("expected thirteen screens, got %d", len(screens))
+	if len(screens) != 17 {
+		t.Fatalf("expected seventeen screens, got %d", len(screens))
 	}
-	if got := screens[len(screens)-1].Route(); got != "/migrating" {
-		t.Errorf("expected the last screen to serve /migrating, got %s", got)
+	routes := map[string]bool{}
+	for _, s := range screens {
+		routes[s.Route()] = true
+	}
+	for _, r := range Routes() {
+		if !routes[r] {
+			t.Errorf("route %s has no screen", r)
+		}
 	}
 }
 

@@ -2,6 +2,7 @@ package base
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/data"
@@ -14,6 +15,7 @@ const mainID = "main"
 
 const (
 	HomeRoute  = "/"
+	NewsRoute  = "/news"
 	Repository = "https://github.com/Toms223/WebGo"
 )
 
@@ -41,7 +43,7 @@ func (l *Layout) Body(content ...app.UI) page.Layout[State] {
 
 func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 	state := m.State()
-	if state.Active == HomeRoute {
+	if state.Active == HomeRoute || state.Active == NewsRoute || strings.HasPrefix(state.Active, NewsRoute+"/") {
 		return l.landing(state)
 	}
 	classes := []app.ClassRule{theme.Shell}
@@ -68,7 +70,12 @@ func (l *Layout) landing(state *State) app.HTMLDiv {
 	if len(l.entries) > 0 {
 		links = append(links, app.A().Style(theme.Pill).Href(nav.Href(l.entries[0].Route)).Text("Docs"))
 	}
+	news := app.A().Style(theme.Pill).Href(nav.Href(NewsRoute)).Text("News")
+	if state.Active != HomeRoute {
+		news = news.Aria("current", "page")
+	}
 	links = append(links,
+		news,
 		app.A().Style(theme.Pill).Href(Repository).Text("GitHub"),
 		l.toggleButton(state),
 	)

@@ -6,6 +6,7 @@ import (
 	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/pages/base"
 	"github.com/Toms223/WebGo/docs/pages/markdown"
+	"github.com/Toms223/WebGo/docs/pages/news"
 	"github.com/Toms223/WebGo/docs/pages/start"
 	"github.com/Toms223/WebGo/docs/pages/state"
 	"github.com/Toms223/WebGo/docs/pages/styling"
@@ -33,6 +34,7 @@ func (l *Layout) Body(content ...app.UI) page.Layout[State] {
 func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 	return app.Div().Style(theme.Wrap).Body(
 		hero(),
+		latestNews(),
 		features(),
 		band(),
 		feel(),
@@ -51,7 +53,7 @@ func hero() app.UI {
 				app.Span().Style(theme.Highlight).Text("whole"),
 				app.Text(" web app in Go."),
 			),
-			app.P().Style(theme.Lead).Text("WebGo adds pages, view models, markdown and typed CSS to go-app. Routing, state and stylesheets are plain Go that compiles to WebAssembly, so the compiler checks your UI the way it checks your server."),
+			app.P().Style(theme.Lead).Text("WebGo gives you pages, view models, markdown and typed CSS on its own app engine. Routing, state and stylesheets are plain Go that compiles to WebAssembly, so the compiler checks your UI the way it checks your server."),
 			app.Div().Style(theme.Actions).Body(
 				app.A().Style(theme.Button, theme.ButtonPrimary).Href(nav.Href(start.Route)).Body(app.Text("Get started"), arrow()),
 				app.A().Style(theme.Button).Href(base.Repository).Text("Star on GitHub"),
@@ -73,6 +75,23 @@ func hero() app.UI {
 				kw("func"), tx(" (b *Buy) "), fn("Render"), tx("() app.UI {\n"),
 				tx("\t"), kw("return"), tx(" app."), fn("Button"), tx("()."), fn("Style"), tx("(Button)."), fn("Text"), tx("("), str(`"Buy"`), tx(")\n"),
 				tx("}"),
+			),
+		),
+	)
+}
+
+func latestNews() app.UI {
+	latest := news.Latest()
+	return app.Section().Style(theme.LatestNews).Aria("label", "Latest news").Body(
+		app.A().Style(theme.LatestNewsCover).Href(nav.Href(latest.Route())).TabIndex(-1).Aria("hidden", "true").Body(news.Cover(latest, false)),
+		app.Div().Style(theme.NewsStory).Body(
+			app.Span().Style(theme.Sticker).Text("Latest news"),
+			app.H2().Style(theme.LatestNewsTitle).Body(app.A().Href(nav.Href(latest.Route())).Text(latest.Title)),
+			app.P().Style(theme.NewsTeaser).Text(latest.Teaser),
+			news.Meta(latest),
+			app.Div().Style(theme.Actions).Body(
+				app.A().Style(theme.Button, theme.ButtonPrimary).Href(nav.Href(latest.Route())).Body(app.Text("Read the update"), arrow()),
+				app.A().Style(theme.Button).Href(nav.Href(news.Route)).Text("All news"),
 			),
 		),
 	)
@@ -142,7 +161,7 @@ func steps() app.UI {
 		app.Span().Style(theme.Eyebrow).Text("Three steps"),
 		app.H2().Style(theme.SectionTitle).Text("From go get to a running page"),
 		app.Div().Style(theme.Steps).Body(
-			step("1", theme.FillSun, "Install", "Add WebGo to your module. go-app comes with it.", install),
+			step("1", theme.FillSun, "Install", "Add WebGo to your module. Everything comes from this one import.", install),
 			step("2", theme.FillLime, "Write a page", "A component, a route and app.RunWhenOnBrowser. Then grow into Pages and ViewModels.", `app.Route("/", func() app.Composer { return &hello{} })`),
 			step("3", theme.FillLilac, "Build and ship", "Compile to wasm and generate a static site, or serve it from the same binary.", "GOARCH=wasm GOOS=js go build -o web/app.wasm ."),
 		),
@@ -161,7 +180,7 @@ func closing() app.UI {
 
 func footer() app.UI {
 	return app.Footer().Style(theme.Footer).Body(
-		app.Span().Text("Built with WebGo and go-app. Docs written in Go, styled with typed CSS."),
+		app.Span().Text("Built with WebGo. Docs written in Go, styled with typed CSS."),
 		app.A().Style(theme.Pill).Href(base.Repository).Text("github.com/Toms223/WebGo"),
 	)
 }
