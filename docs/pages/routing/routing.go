@@ -35,7 +35,7 @@ func New() (*topic.Screen, error) {
 func intro() []app.UI {
 	return []app.UI{
 		doc.P("This page covers the `app` package's router: registering routes, moving between them from code and from links, reading and changing the current page, and hosting the app under a path prefix such as a GitHub Pages project site."),
-		doc.P("Components themselves, and the `OnNav` hook among their lifecycle events, are on the ", doc.A("/components", "Components"), " page. WebGo's `page.Base`, which switches screens by route inside one component, is on the ", doc.A("/state#base", "Pages, layouts and state"), " page."),
+		doc.P("Components themselves, and the `OnNav` hook among their lifecycle events, are on the ", doc.A("/components", "Components"), " page. `app.Shell`, which switches screens by route inside one root component, is on the ", doc.A("/state#shell", "Pages, layouts and state"), " page."),
 	}
 }
 
@@ -75,13 +75,13 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }`),
 		doc.List(
-			doc.Item("The path is matched exactly against the URL path, without query or fragment. `/about` does not match `/about/`."),
+			doc.Item("The path is matched exactly against the URL path, without query or fragment. In the browser, navigation drops a trailing slash first, so `/about/` matches `/about`."),
 			doc.Item("Registering the same path again replaces the earlier function."),
 			doc.Item("Exact routes are tried first, then ", doc.A("#regular-expressions", "regular-expression routes"), " in the order they were registered."),
 		),
 		doc.H("What the function is for"),
-		doc.P("The function is called on every navigation to a new path, and its component is compared with the root that is mounted, by the rules in ", doc.A("/components#writing-a-component", "Writing a component"), ". If the types differ, the old root is dismounted and the new one mounted. If they are the same type, the mounted root stays: differing exported fields are copied from the fresh value, unexported state is kept, and `OnMount` does not run again. Return a fresh value every time, never a shared one."),
-		doc.P("WebGo's docs use that second case on purpose: every route returns a `page.Base`, which stays mounted and swaps its screen in `OnNav`."),
+		doc.P("The function is called on every navigation to a new path, and its component is compared with the root that is mounted, by the rules in ", doc.A("/components#writing-a-component", "Writing a component"), ". If the types differ, the old root is dismounted and the new one mounted. If they are the same type, the mounted root stays: differing exported fields are copied from the fresh value, unexported state is kept, and `OnMount` does not run again. For `app.Route`, return a fresh value every time, never a shared one."),
+		doc.P("`app.Serve` is the exception: it registers every screen's route to one `app.Shell` that is built once in the browser and kept. On each navigation the engine selects the screen for the new path before it loads the shell as the root, and `OnNav` runs after that."),
 		doc.H("Unmatched paths"),
 		doc.P("A path with no route shows `app.NotFound`, a built-in \"Not Found\" component by default. On the server, `app.Handler` prerenders the page with it and answers `404`; in the browser, it is mounted like any root."),
 		doc.Go(`type missing struct{ app.Compo }
@@ -250,7 +250,7 @@ func fragments() []app.UI {
 	d.section = ctx.Page().URL().Fragment
 }`),
 		doc.H("When a fragment link reloads the root"),
-		doc.P("The fragment case compares paths with the last URL the router navigated to, not with the address bar. If the address bar was changed by `ReplaceURL` (by your code, or by `page.Base` restoring a mount prefix), a link to the address bar's path with a fragment has a different path from the last navigation. The router then creates the routed component again and loads it as the root, and the mounted root's exported fields are reset to the fresh value's."),
+		doc.P("The fragment case compares paths with the last URL the router navigated to, not with the address bar. If the address bar was changed by `ReplaceURL` (by your code, or by `app.Shell` restoring a mount prefix), a link to the address bar's path with a fragment has a different path from the last navigation. The router then creates the routed component again and loads it as the root, and the mounted root's exported fields are reset to the fresh value's."),
 		doc.P("Keep the paths of your links equal to what ends up in the address bar. Under a mount prefix that means prefixing every link, as shown in ", doc.A("#serving-under-a-prefix", "Serving under a prefix"), "."),
 	}
 }
@@ -285,7 +285,7 @@ func prefix() []app.UI {
 
 app.A().Href(href("/about")).Text("About")`),
 		doc.P("Trimming the slash matters: without a prefix the variable is `/`, and `\"/\" + \"/about\"` is `//about`, a link to a host named `about`."),
-		doc.H("page.Base"),
-		doc.P("WebGo's `page.Base` works out the prefix by itself: on mount, it compares the address bar's path with its screens' routes, keeps what comes before the matching route as its base path, matches screens with that base removed, and restores the base in the address bar with `ReplaceURL` when a link left it out. Links still need the prefix, for the reason under ", doc.A("#fragments-and-onnav", "Fragments and OnNav"), ". See ", doc.A("/state#base", "Base"), "."),
+		doc.H("app.Shell"),
+		doc.P("`app.Shell` reads the prefix from `GOAPP_ROOT_PREFIX`: it matches screens with the prefix removed, and restores it in the address bar with `ReplaceURL` when a link left it out. Links still need the prefix, for the reason under ", doc.A("#fragments-and-onnav", "Fragments and OnNav"), ". See ", doc.A("/state#shell", "Shell"), "."),
 	}
 }

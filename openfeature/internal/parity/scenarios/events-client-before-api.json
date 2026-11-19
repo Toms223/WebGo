@@ -1,0 +1,31 @@
+{
+  "id": "events-client-before-api",
+  "requirements": ["5.2.1","5.2.3"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "events": true
+    },
+    "q": {
+      "runsOn": "client",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hA1"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hA1c"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hA2"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"hC0"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hC0c"},
+    {"op":"addHandler","target":"client:x","event":"PROVIDER_READY","handler":"hCx"},
+    {"op":"addHandler","target":"client:x","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hCxc"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_READY","handler":"hCd"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hCdc"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hA3"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hA3c"},
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"emit","provider":"q","event":"PROVIDER_CONFIGURATION_CHANGED","details":{"flagsChanged":["f"]}},
+    {"op":"emit","provider":"p","event":"PROVIDER_CONFIGURATION_CHANGED","details":{"flagsChanged":["g"]}}
+  ]
+}

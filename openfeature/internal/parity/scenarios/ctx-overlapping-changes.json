@@ -1,0 +1,34 @@
+{
+  "id": "ctx-overlapping-changes",
+  "requirements": ["5.3.4.2","5.3.4.3"],
+  "partial": "D10",
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"setContext","context":{"targetingKey":"a"}},
+    {"op":"status"},
+    {"op":"setContext","context":{"targetingKey":"b"}},
+    {"op":"status"},
+    {"op":"resolve","target":"p.onContextChange#1"},
+    {"op":"status"},
+    {"op":"resolve","target":"p.onContextChange#2"},
+    {"op":"status"},
+    {"op":"setContext","context":{"targetingKey":"c"}},
+    {"op":"setContext","context":{"targetingKey":"d"}},
+    {"op":"status"},
+    {"op":"resolve","target":"p.onContextChange#4"},
+    {"op":"status"},
+    {"op":"reject","target":"p.onContextChange#3","error":{"code":"GENERAL","message":"late"}},
+    {"op":"status"},
+    {"op":"getContext"}
+  ]
+}

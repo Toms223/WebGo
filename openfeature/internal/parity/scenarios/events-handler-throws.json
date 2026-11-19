@@ -1,0 +1,21 @@
+{
+  "id": "events-handler-throws",
+  "requirements": ["5.2.5"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hA","throws":true},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hB"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"hC","throws":true},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"hD"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hE","throws":true},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"hF","throws":true},
+    {"op":"emit","provider":"p","event":"PROVIDER_READY"},
+    {"op":"status"}
+  ]
+}

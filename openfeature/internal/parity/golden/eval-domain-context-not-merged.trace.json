@@ -1,0 +1,17 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"setContext"},
+{"kind":"return","op":"setContext"},
+{"i":2,"kind":"step","op":"setContext"},
+{"kind":"log","level":"debug","msg":"Unable to find context for 'd'."},
+{"kind":"return","op":"setContext"},
+{"i":3,"kind":"step","op":"evaluate"},
+{"context":{"b":2},"defaultValue":true,"domain":"d","flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"q","stage":"before"},
+{"args":["f",true,{"b":2}],"call":"resolveBooleanEvaluation","kind":"provider","p":"q"},
+{"context":{"b":2},"defaultValue":true,"details":{"flagKey":"f","flagMetadata":{},"reason":"DEFAULT","value":true},"domain":"d","flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"q","stage":"after"},
+{"context":{"b":2},"defaultValue":true,"details":{"flagKey":"f","flagMetadata":{},"reason":"DEFAULT","value":true},"domain":"d","flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"q","stage":"finally"},
+{"details":{"flagKey":"f","flagMetadata":{},"reason":"DEFAULT","value":true},"kind":"result"},
+{"i":4,"kind":"step","op":"track"},
+{"kind":"log","level":"debug","msg":"Provider does not support the track function; will no-op."}
+]

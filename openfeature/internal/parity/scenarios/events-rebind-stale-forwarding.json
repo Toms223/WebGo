@@ -1,0 +1,31 @@
+{
+  "id": "events-rebind-stale-forwarding",
+  "requirements": ["5.1.2"],
+  "deviation": "D3",
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "events": true
+    },
+    "q": {
+      "runsOn": "client",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"client:x","event":"PROVIDER_STALE","handler":"hX"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_STALE","handler":"hD"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"hA"},
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"setProvider","domain":"x","provider":"p"},
+    {"op":"emit","provider":"p","event":"PROVIDER_STALE","details":{"message":"from p"}},
+    {"op":"emit","provider":"q","event":"PROVIDER_STALE","details":{"message":"from q"}},
+    {"op":"status","domain":"d"},
+    {"op":"status","domain":"x"},
+    {"op":"addHandler","target":"client:y","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hY"},
+    {"op":"setProvider","provider":"q"},
+    {"op":"setProvider","domain":"y","provider":"p"},
+    {"op":"emit","provider":"p","event":"PROVIDER_CONFIGURATION_CHANGED","details":{"flagsChanged":["f"]}}
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "ctx-domain-with-provider",
+  "requirements": ["3.2.2.3","3.2.2.4","3.2.4.2","5.3.4.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    },
+    "q": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_RECONCILING","handler":"cd-recon"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_CONTEXT_CHANGED","handler":"cd-ctx"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_ERROR","handler":"cd-error"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_READY","handler":"cd-ready"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_RECONCILING","handler":"c-recon"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONTEXT_CHANGED","handler":"c-ctx"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"c-error"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"c-ready"},
+    {"op":"setContext","context":{"targetingKey":"g"}},
+    {"op":"setContext","domain":"d","context":{"targetingKey":"dd"}},
+    {"op":"status","domain":"d"},
+    {"op":"status"},
+    {"op":"getContext","domain":"d"},
+    {"op":"getContext"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true,"domain":"d"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true}
+  ]
+}

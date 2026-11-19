@@ -1,0 +1,16 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"evaluate"},
+{"context":{},"defaultValue":true,"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"before"},
+{"args":["f",true,{}],"call":"resolveBooleanEvaluation","kind":"provider","p":"p"},
+{"context":{},"defaultValue":true,"error":{"code":"PARSE_ERROR","message":"bad json"},"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"error"},
+{"context":{},"defaultValue":true,"details":{"errorCode":"PARSE_ERROR","errorMessage":"bad json","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":true},"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"finally"},
+{"details":{"errorCode":"PARSE_ERROR","errorMessage":"bad json","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":true},"kind":"result"},
+{"i":2,"kind":"step","op":"evaluate"},
+{"args":["f","s",{}],"call":"resolveStringEvaluation","kind":"provider","p":"p"},
+{"details":{"errorCode":"GENERAL","errorMessage":"plain error","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":"s"},"kind":"result"},
+{"i":3,"kind":"step","op":"evaluate"},
+{"args":["f",3,{}],"call":"resolveNumberEvaluation","kind":"provider","p":"p"},
+{"details":{"errorCode":"PROVIDER_NOT_READY","errorMessage":"later","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":3},"kind":"result"}
+]

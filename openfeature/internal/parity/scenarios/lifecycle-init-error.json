@@ -1,0 +1,30 @@
+{
+  "id": "lifecycle-init-error",
+  "requirements": ["1.7.1","2.4.2","5.3.2"],
+  "partial": "D10",
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "initialize": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"api-stale"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"api-config"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"c-ready"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"c-error"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_STALE","handler":"c-stale"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"c-config"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONTEXT_CHANGED","handler":"c-ctx"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_RECONCILING","handler":"c-recon"},
+    {"op":"setProviderAndWait","provider":"p"},
+    {"op":"status"},
+    {"op":"reject","target":"p.initialize#1","error":{"code":"GENERAL","message":"init failed"}},
+    {"op":"status"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true}
+  ]
+}

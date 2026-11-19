@@ -34,7 +34,6 @@ type computeDemo struct{ app.Compo }
 func ComputeDemo() app.UI { return &computeDemo{} }
 
 func (d *computeDemo) OnMount(ctx app.Context) {
-	accent.OnAction(ctx)
 	accent.Load(ctx).Set()
 }
 

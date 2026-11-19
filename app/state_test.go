@@ -871,3 +871,101 @@ type copyTester struct {
 	slice      []int
 	mapp       map[string]int
 }
+
+type fakeStateReceiver struct{ inner *int }
+
+func (r *fakeStateReceiver) target() any { return r.inner }
+
+func TestStoreValuePrefersAStateReceiver(t *testing.T) {
+	var n int
+	r := &fakeStateReceiver{inner: &n}
+
+	require.NoError(t, storeValue(r, 42))
+	require.Equal(t, 42, n)
+}
+
+func TestStoreValueUsesAPlainPointerAsIs(t *testing.T) {
+	var n int
+
+	require.NoError(t, storeValue(&n, 42))
+	require.Equal(t, 42, n)
+	require.Error(t, storeValue(&n, "text"))
+}
+
+func TestHandleBroadcastReachesAModelObserver(t *testing.T) {
+	if IsServer {
+		t.Skip()
+	}
+
+	stateName := uuid.NewString()
+	e1 := newTestEngine()
+	e2 := newTestEngine()
+
+	compo2 := &hello{}
+	require.NoError(t, e2.Load(compo2))
+	ctx2 := e2.nodes.context(e2.baseContext(), compo2)
+	m, err := NewModel(stateName, &counterState{})
+	require.NoError(t, err)
+	broadcasted := false
+	m.Observe(ctx2).WithBroadcast().OnChange(func() { broadcasted = true })
+
+	compo1 := &hello{}
+	require.NoError(t, e1.Load(compo1))
+	ctx1 := e1.nodes.context(e1.baseContext(), compo1)
+	ctx1.SetState(stateName, counterState{N: 7}).Broadcast()
+	e1.ConsumeAll()
+
+	for !broadcasted {
+		e2.ConsumeAll()
+		time.Sleep(time.Millisecond * 5)
+	}
+	require.Equal(t, 7, m.State().N)
+}
+
+type counterState struct{ N int }
+
+func TestSetStateEmitsAnActionNamedAfterTheKey(t *testing.T) {
+	e := newTestEngine()
+	compo := &hello{}
+	require.NoError(t, e.Load(compo))
+	ctx := e.nodes.context(e.baseContext(), compo)
+
+	var got any
+	ctx.Handle("k", func(_ Context, a Action) { got = a.Value })
+
+	v := &counterState{N: 1}
+	ctx.SetState("k", v)
+	e.ConsumeAll()
+	require.Same(t, v, got)
+}
+
+func TestSetStateWithNoHandlerIsQuiet(t *testing.T) {
+	e := newTestEngine()
+	compo := &hello{}
+	require.NoError(t, e.Load(compo))
+	ctx := e.nodes.context(e.baseContext(), compo)
+
+	require.NotPanics(t, func() {
+		ctx.SetState("k", 1)
+		e.ConsumeAll()
+	})
+	_, ok := e.actions.handlers["k"]
+	require.False(t, ok)
+}
+
+func TestModelSetReachesAGlobalActionHandler(t *testing.T) {
+	e := newTestEngine()
+	compo := &hello{}
+	require.NoError(t, e.Load(compo))
+	ctx := e.nodes.context(e.baseContext(), compo)
+
+	var got any
+	e.actions.Handle("model-key", e.body, true, func(_ Context, a Action) { got = a.Value })
+
+	m, err := NewModel("model-key", &counterState{})
+	require.NoError(t, err)
+	m.Load(ctx).Apply(func(_ Context, s *counterState) *counterState { s.N = 5; return s }).Set()
+	e.ConsumeAll()
+
+	require.Same(t, m.State(), got)
+}

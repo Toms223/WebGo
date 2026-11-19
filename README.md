@@ -14,12 +14,12 @@
   </a>
 </p>
 
-WebGo is built from [go-app](https://github.com/maxence-charriere/go-app), whose code it now includes as the `app` package (MIT, see [NOTICE](NOTICE)), and adds four things: a `Page` that pairs a layout with a view model, a `Base` that swaps pages by route, a `ViewModel` that holds the state a page reads and writes, and typed styling, which writes CSS as Go values that the compiler checks. A markdown renderer is included for pages whose content is written as text.
+WebGo is built from [go-app](https://github.com/maxence-charriere/go-app), whose code it now includes as the `app` package (MIT, see [NOTICE](NOTICE)), and adds three things: `Screen`, `Shell` and `Model` in `app`, which pair a layout with typed state, swap screens by route and load data before a screen draws; typed styling, which writes CSS as Go values that the compiler checks; and a markdown renderer for pages whose content is written as text.
 
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset=".github/readme/features-dark.svg">
-  <img alt="The four parts of WebGo: Page, Base, ViewModel and typed styling" src=".github/readme/features-light.svg">
+  <img alt="The four parts of WebGo: Screen, Shell, Model and typed styling" src=".github/readme/features-light.svg">
 </picture>
 </p>
 
@@ -30,10 +30,10 @@ The docs site is itself a WebGo app — it is built with the packages it documen
 ## Install
 
 ```sh
-go get github.com/Toms223/WebGo@v0.1.0
+go get github.com/Toms223/WebGo@v1.0.0
 ```
 
-`v0.1.0` is the current release. It brings go-app into WebGo as the `app` package, adds typed `Style(rules...)` on elements, folds `serve.Handler` into `app.Handler`, and fixes app updates. `v0.0.3` added `ViewModel.State()`; `v0.0.4` made `Base` work when the app is mounted under a subpath rather than at the domain root; `v0.0.5` renamed the `model` package to `data`. `v0.0.1` and `v0.0.2` do not work and should not be used.
+`v1.0.0` is the current release. It moves the `page` and `data` packages into `app` as `Screen`, `Shell` and `Model` and deletes them, adds `OnLoad`, which lets any component load its data before it draws, adds the `script` package for typed ES modules, the `openfeature` package for feature flags, and the `dev` package for running a site locally. There is no `v0.2.0`: the work planned for it ships in `v1.0.0`. `v0.1.0` brought go-app into WebGo as the `app` package, added typed `Style(rules...)` on elements, folded `serve.Handler` into `app.Handler`, and fixed app updates. `v0.0.3` added `ViewModel.State()`; `v0.0.4` made `Base` work when the app is mounted under a subpath rather than at the domain root; `v0.0.5` renamed the `model` package to `data`. `v0.0.1` and `v0.0.2` do not work and should not be used.
 
 Everything comes from this one module: `app` is `github.com/Toms223/WebGo/app`.
 
@@ -80,11 +80,11 @@ go run .
 
 | Type | What it does |
 | --- | --- |
-| `page.Page[T]` | One screen: a path, a `Layout[T]`, and a `ViewModel[T]` |
-| `page.Base[U]` | The app shell: holds the screens and switches between them on navigation |
-| `data.ViewModel[T]` | Typed state under a key, readable from a layout and writable through an action |
-| `page.Layout[T]` | Interface you implement: loading, error and drawn states |
-| `page.Screen` | Interface a screen satisfies; `*Page[T]` already does |
+| `app.Screen[T]` | One screen: a path, a `Layout[T]`, a `Model[T]`, and an optional loader that runs before it draws |
+| `app.Shell[U]` | The app shell: holds the screens and switches between them on navigation; `app.Serve` registers their routes |
+| `app.Model[T]` | Typed state under a key; every `Set` notifies observers and fires an action named after the key |
+| `app.Layout[T]` | Interface you implement: loading, error and drawn states |
+| `app.Routed` | Interface a screen satisfies; `*Screen[T]` already does |
 | `style.Rule` | One CSS rule as a Go value: a selector, its properties, its pseudo-class, `@media`, `@container` and `@supports` blocks, and nested rules |
 | `style.Item` | Anything a stylesheet holds: a `Rule`, `KeyframesRule`, `FontFaceRule`, `PropertyRule`, `ImportRule`, `LayerRule` or `LayerOrderRule` |
 | `style.KeyframesRule` and friends | `@keyframes`, `@font-face`, `@property`, `@import` and `@layer` as Go values, made by `Keyframes`, `FontFace`, `Property`, `Import`, `Layer` and `LayerOrder` |
@@ -99,27 +99,26 @@ go run .
 | `supports.Query` | `@supports` conditions: `Property`, `Selector`, `FontFormat`, `FontTech`, `Not`, `And`, `Or` |
 | `markdown` | Renders a markdown string into `[]app.UI` |
 
-### Building a page
+### Building a screen
 
-`Page` is built by chaining. The first error is latched, so later calls become no-ops and `Err()` reports what went wrong.
+`Screen` is built by chaining. The first error is latched, so later calls become no-ops and `Err()` reports what went wrong.
 
 ```go
-state := &AppState{}
-vm, err := data.NewViewModel("app", state)
+model, err := app.NewModel("app", &AppState{})
 if err != nil {
 	log.Fatal(err)
 }
 
-p := page.NewPage[AppState]("/settings").
+settings := app.NewScreen[AppState]("/settings").
 	WithLayout(&settingsLayout{}).
-	WithModel(vm)
+	WithModel(model)
 
-if err := p.Err(); err != nil {
+if err := settings.Err(); err != nil {
 	log.Fatal(err)
 }
 ```
 
-`NewPage("")` serves `/` — `Route()` always returns a leading slash.
+`NewScreen("")` serves `/`: `Route()` always returns a leading slash.
 
 ### Implementing a layout
 
@@ -127,71 +126,90 @@ if err := p.Err(); err != nil {
 type Layout[T any] interface {
 	Loading() app.UI
 	Error(error) app.UI
-	Draw(m *data.ViewModel[T]) app.HTMLDiv
+	Draw(m *app.Model[T]) app.HTMLDiv
 	Body(...app.UI) Layout[T]
 }
 ```
 
-`Loading` shows before mount, `Error` shows when `Err()` is non-nil, and `Draw` renders the real thing. `Page` picks between the three for you, so a layout never needs its own conditionals.
+`Loading` shows while the screen's loader runs, `Error` shows for a builder error or a failed load, and `Draw` renders the real thing. A screen without a loader also shows `Loading` for one frame, while its empty load comes back. The screen picks between the three for you, so a layout never needs its own conditionals.
 
-> `Body` is called on **every** render of a `Base`. Store what it hands you by replacing the previous content, not by appending to it, or the slice grows without bound.
+> `Body` is called on **every** render of a `Shell`. Store what it hands you by replacing the previous content, not by appending to it, or the slice grows without bound.
+>
+> Screens are built once and reused, so `Draw` must keep the `Body` content at the same position under the same elements on every render. Vary what is around it, not where it is, or the engine panics with "component is already mounted".
 
-### Reading and writing state
-
-State flows one way: something writes through an action, the layout reads it back in `Draw`.
+### Loading before a screen draws
 
 ```go
-func (s *screen) load(ctx app.Context) {
-	ctx.Async(func() {
+settings := app.NewScreen[AppState]("/settings").
+	WithLayout(&settingsLayout{}).
+	WithModel(model).
+	WithLoader(func(ctx app.Context, st *AppState) error {
 		user, err := fetchUser()
-		ctx.Dispatch(func(ctx app.Context) {
-			s.model.Load(ctx).Apply(func(ctx app.Context, st *AppState) *AppState {
-				st.User, st.Err = user, err
-				return st
-			}).Set()
-		})
+		st.User = user
+		return err
 	})
+```
+
+The loader runs in the browser, on its own goroutine, after the screen mounts and again after it is updated. It fills a shallow copy of the state. While it runs, the layout's `Loading` shows. When it returns `nil`, the copy becomes the model's state through `Set`; when it returns an error, the layout's `Error` shows. It never runs on the server.
+
+> The copy is shallow: slices and maps inside the state are shared with the model. Assign a new slice or map in the loader; appending to the existing one is a data race.
+
+Any component can do the same by implementing `OnLoad(app.Context) error`, with optional `Loading() app.UI` and `Error(error) app.UI`. The wait is per component: siblings and ancestors keep rendering.
+
+### Writing state
+
+State flows one way: something writes through the model, the layout reads it back in `Draw`.
+
+```go
+func (l *layout) rename(ctx app.Context, e app.Event) {
+	model.Load(ctx).Apply(func(ctx app.Context, st *AppState) *AppState {
+		st.User = ctx.JSSrc().Get("value").String()
+		return st
+	}).Set()
 }
 
-func (l *layout) Draw(m *data.ViewModel[AppState]) app.HTMLDiv {
+func (l *layout) Draw(m *app.Model[AppState]) app.HTMLDiv {
 	return app.Div().Text(m.State().User)
 }
 ```
 
-> Return the **same pointer** your `Apply` verb was given. Returning a new one detaches the model from the observer registered at mount, and the page silently stops updating.
-
-`Set()` writes to the state store and notifies observers. `SetAndPersist(v)` also persists it. A verb that returns `nil` leaves the state untouched.
+`Set()` writes to the state store, notifies observers and fires an action named after the model's key. `SetAndPersist(v)` also persists it. A verb that returns `nil` leaves the state untouched; one that returns a new pointer replaces it, and observers follow the model, not the pointer.
 
 ### Assembling the shell
 
 ```go
-shell, err := page.NewBase(&appLayout{}, vm, []page.Screen{home, settings})
+func main() {
+	app.Serve(func() *app.Shell[AppState] {
+		home := app.NewScreen[AppState]("/").WithLayout(&homeLayout{}).WithModel(model)
+		settings := app.NewScreen[AppState]("/settings").WithLayout(&settingsLayout{}).WithModel(model)
+		shell, err := app.NewShell(&appLayout{}, model, home, settings)
+		if err != nil {
+			panic(err)
+		}
+		return shell
+	})
+	app.RunWhenOnBrowser()
+
+	http.Handle("/", &app.Handler{Name: "My app"})
+	http.ListenAndServe(":8080", nil)
+}
 ```
 
-`Base.OnNav` matches the current path against each screen's `Route()`, dismounts the previous screen and mounts the new one. If nothing matches, it renders `Error(ErrNoRoute)`.
+`Serve` registers every screen's route. `build` must return new screens, and may return a new layout, on every call: a screen built once outside it and reused fails on the server's second request with "component is already mounted". In the browser the shell is built once and kept across navigations. `Shell.OnNav` matches the current path against each screen's `Route()` and selects the first match. If nothing matches, it renders `Error(ErrNoRoute)`.
 
 ### Mounting under a subpath
 
 Screens always use paths rooted at `/`. They never need to know where the app is served from.
 
-On its first mount, `Base` works out its own mount point by comparing the landing URL against the routes it holds, and stores it. From then on it subtracts that prefix before matching, and puts it back in the address bar after each navigation. So an app whose screens are `/`, `/markdown` and `/state` runs unchanged at `example.com/` and at `example.com/docs/`, and the links it renders stay reloadable and shareable in both.
+The shell reads the mount from `GOAPP_ROOT_PREFIX`, which `app.Handler` sets from its `Resources`: `app.GitHubPages("WebGo")` makes it `/WebGo`, the default makes it `/`. The shell subtracts that prefix before matching and puts it back in the address bar after each navigation. So an app whose screens are `/`, `/markdown` and `/state` runs at `example.com/` and, generated with `app.GitHubPages("docs")`, at `example.com/docs/`.
 
-You only need the mount yourself when building a URL to something that is not a route — a data file, say. If you hold the `Base`, ask it:
-
-```go
-source := shell.BasePath() + "/data/page.md"
-```
-
-From inside a screen, which has no reference to the `Base`, subtract your own route from the current path instead. `Base` fixes the address bar before mounting a screen, so the path is correct by then:
+You only need the mount yourself when building a URL to something that is not a route, a data file, say:
 
 ```go
-func (s *screen) sourceURL(ctx app.Context) string {
-	base := strings.TrimSuffix(ctx.Page().URL().Path, s.Route())
-	return strings.TrimSuffix(base, "/") + "/data/page.md"
-}
+source := strings.TrimSuffix(app.Getenv("GOAPP_ROOT_PREFIX"), "/") + "/data/page.md"
 ```
 
-Nothing reads an environment variable, and no build flag configures it.
+Trim the slash: without a prefix the variable is `/`.
 
 ### Rendering markdown
 
@@ -205,6 +223,25 @@ ui := markdown.RenderMarkdown(source, markdown.Style{
 Returns one `app.UI` per top-level block, or `nil` for empty input. It is a deliberate subset: headings, lists, blockquotes, code blocks, thematic breaks, emphasis, code spans and links. Heading levels 1–2 become `h3` with your `Heading` class, deeper levels become `h4` with `Subheading`.
 
 Links are filtered. Relative paths starting with `/`, anchors, `http://`, `https://` and `mailto:` become anchors carrying `rel="noopener noreferrer"`; everything else — including bare relative links like `guide.md` and protocol-relative `//host` — renders as a plain `span`. Tables and other GitHub extensions are not supported and pass through as text.
+
+### Feature flags
+
+The `openfeature` package is an OpenFeature SDK for the browser. Bind a provider once, then evaluate flags from any component; a failed evaluation returns the default you passed.
+
+```go
+p := memprovider.New(memprovider.Flag{
+	Key:            "new-nav",
+	Variants:       map[string]any{"on": true, "off": false},
+	DefaultVariant: "on",
+})
+if err := openfeature.SetProviderAndWait(p); err != nil {
+	log.Print(err)
+}
+
+on := openfeature.GetClient().Boolean("new-nav", false)
+```
+
+`memprovider` holds flags in memory, `jsprovider` wraps any JavaScript OpenFeature web provider, and `flipt` loads the official Flipt one. See [Feature flags](https://toms223.github.io/WebGo/feature-flags).
 
 ### Errors
 
@@ -228,7 +265,7 @@ The docs cover it on two pages: [Styling](https://toms223.github.io/WebGo/stylin
 - `!important` through `Important()` on a property;
 - `@container` and `@supports` blocks through `Container` and `Supports`;
 - typed bindings: `Bind(style.When(...))` and `Bind(style.Compute(...))` insert, remove or recompute a rule from an action's typed value;
-- `ViewModel.OnAction`, which turns a model's state changes into those actions.
+- every `Set` on an `app.Model` fires an action named after its key, so bindings on that key follow the model's state.
 
 ```go
 package theme
@@ -311,7 +348,28 @@ Build `web/app.wasm` first — the generator does not produce it, and expects it
 
 Because routing happens in the browser, the host must serve `index.html` for unknown extensionless paths. Most static hosts do this by default; GitHub Pages does it via `404.html`.
 
+## Running locally
+
+`dev.RunDevServer` builds the static site into a folder, serves it, and rebuilds when a `.go` file, `go.mod`, `go.sum` or a `web/` asset changes. A build that fails is logged and the last good one keeps being served.
+
+```go
+ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+defer stop()
+err := dev.RunDevServer(ctx, ".dev", "localhost:8000", func(dir string) *exec.Cmd {
+	return exec.Command("go", "run", ".", "-static", dir)
+})
+```
+
+The function you pass returns the command that writes your static site into `dir`, with `dir/web` as the handler's `WebDir`. `app.wasm` is built for you. The [Handler and deployment](https://toms223.github.io/WebGo/deploy#running-locally) page has a full `main`.
+
 ## Running the docs locally
+
+```sh
+cd docs
+go run . dev
+```
+
+Then open http://localhost:8000. It rebuilds when you save. To run it the way it is deployed, behind the container's gateway:
 
 ```sh
 cd docs
@@ -333,11 +391,11 @@ go run . static -o dist --github-pages WebGo
 
 That sets go-app's resource resolver, so the generated HTML points at `/WebGo/app.js`, `/WebGo/web/app.wasm` and so on instead of the domain root.
 
-The flag covers go-app's own assets only. The app's routing needs nothing: `Base` deduces its mount at runtime, so the same source serves correctly from `/` in the container and from `/WebGo/` on Pages, with no build-time switch and no environment variable.
+The same resolver sets `GOAPP_ROOT_PREFIX` to `/WebGo`, and the shell strips it before matching routes. Without the flag it is `/`, so the same source serves from `/` in the container and from `/WebGo/` on Pages.
 
 ## Roadmap to v1
 
-WebGo is becoming its own framework instead of a layer on go-app. Some of what it needs can't be done from outside go-app, so WebGo is taking go-app's code over. Nothing here is released yet: `v0.0.5` is still the current tag.
+WebGo is becoming its own framework instead of a layer on go-app. Some of what it needs can't be done from outside go-app, so WebGo is taking go-app's code over. `v0.1.0` shipped the fork. Everything below is done and ships in `v1.0.0`. `v0.2.0` was going to carry the first half; it was never tagged, because the second half was finished before it went out.
 
 <p align="center">
 <picture>
@@ -351,7 +409,7 @@ The order is: keep what already works, then the new features, then the extras. v
 ### 1. Keep what works
 
 - Copy go-app v11 into this repository with its MIT licence and its tests. After that, WebGo imports nothing from go-app.
-- Move `page`, `data` and `style` into the core.
+- Move `page` and `data` into the core. Done: they are `app.Screen`, `app.Shell` and `app.Model`, and both packages are deleted. `style` stays a sibling package; its dependency direction is already right.
 - Behaviour stays exactly as it is. The existing tests pass, and the docs site builds and runs the same at `/` and under `/WebGo`.
 - Static generation keeps working the way go-app does it now: every registered route is rendered to HTML at build time.
 - This is the one breaking tag. The import path changes, and the release notes say how to update.
@@ -360,12 +418,12 @@ The order is: keep what already works, then the new features, then the extras. v
 
 Each one gets its own design before any code is written.
 
-**Load.** A page can declare a function that has to finish before its screen draws. While it runs, `Base` leaves the current screen up, so navigating never flashes a blank page. If it fails, the layout's `Error` is shown. It also runs at build time, which puts the data in the generated HTML. go-app's `OnPreRender` was meant for this, but it only ever ran on the server. The shape below is a proposal:
+**Load.** Done, browser only, as `OnLoad` on any component. It runs in the browser, on its own goroutine, after `OnMount` and again after `OnUpdate`, and the component is not drawn until it returns. Meanwhile its `Loading()` shows, if it has one; on an error, its `Error(err)`. The wait is per component, so siblings and ancestors keep rendering. A screen gets one with `WithLoader`:
 
 ```go
-page.NewPage[AppState]("/settings").
+app.NewScreen[AppState]("/settings").
 	WithLayout(&settingsLayout{}).
-	WithModel(vm).
+	WithModel(model).
 	WithLoader(func(ctx app.Context, s *AppState) error {
 		user, err := fetchUser()
 		s.User = user
@@ -373,15 +431,15 @@ page.NewPage[AppState]("/settings").
 	})
 ```
 
-One limit: the build has no user. Anything saved in the browser, like whether a sidebar is open, renders in its default state in the generated HTML and flips once WebAssembly starts. `Load` doesn't change that.
+`OnLoad` never runs on the server. Keeping the old screen up while the new one loads is not built yet.
 
-**Scripts.** Declare scripts as local files or CDN URLs. They get a fixed entrypoint shape and a typed contract for the events and actions passed between them and the Go app, much like CSS lets you plug in your own implementations. The contract isn't designed yet.
+**Scripts.** Done, as the `script` package. A module is a Go type that says where its ES module comes from, `script.CDN` or `script.Local`, and what Go gets back from it. List it on `Handler.Imports`, which writes one importmap, and call it from a component with `script.Use`, which returns the typed value and `false` when the module did not load.
 
-**OpenFeature.** An OpenFeature SDK written from scratch in Go that runs in the browser. The official Go one is server-only. You register your own providers with it. Flags are evaluated in the browser at runtime, and at build time only their default values exist.
+**OpenFeature.** Done, as the `openfeature` package: an OpenFeature SDK written from scratch in Go that runs in the browser. The official Go one is server-only. It follows the OpenFeature specification v0.9.0 and is tested against the official Web SDK. You register your own providers with it, or use `memprovider`, `jsprovider` or `flipt`. Flags are evaluated in the browser at runtime, and at build time only their default values exist.
 
 ### 3. Extras
 
-**Dev server.** Once pages stop being served per request, WebGo needs its own way to run locally: a very small HTTP server for the built site, and a folder watcher that rebuilds when a file changes. Serving pages per request is removed only after this exists.
+**Dev server.** Done, as `dev.RunDevServer`: a very small HTTP server for the built site, and a folder watcher that rebuilds when a file changes. Serving pages per request still works in v1; it can only be removed now that this exists.
 
 ### What v1 means
 
@@ -390,8 +448,8 @@ The fork, the core move, `Load`, scripts and OpenFeature all ship. Each one is d
 ## Requirements
 
 - Go matching the version in your `go.mod`
-- `github.com/Toms223/WebGo` v0.1.0 or later
+- `github.com/Toms223/WebGo` v1.0.0 or later
 
 ## License
 
-WebGo is licensed under the [GNU General Public License v3.0](LICENSE). Any project that includes WebGo, extends it or is built on it must also be released as open source under the GPL-3.0 when it is distributed. WebGo DOES NOT treat serving the compiled WebAssembly to a browser as distributing it.
+WebGo is licensed under the [MIT License](LICENSE), so you can use it in any project, open source or not. The go-app code it includes is MIT too; [NOTICE](NOTICE) credits it and the other third-party code.

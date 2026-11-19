@@ -1,0 +1,124 @@
+{
+  "id": "mem-resolution-branches",
+  "requirements": ["2.2.1","2.2.3"],
+  "providers": {
+    "mem": {
+      "memory": {
+        "static-flag": {
+          "variants": {
+            "on": true,
+            "off": false
+          },
+          "defaultVariant": "on"
+        },
+        "off-variant": {
+          "variants": {
+            "on": true,
+            "off": false
+          },
+          "defaultVariant": "off",
+          "disabled": false
+        },
+        "disabled-flag": {
+          "variants": {
+            "a": "A",
+            "b": "B"
+          },
+          "defaultVariant": "a",
+          "disabled": true
+        },
+        "targeted": {
+          "variants": {
+            "gold": "G",
+            "basic": "B"
+          },
+          "defaultVariant": "basic",
+          "contextEvaluator": {
+            "attr": "tier",
+            "map": {
+              "gold": "gold"
+            }
+          }
+        },
+        "targeted-missing": {
+          "variants": {
+            "gold": "G"
+          },
+          "defaultVariant": "gold",
+          "contextEvaluator": {
+            "attr": "tier",
+            "map": {
+              "gold": "ghost"
+            }
+          }
+        },
+        "no-variant": {
+          "variants": {
+            "a": 1
+          },
+          "defaultVariant": "nope"
+        },
+        "empty-variant": {
+          "variants": {
+            "": "empty",
+            "a": "A"
+          },
+          "defaultVariant": ""
+        },
+        "zero": {
+          "variants": {
+            "z": 0
+          },
+          "defaultVariant": "z"
+        },
+        "obj": {
+          "variants": {
+            "o": {
+              "k": [
+                1
+              ]
+            },
+            "n": null
+          },
+          "defaultVariant": "o"
+        },
+        "null-variant": {
+          "variants": {
+            "n": null
+          },
+          "defaultVariant": "n"
+        },
+        "bool-variant": {
+          "variants": {
+            "on": true
+          },
+          "defaultVariant": "on"
+        }
+      }
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"mem"},
+    {"op":"providerMetadata"},
+    {"op":"evaluate","type":"boolean","flag":"static-flag","default":false},
+    {"op":"evaluate","type":"boolean","flag":"off-variant","default":true},
+    {"op":"evaluate","type":"string","flag":"disabled-flag","default":"dflt"},
+    {"op":"evaluate","type":"string","flag":"missing","default":"dflt"},
+    {"op":"evaluate","type":"string","flag":"targeted","default":"x"},
+    {"op":"setContext","context":{"tier":"gold"}},
+    {"op":"evaluate","type":"string","flag":"targeted","default":"x"},
+    {"op":"evaluate","type":"string","flag":"targeted-missing","default":"x"},
+    {"op":"setContext","context":{"tier":1}},
+    {"op":"evaluate","type":"string","flag":"targeted","default":"x"},
+    {"op":"evaluate","type":"number","flag":"no-variant","default":5},
+    {"op":"evaluate","type":"string","flag":"empty-variant","default":"x"},
+    {"op":"evaluate","type":"boolean","flag":"empty-variant","default":true},
+    {"op":"evaluate","type":"number","flag":"zero","default":9},
+    {"op":"evaluate","type":"string","flag":"zero","default":"s"},
+    {"op":"evaluate","type":"object","flag":"obj","default":null},
+    {"op":"evaluate","type":"object","flag":"null-variant","default":{}},
+    {"op":"evaluate","type":"string","flag":"bool-variant","default":"not-bool"},
+    {"op":"evaluate","type":"boolean","flag":"toString","default":false},
+    {"op":"evaluate","type":"boolean","flag":"__proto__","default":false}
+  ]
+}

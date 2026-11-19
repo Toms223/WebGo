@@ -1,0 +1,35 @@
+{
+  "id": "lifecycle-close",
+  "requirements": ["1.6.1"],
+  "partial": "D11",
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onClose": "deferred"
+    },
+    "q": {
+      "runsOn": "client",
+      "onClose": "deferred"
+    },
+    "r": {
+      "runsOn": "client",
+      "onClose": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","domain":"zeta","provider":"q"},
+    {"op":"setProvider","domain":"mid","provider":"r"},
+    {"op":"setProvider","domain":"alpha","provider":"q"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"close"},
+    {"op":"resolve","target":"p.onClose#1"},
+    {"op":"resolve","target":"q.onClose#2"},
+    {"op":"resolve","target":"q.onClose#1"},
+    {"op":"reject","target":"r.onClose#1","error":{"code":"GENERAL","message":"r close"}},
+    {"op":"status"},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"alpha"},
+    {"op":"providerMetadata","domain":"alpha"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true,"domain":"zeta"}
+  ]
+}

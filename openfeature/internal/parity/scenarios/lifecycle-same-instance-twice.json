@@ -1,0 +1,29 @@
+{
+  "id": "lifecycle-same-instance-twice",
+  "requirements": ["1.1.2.2"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "initialize": "deferred",
+      "onClose": "sync"
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"api-stale"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"api-config"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"resolve","target":"p.initialize#1"},
+    {"op":"status"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"status"},
+    {"op":"setProviderAndWait","provider":"p"},
+    {"op":"status"},
+    {"op":"setProvider","provider":"p","domain":"d"},
+    {"op":"setProvider","provider":"p","domain":"d"},
+    {"op":"status","domain":"d"}
+  ]
+}

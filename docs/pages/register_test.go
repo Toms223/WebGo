@@ -28,6 +28,20 @@ func TestEntriesAndScreensAgree(t *testing.T) {
 	}
 }
 
+func TestShellBuilds(t *testing.T) {
+	shell, err := Shell()
+	if err != nil {
+		t.Fatalf("building the shell failed: %v", err)
+	}
+	screens, err := Screens()
+	if err != nil {
+		t.Fatalf("building the screens failed: %v", err)
+	}
+	if len(shell.Screens) != len(screens) {
+		t.Errorf("expected the shell to hold %d screens, got %d", len(screens), len(shell.Screens))
+	}
+}
+
 func TestLandingPageServesRoot(t *testing.T) {
 	screens, err := Screens()
 	if err != nil {
@@ -62,8 +76,8 @@ func TestScreensCoverEveryPage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("building the screens failed: %v", err)
 	}
-	if len(screens) != 17 {
-		t.Fatalf("expected seventeen screens, got %d", len(screens))
+	if len(screens) != 20 {
+		t.Fatalf("expected twenty screens, got %d", len(screens))
 	}
 	routes := map[string]bool{}
 	for _, s := range screens {
@@ -81,7 +95,7 @@ func TestNavigationOrder(t *testing.T) {
 	for _, entry := range Entries() {
 		titles = append(titles, entry.Title)
 	}
-	want := []string{"Getting Started", "Markdown rendering", "Pages, layouts and state", "Styling", "Applying", "Components", "Routing", "State and actions", "Concurrency and the browser", "Handler and deployment", "Testing", "Migrating"}
+	want := []string{"Getting Started", "Markdown rendering", "Pages, layouts and state", "Styling", "Applying", "Scripts", "Feature flags", "Components", "Routing", "State and actions", "Concurrency and the browser", "Handler and deployment", "Testing", "Migrating"}
 	if !slices.Equal(titles, want) {
 		t.Errorf("navigation titles = %q, want %q", titles, want)
 	}

@@ -1,0 +1,22 @@
+{
+  "id": "ctx-on-change-sync-throw",
+  "requirements": ["5.3.4.3"],
+  "deviation": "D2",
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "throw"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"setContext","context":{"targetingKey":"a"}},
+    {"op":"status"},
+    {"op":"setContext","context":{"targetingKey":"b"}},
+    {"op":"status"}
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "id": "events-domain-routing",
+  "requirements": ["5.1.3","5.2.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "events": true
+    },
+    "z": {
+      "runsOn": "client",
+      "events": true
+    },
+    "a": {
+      "runsOn": "client",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_READY","handler":"client:zeta-ready"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_STALE","handler":"client:zeta-stale"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_READY","handler":"client:alpha-ready"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_STALE","handler":"client:alpha-stale"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"client:-ready"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_STALE","handler":"client:-stale"},
+    {"op":"addHandler","target":"client:free","event":"PROVIDER_READY","handler":"client:free-ready"},
+    {"op":"addHandler","target":"client:free","event":"PROVIDER_STALE","handler":"client:free-stale"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"api-stale"},
+    {"op":"setProvider","domain":"zeta","provider":"z"},
+    {"op":"setProvider","domain":"alpha","provider":"a"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"emit","provider":"z","event":"PROVIDER_STALE","details":{"message":"z"}},
+    {"op":"emit","provider":"a","event":"PROVIDER_STALE","details":{"message":"a"}},
+    {"op":"emit","provider":"p","event":"PROVIDER_STALE","details":{"message":"p"}},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"alpha"},
+    {"op":"status","domain":"free"},
+    {"op":"status"}
+  ]
+}

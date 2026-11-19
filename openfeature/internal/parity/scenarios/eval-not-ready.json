@@ -1,0 +1,19 @@
+{
+  "id": "eval-not-ready",
+  "requirements": ["1.7.6"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "initialize": "deferred"
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"addHooks","level":"api","hooks":["h"]},
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true},
+    {"op":"evaluate","type":"object","flag":"f","default":null}
+  ]
+}

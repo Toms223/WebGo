@@ -1,0 +1,23 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"status"},
+{"domain":"d1","kind":"status","status":"READY"},
+{"i":2,"kind":"step","op":"setProvider"},
+{"kind":"log","level":"debug","msg":"Provider is already set, ignoring setProvider call"},
+{"kind":"return","op":"setProvider"},
+{"i":3,"kind":"step","op":"setProvider"},
+{"error":{"code":"GENERAL","message":"Cannot bind domain-scoped provider 'ds' to more than one domain."},"kind":"return","op":"setProvider"},
+{"i":4,"kind":"step","op":"status"},
+{"domain":"d2","kind":"status","status":"NOT_READY"},
+{"i":5,"kind":"step","op":"providerMetadata"},
+{"kind":"metadata","value":{"name":"No-op Provider"},"which":"provider"},
+{"i":6,"kind":"step","op":"setProvider"},
+{"error":{"code":"GENERAL","message":"Cannot bind domain-scoped provider 'ds' to more than one domain."},"kind":"return","op":"setProvider"},
+{"i":7,"kind":"step","op":"status"},
+{"kind":"status","status":"NOT_READY"},
+{"i":8,"kind":"step","op":"setProviderAndWait"},
+{"error":{"code":"GENERAL","message":"Cannot bind domain-scoped provider 'ds' to more than one domain."},"kind":"return","op":"setProviderAndWait"},
+{"i":9,"kind":"step","op":"status"},
+{"domain":"d3","kind":"status","status":"NOT_READY"}
+]

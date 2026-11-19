@@ -127,9 +127,9 @@ func choosing() []app.UI {
 		doc.List(
 			doc.Item(doc.B("A state"), " is for a value that has a current value: the signed-in user, a filter, a cart. A component mounted later can still read it, and it can be persisted and broadcast."),
 			doc.Item(doc.B("An action"), " is for something that happened: a click handled somewhere else, or a request to do work off the UI goroutine. It is not stored, so a component mounted later does not see it."),
-			doc.Item(doc.B("A ViewModel"), ", `data.ViewModel[T]`, is for typed state shared by a page. It binds one key to a `*T`, so components share the pointer instead of each declaring a receiver, and changes go through `Load(ctx).Apply(...).Set()`. Underneath it is `GetState`, `SetState` and `ObserveState`, and `SetAndPersist` is `SetState(...).Persist()`. It is on ", doc.A("/state#model", "Pages, layouts and state"), "."),
+			doc.Item(doc.B("A model"), ", `app.Model[T]`, is for typed state shared by a page. It binds one key to a `*T`, so components share the pointer instead of each declaring a receiver, and changes go through `Load(ctx).Apply(...).Set()`. Underneath it is `GetState`, `SetState` and `ObserveState`, and `SetAndPersist` is `SetState(...).Persist()`. It is on ", doc.A("/state#model", "Pages, layouts and state"), "."),
 		),
-		doc.P("Dynamic styles join the two. `ViewModel.OnAction` observes the model's key and, on each change, creates an action named after the key with the model's `*T` as its value. `style.When` and `style.Compute` bind rules to that name, so the page's CSS follows the state. This is under ", doc.A("/applying#viewmodel-and-onaction", "ViewModel and OnAction"), "."),
+		doc.P("Dynamic styles join the two. Every `SetState`, and so every `Set` or `SetAndPersist` through a model, also fires an action named after the key, with the stored value as its value. `style.When` and `style.Compute` bind rules to that name, so the page's CSS follows the state. This is under ", doc.A("/applying#models-and-actions", "Models and actions"), "."),
 		doc.Note("Action names that dynamic styles are bound to belong to WebGo's style engine. Handle them with `ctx.Handle` in a component, never with `app.Handle`, or one of the two handlers is lost."),
 	}
 }

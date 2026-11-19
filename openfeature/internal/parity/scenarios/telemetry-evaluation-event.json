@@ -1,0 +1,85 @@
+{
+  "id": "telemetry-evaluation-event",
+  "requirements": ["4.4.2"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "string": {
+            "value": "on",
+            "variant": "v-on",
+            "reason": "TARGETING_MATCH",
+            "flagMetadata": {
+              "contextId": "ctx-7",
+              "flagSetId": "set-1",
+              "version": "v3",
+              "other": 1
+            }
+          }
+        },
+        "g": {
+          "object": {
+            "value": {
+              "zeta": 1,
+              "alpha": [
+                true,
+                null
+              ],
+              "mid": {
+                "b": 2,
+                "a": 1
+              }
+            }
+          }
+        },
+        "h": {
+          "number": {
+            "value": 0,
+            "reason": "STATIC",
+            "flagMetadata": {
+              "version": ""
+            }
+          }
+        },
+        "n": {
+          "object": {
+            "value": null,
+            "reason": "STATIC"
+          }
+        },
+        "e": {
+          "boolean": {
+            "errorCode": "FLAG_NOT_FOUND",
+            "errorMessage": "missing",
+            "flagMetadata": {
+              "flagSetId": "set-2"
+            }
+          }
+        },
+        "x": {
+          "boolean": {
+            "errorCode": "PARSE_ERROR"
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "ht": {
+      "telemetry": true
+    }
+  },
+  "steps": [
+    {"op":"addHooks","level":"api","hooks":["ht"]},
+    {"op":"evaluate","type":"string","flag":"f","default":"off"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"string","flag":"f","default":"off"},
+    {"op":"setContext","context":{"targetingKey":"user-1"}},
+    {"op":"evaluate","type":"object","flag":"g","default":{}},
+    {"op":"evaluate","type":"number","flag":"h","default":5},
+    {"op":"evaluate","type":"object","flag":"n","default":{}},
+    {"op":"evaluate","type":"boolean","flag":"e","default":true},
+    {"op":"evaluate","type":"boolean","flag":"x","default":false}
+  ]
+}

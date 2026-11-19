@@ -36,7 +36,7 @@ func New() (*topic.Screen, error) {
 func intro() []app.UI {
 	return []app.UI{
 		doc.P("This page covers the `app` package's component model: how a WebGo program runs on the server and in the browser, how a component describes its markup, how it reacts to events, and when it renders again. This is go-app's component model, now WebGo's `app` package."),
-		doc.P("Choosing which component a URL shows is on the ", doc.A("/routing", "Routing"), " page. WebGo's `page.Page`, `page.Base` and `data.ViewModel`, built on these components, are on the ", doc.A("/state", "Pages, layouts and state"), " page."),
+		doc.P("Choosing which component a URL shows is on the ", doc.A("/routing", "Routing"), " page. `app.Screen`, `app.Shell` and `app.Model`, built on these components, are on the ", doc.A("/state", "Pages, layouts and state"), " page."),
 	}
 }
 

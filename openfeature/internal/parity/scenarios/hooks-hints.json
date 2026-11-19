@@ -1,0 +1,31 @@
+{
+  "id": "hooks-hints",
+  "requirements": ["4.2.2.1","4.5.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "string": {
+            "value": "s"
+          }
+        },
+        "g": {
+          "string": {
+            "throw": {
+              "message": "g"
+            }
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"string","flag":"f","default":"d","hooks":["h"],"hints":{"k":"v","n":1,"nested":{"a":[true]}}},
+    {"op":"evaluate","type":"string","flag":"g","default":"d","hooks":["h"],"hints":{"k":"w"}}
+  ]
+}

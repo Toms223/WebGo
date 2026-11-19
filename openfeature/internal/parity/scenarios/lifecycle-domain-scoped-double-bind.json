@@ -1,0 +1,22 @@
+{
+  "id": "lifecycle-domain-scoped-double-bind",
+  "requirements": ["1.1.2.2"],
+  "providers": {
+    "ds": {
+      "runsOn": "client",
+      "domainScoped": true
+    }
+  },
+  "steps": [
+    {"op":"setProvider","domain":"d1","provider":"ds"},
+    {"op":"status","domain":"d1"},
+    {"op":"setProvider","domain":"d1","provider":"ds"},
+    {"op":"setProvider","domain":"d2","provider":"ds"},
+    {"op":"status","domain":"d2"},
+    {"op":"providerMetadata","domain":"d2"},
+    {"op":"setProvider","provider":"ds"},
+    {"op":"status"},
+    {"op":"setProviderAndWait","domain":"d3","provider":"ds"},
+    {"op":"status","domain":"d3"}
+  ]
+}

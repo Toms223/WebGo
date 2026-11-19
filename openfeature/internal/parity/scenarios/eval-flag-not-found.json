@@ -1,0 +1,33 @@
+{
+  "id": "eval-flag-not-found",
+  "requirements": ["1.4.8","1.4.9"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "string": {
+            "errorCode": "FLAG_NOT_FOUND",
+            "errorMessage": "nope"
+          }
+        }
+      }
+    },
+    "mem": {
+      "memory": {
+        "known": {
+          "variants": {
+            "on": "yes"
+          },
+          "defaultVariant": "on"
+        }
+      }
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"setProvider","domain":"m","provider":"mem"},
+    {"op":"evaluate","type":"string","flag":"f","default":"dflt"},
+    {"op":"evaluate","type":"string","flag":"absent","default":"dflt","domain":"m"}
+  ]
+}

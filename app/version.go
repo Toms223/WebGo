@@ -36,6 +36,9 @@ func (h *Handler) contentVersion() string {
 	for _, k := range keys {
 		write(k + "=" + h.Env[k])
 	}
+	for _, e := range h.imports {
+		write(e.name + "=" + e.url)
+	}
 	for _, l := range h.Libraries {
 		path, styles := l.Styles()
 		write(path + "\n" + styles)
@@ -43,7 +46,7 @@ func (h *Handler) contentVersion() string {
 
 	files := slices.Concat(
 		[]string{"/web/app.wasm", h.Image, h.Icon.Default, h.Icon.Large, h.Icon.Maskable, h.Icon.SVG},
-		h.styleLinks, h.Scripts, h.Fonts, h.CacheableResources,
+		h.styleLinks, h.Scripts, h.importURLs(), h.Fonts, h.CacheableResources,
 	)
 	webDir := h.webDir()
 	for _, p := range files {

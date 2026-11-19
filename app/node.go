@@ -214,7 +214,18 @@ func (m nodeManager) mountComponent(ctx Context, depth uint, v Composer) (UI, er
 		ctx.Dispatch(preRenderer.OnPreRender)
 	}
 
-	if mounter, ok := v.(Mounter); ok && IsClient {
+	if _, ok := v.(Loader); ok && isClient {
+		state := v.load()
+		state.loading = true
+		state.loads++
+		state.err = nil
+		ctx.Dispatch(func(ctx Context) {
+			if mounter, ok := v.(Mounter); ok {
+				mounter.OnMount(ctx)
+			}
+			startLoad(ctx, v)
+		})
+	} else if mounter, ok := v.(Mounter); ok && isClient {
 		ctx.Dispatch(mounter.OnMount)
 	}
 
@@ -238,11 +249,40 @@ func (m nodeManager) mountComponent(ctx Context, depth uint, v Composer) (UI, er
 }
 
 func (m nodeManager) renderComponent(v Composer) (UI, error) {
-	rendering := FilterUIElems(v.Render())
+	rendering := FilterUIElems(m.renderOrHold(v))
 	if len(rendering) == 0 {
 		return nil, errors.New("render method does not returns a text, html element, or component")
 	}
 	return rendering[0], nil
+}
+
+func (m nodeManager) renderOrHold(v Composer) UI {
+	state := v.load()
+	if state.loading {
+		if r, ok := v.(LoadingRenderer); ok {
+			return r.Loading()
+		}
+		return Text("")
+	}
+	if r, ok := v.(LoadErrorRenderer); ok && state.err != nil {
+		return r.Error(state.err)
+	}
+	return v.Render()
+}
+
+func startLoad(ctx Context, v Composer) {
+	state := v.load()
+	n := state.loads
+	ctx.Async(func() {
+		err := v.(Loader).OnLoad(ctx)
+		ctx.Dispatch(func(Context) {
+			if state.loads != n {
+				return
+			}
+			state.loading = false
+			state.err = err
+		})
+	})
 }
 
 func (m nodeManager) mountRawHTML(depth uint, v *raw) (UI, error) {
@@ -516,12 +556,28 @@ func (m nodeManager) updateComponent(ctx Context, v, new Composer) (UI, error) {
 	}
 
 	ctx.removeComponentUpdate(v)
+	if _, ok := v.(Loader); ok && isClient {
+		state := v.load()
+		state.loading = true
+		state.loads++
+		state.err = nil
+		startLoad(ctx, v)
+		return m.redrawComponentRoot(m.context(ctx, v), v)
+	}
 	return m.UpdateComponentRoot(ctx, v)
 }
 
 func (m nodeManager) UpdateComponentRoot(ctx Context, v Composer) (UI, error) {
 	ctx = m.context(ctx, v)
 
+	root := v.root()
+	if v.load().loading && root != nil {
+		return v, nil
+	}
+	return m.redrawComponentRoot(ctx, v)
+}
+
+func (m nodeManager) redrawComponentRoot(ctx Context, v Composer) (UI, error) {
 	root := v.root()
 	newRoot, err := m.renderComponent(v)
 	if err != nil {

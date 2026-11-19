@@ -1,0 +1,16 @@
+[
+{"i":0,"kind":"step","op":"addHooks"},
+{"i":1,"kind":"step","op":"setProvider"},
+{"args":[{}],"call":"initialize","kind":"provider","p":"p"},
+{"kind":"return","op":"setProvider"},
+{"i":2,"kind":"step","op":"evaluate"},
+{"context":{},"defaultValue":true,"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"before"},
+{"context":{},"defaultValue":true,"error":{"code":"PROVIDER_NOT_READY","message":"provider has not yet initialized"},"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"error"},
+{"context":{},"defaultValue":true,"details":{"errorCode":"PROVIDER_NOT_READY","errorMessage":"provider has not yet initialized","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":true},"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"finally"},
+{"details":{"errorCode":"PROVIDER_NOT_READY","errorMessage":"provider has not yet initialized","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":true},"kind":"result"},
+{"i":3,"kind":"step","op":"evaluate"},
+{"context":{},"defaultValue":null,"flagKey":"f","flagValueType":"object","h":"h","kind":"hook","providerName":"p","stage":"before"},
+{"context":{},"defaultValue":null,"error":{"code":"PROVIDER_NOT_READY","message":"provider has not yet initialized"},"flagKey":"f","flagValueType":"object","h":"h","kind":"hook","providerName":"p","stage":"error"},
+{"context":{},"defaultValue":null,"details":{"errorCode":"PROVIDER_NOT_READY","errorMessage":"provider has not yet initialized","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":null},"flagKey":"f","flagValueType":"object","h":"h","kind":"hook","providerName":"p","stage":"finally"},
+{"details":{"errorCode":"PROVIDER_NOT_READY","errorMessage":"provider has not yet initialized","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":null},"kind":"result"}
+]

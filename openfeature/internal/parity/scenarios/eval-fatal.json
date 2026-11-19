@@ -1,0 +1,18 @@
+{
+  "id": "eval-fatal",
+  "requirements": ["1.7.7"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "initialize": "deferred"
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"reject","target":"p.initialize#1","error":{"code":"PROVIDER_FATAL","message":"gone"}},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true,"hooks":["h"]}
+  ]
+}

@@ -22,6 +22,7 @@ type Composer interface {
 	parent() UI
 	root() UI
 	setRoot(UI) Composer
+	load() *loadState
 }
 
 // Initializer is implemented by components that set up fields before their
@@ -41,6 +42,23 @@ type PreRenderer interface {
 // OnMount runs only in the browser, on the UI goroutine.
 type Mounter interface {
 	OnMount(Context)
+}
+
+// Loader is implemented by components that fetch data before they are drawn.
+// OnLoad runs in the browser, on its own goroutine, after OnMount and again
+// after OnUpdate. The component is not rendered until it returns.
+type Loader interface {
+	OnLoad(Context) error
+}
+
+// LoadingRenderer is implemented by Loaders that show a placeholder while loading.
+type LoadingRenderer interface {
+	Loading() UI
+}
+
+// LoadErrorRenderer is implemented by Loaders that show a view when OnLoad fails.
+type LoadErrorRenderer interface {
+	Error(error) UI
 }
 
 // Dismounter is implemented by components that clean up when they leave the
@@ -96,6 +114,17 @@ type Compo struct {
 	ref           Composer
 	parentElement UI
 	rootElement   UI
+	loadState     loadState
+}
+
+type loadState struct {
+	loading bool
+	loads   int
+	err     error
+}
+
+func (c *Compo) load() *loadState {
+	return &c.loadState
 }
 
 // JSValue returns the DOM node of the component's root element, or a null value

@@ -28,10 +28,6 @@ type whenDemo struct{ app.Compo }
 
 func WhenDemo() app.UI { return &whenDemo{} }
 
-func (d *whenDemo) OnMount(ctx app.Context) {
-	compact.OnAction(ctx)
-}
-
 func (d *whenDemo) Render() app.UI {
 	return app.Div().Body(
 		app.Label().Body(

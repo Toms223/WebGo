@@ -70,6 +70,7 @@ type Icon struct {
 		doc.H("Head resources"),
 		doc.Go(`Styles             []Stylesheet
 Scripts            []string
+Imports            []Module
 Fonts              []string
 Preconnect         []string
 CacheableResources []string
@@ -77,6 +78,7 @@ RawHeaders         []string`),
 		doc.List(
 			doc.Item("`Styles` is covered under ", doc.A("/applying#handler-and-build", "Handler and Build"), "."),
 			doc.Item("`Scripts` become `<script src>` tags after `app.js`, in order. An entry may end with `defer`, `async`, `crossorigin` or `crossorigin=<value>` after a space: `\"/web/chart.js defer\"`."),
+			doc.Item("`Imports` are ES modules loaded through one importmap before `app.wasm` starts, under ", doc.A("/scripts", "Scripts"), "."),
 			doc.Item("`Fonts` become `<link rel=\"preload\" as=\"font\">` tags whose `type` is `font/` plus the file extension."),
 			doc.Item("`Preconnect` entries become `<link rel=\"preconnect\">` tags, one per origin."),
 			doc.Item("`CacheableResources` are extra files the service worker stores for offline use. Icons, fonts, stylesheets, scripts and `app.wasm` are stored already."),

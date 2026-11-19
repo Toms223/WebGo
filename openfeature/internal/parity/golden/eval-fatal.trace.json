@@ -1,0 +1,12 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"args":[{}],"call":"initialize","kind":"provider","p":"p"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"reject"},
+{"args":["gone"],"kind":"log","level":"error","msg":"Error during provider initialization:"},
+{"i":2,"kind":"step","op":"evaluate"},
+{"context":{},"defaultValue":true,"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"before"},
+{"context":{},"defaultValue":true,"error":{"code":"PROVIDER_FATAL","message":"provider is in an irrecoverable error state"},"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"error"},
+{"context":{},"defaultValue":true,"details":{"errorCode":"PROVIDER_FATAL","errorMessage":"provider is in an irrecoverable error state","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":true},"flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"p","stage":"finally"},
+{"details":{"errorCode":"PROVIDER_FATAL","errorMessage":"provider is in an irrecoverable error state","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":true},"kind":"result"}
+]

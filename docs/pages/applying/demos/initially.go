@@ -30,10 +30,6 @@ type initiallyDemo struct{ app.Compo }
 
 func InitiallyDemo() app.UI { return &initiallyDemo{} }
 
-func (d *initiallyDemo) OnMount(ctx app.Context) {
-	banner.OnAction(ctx)
-}
-
 func (d *initiallyDemo) Render() app.UI {
 	label := "Hide the banner"
 	if banner.State().Hidden {

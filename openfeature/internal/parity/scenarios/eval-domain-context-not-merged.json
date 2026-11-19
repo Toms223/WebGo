@@ -1,0 +1,19 @@
+{
+  "id": "eval-domain-context-not-merged",
+  "requirements": ["3.2.2.3"],
+  "providers": {
+    "q": {
+      "runsOn": "client"
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"setContext","context":{"targetingKey":"g","a":1}},
+    {"op":"setContext","domain":"d","context":{"b":2}},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true,"domain":"d","hooks":["h"]},
+    {"op":"track","domain":"d","name":"n"}
+  ]
+}

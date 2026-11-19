@@ -1,0 +1,31 @@
+{
+  "id": "ctx-on-change-rejects",
+  "requirements": ["3.2.4.1","5.3.4.2","5.3.4.3"],
+  "partial": "D10",
+  "providers": {
+    "p": {
+      "name": "rej",
+      "runsOn": "client",
+      "onContextChange": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_RECONCILING","handler":"c-recon"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONTEXT_CHANGED","handler":"c-ctx"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"c-error"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"c-ready"},
+    {"op":"setContext","context":{"targetingKey":"a"}},
+    {"op":"status"},
+    {"op":"reject","target":"p.onContextChange#1","error":{"code":"GENERAL","message":"nope"}},
+    {"op":"status"},
+    {"op":"setContext","context":{"targetingKey":"b"}},
+    {"op":"reject","target":"p.onContextChange#2","error":{"message":"plain"}},
+    {"op":"status"},
+    {"op":"getContext"}
+  ]
+}

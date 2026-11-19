@@ -17,12 +17,12 @@ func New() (*topic.Screen, error) {
 		Key:   "state",
 		Path:  Route,
 		Title: Title,
-		Lead:  "Screens are a Layout and a ViewModel, hosted by a Base that switches them by route.",
+		Lead:  "Screens are a Layout and a Model, hosted by a Shell that switches them by route.",
 		Intro: intro,
 		Sections: []topic.Section{
-			{Title: "Page", Body: pageSection},
-			{Title: "Base", Body: baseSection},
-			{Title: "Layout and Screen interfaces", Body: interfaces},
+			{Title: "Screen", Body: screenSection},
+			{Title: "Shell", Body: shellSection},
+			{Title: "Layout and Routed", Body: interfaces},
 			{Title: "Model", Body: model},
 			{Title: "Errors", Body: errorsSection},
 			{Title: "Example: fetching and displaying state", Body: fetchingExample},
@@ -33,105 +33,104 @@ func New() (*topic.Screen, error) {
 
 func intro() []app.UI {
 	return []app.UI{
-		doc.P("The `page` package builds screens out of a `Layout` and a `data.ViewModel`, and assembles them under a `Base` component that switches between screens by route. The `data` package holds the state each screen reads and writes."),
-		doc.P("This page covers `github.com/Toms223/WebGo` from `v0.1.0` onward. `v0.0.5` renamed the `model` package to `data`, and `v0.1.0` moved `app` into WebGo; the state API is otherwise unchanged."),
+		doc.P("A `Screen` draws a `Model` through a `Layout` and can load its data before it draws. A `Shell` is the root of the app: it holds every screen under one shared layout and model, and draws the screen whose route matches the URL. A `Model` holds the typed state screens read and write."),
+		doc.P("Since `v1.0.0`, all of them live in the `app` package, next to `Compo`, and the engine routes to them. Up to `v0.1.0` they lived in the `page` and `data` packages, which are deleted."),
 	}
 }
 
-func pageSection() []app.UI {
+func screenSection() []app.UI {
 	return []app.UI{
-		doc.Go(`type Page[T any] struct {
+		doc.Go(`type Screen[T any] struct {
+	app.Compo
 	Path string
 	// unexported fields
 }
 
-func NewPage[T any](path string) *Page[T]`),
-		doc.P("`NewPage` creates a page for the given path. It has no layout and no model yet, so it is not usable until both are set."),
-		doc.H("Building a page"),
-		doc.P("`Page` is built by chaining calls. Each call returns the same `*Page[T]`, so the order of calls does not matter:"),
+func NewScreen[T any](path string) *Screen[T]`),
+		doc.P("A `Screen` is a component served at a route. `NewScreen` creates one for the given path. It has no layout and no model yet, so it is not usable until both are set."),
+		doc.H("Building a screen"),
+		doc.P("A screen is built by chaining calls. Each call returns the same `*Screen[T]`:"),
 		doc.Go(`package main
 
-import (
-	"github.com/Toms223/WebGo/data"
-	"github.com/Toms223/WebGo/page"
-	"github.com/Toms223/WebGo/app"
-)
+import "github.com/Toms223/WebGo/app"
 
-type AppState struct {
+type Settings struct {
 	User string
 }
 
-type shellLayout struct {
-	body []app.UI
-}
+type settingsLayout struct{}
 
-func (s *shellLayout) Loading() app.UI {
+func (settingsLayout) Loading() app.UI {
 	return app.Text("loading")
 }
 
-func (s *shellLayout) Error(err error) app.UI {
+func (settingsLayout) Error(err error) app.UI {
 	return app.Text(err.Error())
 }
 
-func (s *shellLayout) Draw(m *data.ViewModel[AppState]) app.HTMLDiv {
-	return app.Div().Body(s.body...)
+func (settingsLayout) Draw(m *app.Model[Settings]) app.HTMLDiv {
+	return app.Div().Text(m.State().User)
 }
 
-func (s *shellLayout) Body(content ...app.UI) page.Layout[AppState] {
-	s.body = content
-	return s
+func (l settingsLayout) Body(...app.UI) app.Layout[Settings] {
+	return l
 }
 
 func main() {
-	vm, err := data.NewViewModel("app-state", &AppState{})
+	model, err := app.NewModel("settings", &Settings{})
 	if err != nil {
 		panic(err)
 	}
-	layout := &shellLayout{}
 
-	p := page.NewPage[AppState]("/settings").
-		WithLayout(layout).
-		WithModel(vm)
+	s := app.NewScreen[Settings]("/settings").
+		WithLayout(settingsLayout{}).
+		WithModel(model)
 
-	if p.Err() != nil {
-		panic(p.Err())
+	if s.Err() != nil {
+		panic(s.Err())
 	}
 }`),
 		doc.List(
-			doc.Item("`At(path string) *Page[T]` sets the page's path."),
-			doc.Item("`WithLayout(layout Layout[T]) *Page[T]` sets the page's layout. Passing `nil` sets the page's error to `ErrNoLayout`."),
-			doc.Item("`WithModel(m *data.ViewModel[T]) *Page[T]` sets the page's model. Passing `nil` sets the page's error to `ErrNoModel`."),
+			doc.Item("`At(path string) *Screen[T]` sets the screen's path."),
+			doc.Item("`WithLayout(layout Layout[T]) *Screen[T]` sets the layout. Passing `nil` latches `ErrNoLayout`."),
+			doc.Item("`WithModel(m *Model[T]) *Screen[T]` sets the model. Passing `nil` latches `ErrNoModel`."),
+			doc.Item("`WithLoader(loader func(ctx Context, state *T) error) *Screen[T]` sets the function `OnLoad` runs. See ", doc.A("#onload", "OnLoad"), " below."),
 		),
 		doc.H("Error latching"),
-		doc.P("A `Page` keeps a single internal error. The first builder call that produces an error (`WithLayout(nil)` or `WithModel(nil)`) stores that error. Once an error is stored, every later builder call (`At`, `WithLayout`, `WithModel`) returns immediately without changing anything on the page — not the path, not the layout, not the model."),
-		doc.P("This means only the first failure in a chain is kept. If both `WithLayout(nil)` and `WithModel(nil)` appear in the same chain, the page's error is whichever of the two ran first."),
+		doc.P("A `Screen` keeps a single builder error. The first call that produces one (`WithLayout(nil)` or `WithModel(nil)`) stores it. From then on every builder call (`At`, `WithLayout`, `WithModel`, `WithLoader`) returns at once without changing anything. Only the first failure in a chain is kept."),
 		doc.H("Err"),
-		doc.Go(`func (p *Page[T]) Err() error`),
-		doc.P("`Err` returns the page's error, if one was latched by a builder call. If no error was latched, it checks the page's current layout and model:"),
+		doc.Go(`func (s *Screen[T]) Err() error`),
+		doc.P("`Err` returns the latched error, if there is one. Otherwise it returns `ErrNoLayout` when the layout is `nil`, then `ErrNoModel` when the model is `nil`, and `nil` when both are set."),
+		doc.H("Route and CompoID"),
+		doc.Go(`func (s *Screen[T]) Route() string
+func (s *Screen[T]) CompoID() string`),
+		doc.P("`Route` returns the path with exactly one leading slash: `\"\"` becomes `/`, `\"settings\"` becomes `/settings`, and `\"/settings\"` stays `/settings`."),
+		doc.P("`CompoID` returns the route. When a parent renders a screen of the same Go type on another route, the mounted one is dismounted and the new one mounted, instead of copying fields across. That is how a `Shell` switches between two screens of the same type cleanly. See ", doc.A("/components#lifecycle", "Lifecycle"), "."),
+		doc.H("OnMount"),
+		doc.Go(`func (s *Screen[T]) OnMount(ctx app.Context)`),
+		doc.P("If `Err()` reports an error, `OnMount` stores it and returns, so `Render` shows it. Otherwise it reads the model's state from the store with `Get` and observes the model while the screen is mounted, so every `Set` on the model renders the screen again."),
+		doc.H("OnLoad"),
+		doc.Go(`func (s *Screen[T]) OnLoad(ctx app.Context) error`),
+		doc.P("A `Screen` is an `app.Loader`: the engine runs `OnLoad` in the browser, on its own goroutine, after `OnMount` and again after each `OnUpdate`, and holds the screen's render until it returns. The load phase is described under ", doc.A("/components#lifecycle", "Lifecycle"), "."),
 		doc.List(
-			doc.Item("If the layout is `nil`, it returns `ErrNoLayout`."),
-			doc.Item("Otherwise, if the model is `nil`, it returns `ErrNoModel`."),
-			doc.Item("Otherwise, it returns `nil`."),
+			doc.Item("Without a loader, or with a builder error, `OnLoad` returns `nil` at once."),
+			doc.Item("Otherwise it makes a shallow copy of the model's state and calls the loader with a pointer to the copy."),
+			doc.Item("When the loader returns `nil`, the copy is written back on the UI goroutine through `Load(ctx).Apply(...).Set()`, so observers re-render and the model's action fires. The screen then draws with the new state."),
+			doc.Item("When the loader returns an error, the copy is dropped, the model is unchanged, and the screen draws `Error(err)`. The next load, after a remount or an `OnUpdate`, tries again."),
+			doc.Item("`OnLoad` never runs on the server."),
 		),
-		doc.H("Route"),
-		doc.Go(`func (p *Page[T]) Route() string`),
-		doc.P("`Route` returns the page's path with exactly one leading slash, regardless of what was passed to `NewPage` or `At`. A path of `\"\"` becomes `/`, `\"settings\"` becomes `/settings`, and `\"/settings\"` stays `/settings`."),
-		doc.H("OnMount, OnDismount, Mounted"),
-		doc.Go(`func (p *Page[T]) OnMount(ctx app.Context) Screen
-func (p *Page[T]) OnDismount() Screen
-func (p *Page[T]) Mounted() bool`),
-		doc.P("`OnMount` is called by a `Base` when the page becomes the selected screen. If `Err()` reports an error, `OnMount` stores that error and returns the page without mounting it — it does not panic, even if the layout or model is missing. Otherwise, it reads the model's current state from `ctx`, starts observing the model for further state changes for as long as the page reports itself as mounted, and marks the page mounted."),
-		doc.P("`OnDismount` marks the page as not mounted and returns it."),
-		doc.P("`Mounted` reports whether the page is currently mounted."),
-		doc.H("Content"),
-		doc.Go(`func (p *Page[T]) Content() app.UI`),
-		doc.P("`Content` renders the page:"),
+		doc.Note("The copy is shallow. Slices and maps inside the state are shared with the model. A loader that assigns a new slice or map is safe; one that appends to or writes into the existing one races with the UI goroutine."),
+		doc.P("A screen always implements `Loader`, so even without a loader it shows `Loading()` for the moment its empty load takes to come back through the UI goroutine."),
+		doc.H("Loading, Error and Render"),
+		doc.Go(`func (s *Screen[T]) Loading() app.UI
+func (s *Screen[T]) Error(err error) app.UI
+func (s *Screen[T]) Render() app.UI`),
 		doc.List(
-			doc.Item("If the page has no layout, `Content` panics with `ErrNoLayout`."),
-			doc.Item("Otherwise, if `Err()` reports an error, `Content` returns `layout.Error(err)`."),
-			doc.Item("Otherwise, if the page is not mounted, `Content` returns `layout.Loading()`."),
-			doc.Item("Otherwise, `Content` returns `layout.Draw(model)`."),
+			doc.Item("While `OnLoad` runs, the engine draws `Loading()`, which is the layout's `Loading()`."),
+			doc.Item("After a failed load, it draws `Error(err)`, which is the layout's `Error(err)`."),
+			doc.Item("Otherwise it draws `Render()`. `Render` returns the layout's `Error(err)` when `Err()` reports an error, and `layout.Draw(model)` otherwise."),
+			doc.Item("All three panic with `ErrNoLayout` when the screen has no layout."),
 		),
-		doc.P("Only `*Page[T]` (a pointer) satisfies the `Screen` interface described below. A `Page[T]` value does not."),
+		doc.P("Only `*Screen[T]` (a pointer) is a component. A screen does not need a `Shell`: it can be rendered as a child of any component, as the ", doc.A("#example-fetching-and-displaying-state", "example"), " below does."),
 	}
 }

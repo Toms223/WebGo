@@ -1,6 +1,7 @@
 package topic
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -45,7 +46,7 @@ func (r *Rail) OnResize(ctx app.Context) {
 
 func (r *Rail) Render() app.UI {
 	if r.wide {
-		return app.Nav().Style(theme.Rail).Aria("label", "Sections").Body(r.panel()...)
+		return app.Nav().Style(theme.Rail).Aria("label", "Sections").Body(append(r.panel(), r.stamp())...)
 	}
 	classes := []app.ClassRule{theme.Rail}
 	if r.open {
@@ -64,6 +65,14 @@ func (r *Rail) Render() app.UI {
 		body = append(body, app.Div().ID(railPanel).Style(theme.RailPanel).Body(r.panel()...))
 	}
 	return app.Nav().Style(classes...).Aria("label", "Sections").Body(body...)
+}
+
+func (r *Rail) stamp() app.UI {
+	return app.P().Style(theme.RailStamp).Body(
+		app.Span().Text("Section"),
+		app.Span().Style(theme.RailStampNumber).Text(fmt.Sprintf("%02d", r.Active+1)),
+		app.Span().Text("of "+fmt.Sprintf("%02d", len(r.Sections))),
+	)
 }
 
 func (r *Rail) panel() []app.UI {

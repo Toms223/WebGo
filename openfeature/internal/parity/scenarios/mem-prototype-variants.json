@@ -1,0 +1,36 @@
+{
+  "id": "mem-prototype-variants",
+  "requirements": ["2.2.1","2.2.3"],
+  "providers": {
+    "mem": {
+      "memory": {
+        "to-string": {"variants": {"on": true}, "defaultVariant": "toString"},
+        "constructor": {"variants": {"on": "A"}, "defaultVariant": "constructor"},
+        "targeted": {"variants": {"x": "X"}, "defaultVariant": "x", "contextEvaluator": {"attr": "tier", "map": {"gold": "hasOwnProperty"}}},
+        "proto": {"variants": {"on": true}, "defaultVariant": "__proto__"},
+        "own-to-string": {"variants": {"toString": "T"}, "defaultVariant": "toString"},
+        "own-proto": {"variants": {"__proto__": 5}, "defaultVariant": "__proto__"},
+        "no-variants": {"defaultVariant": "on"},
+        "no-variants-proto": {"defaultVariant": "__proto__"}
+      }
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"mem"},
+    {"op":"evaluate","type":"boolean","flag":"to-string","default":false},
+    {"op":"evaluate","type":"object","flag":"to-string","default":{}},
+    {"op":"evaluate","type":"string","flag":"constructor","default":"d"},
+    {"op":"evaluate","type":"string","flag":"targeted","default":"d"},
+    {"op":"setContext","context":{"tier":"gold"}},
+    {"op":"evaluate","type":"string","flag":"targeted","default":"d"},
+    {"op":"evaluate","type":"object","flag":"proto","default":{"k":1}},
+    {"op":"evaluate","type":"object","flag":"proto","default":null},
+    {"op":"evaluate","type":"boolean","flag":"proto","default":true},
+    {"op":"evaluate","type":"string","flag":"proto","default":"d"},
+    {"op":"evaluate","type":"number","flag":"proto","default":1},
+    {"op":"evaluate","type":"string","flag":"own-to-string","default":"d"},
+    {"op":"evaluate","type":"number","flag":"own-proto","default":1},
+    {"op":"evaluate","type":"boolean","flag":"no-variants","default":true},
+    {"op":"evaluate","type":"object","flag":"no-variants-proto","default":{}}
+  ]
+}

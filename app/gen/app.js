@@ -14,6 +14,8 @@ const goappEnv = {{.Env}};
 const goappLoadingLabel = "{{.LoadingLabel}}";
 const goappWasmContentLength = "{{.WasmContentLength}}";
 const goappWasmContentLengthHeader = "{{.WasmContentLengthHeader}}";
+const goappImports = {{.Imports}};
+window.goappModules = {};
 
 let goappServiceWorkerRegistration;
 let deferredPrompt = null;
@@ -191,6 +193,16 @@ function goappKeepBodyClean() {
   return () => mutationObserver.disconnect();
 }
 
+async function goappImportModules() {
+  await Promise.all(goappImports.map(async (name) => {
+    try {
+      window.goappModules[name] = await import(name);
+    } catch (err) {
+      console.error("goapp import failed: ", name, err);
+    }
+  }));
+}
+
 async function goappInitWebAssembly() {
   const loader = document.getElementById("app-wasm-loader");
 
@@ -216,12 +228,14 @@ async function goappInitWebAssembly() {
     };
     showProgress(0);
 
+    const modules = goappImportModules();
     const go = new Go();
     const wasm = await instantiateStreaming(
       fetchWithProgress("{{.Wasm}}", showProgress),
       go.importObject
     );
 
+    await modules;
     go.run(wasm.instance);
     loader.remove();
   } catch (err) {

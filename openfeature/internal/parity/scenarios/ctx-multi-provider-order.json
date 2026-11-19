@@ -1,0 +1,69 @@
+{
+  "id": "ctx-multi-provider-order",
+  "requirements": ["3.2.4.1","5.3.4.1","5.3.4.2"],
+  "partial": "D10",
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "deferred"
+    },
+    "z": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    },
+    "m": {
+      "runsOn": "client",
+      "onContextChange": "deferred"
+    },
+    "a": {
+      "runsOn": "client"
+    },
+    "b": {
+      "runsOn": "client",
+      "onContextChange": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"setProvider","domain":"zeta","provider":"z"},
+    {"op":"setProvider","domain":"mid","provider":"m"},
+    {"op":"setProvider","domain":"alpha","provider":"a"},
+    {"op":"setProvider","domain":"beta","provider":"b"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_RECONCILING","handler":"ca-recon"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_CONTEXT_CHANGED","handler":"ca-ctx"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_ERROR","handler":"ca-error"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_READY","handler":"ca-ready"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_RECONCILING","handler":"cz-recon"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_CONTEXT_CHANGED","handler":"cz-ctx"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_ERROR","handler":"cz-error"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_READY","handler":"cz-ready"},
+    {"op":"addHandler","target":"client:mid","event":"PROVIDER_RECONCILING","handler":"cm-recon"},
+    {"op":"addHandler","target":"client:mid","event":"PROVIDER_CONTEXT_CHANGED","handler":"cm-ctx"},
+    {"op":"addHandler","target":"client:mid","event":"PROVIDER_ERROR","handler":"cm-error"},
+    {"op":"addHandler","target":"client:mid","event":"PROVIDER_READY","handler":"cm-ready"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_RECONCILING","handler":"c-recon"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONTEXT_CHANGED","handler":"c-ctx"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"c-error"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"c-ready"},
+    {"op":"addHandler","target":"client:beta","event":"PROVIDER_RECONCILING","handler":"cb-recon"},
+    {"op":"addHandler","target":"client:beta","event":"PROVIDER_CONTEXT_CHANGED","handler":"cb-ctx"},
+    {"op":"addHandler","target":"client:beta","event":"PROVIDER_ERROR","handler":"cb-error"},
+    {"op":"addHandler","target":"client:beta","event":"PROVIDER_READY","handler":"cb-ready"},
+    {"op":"setContext","context":{"targetingKey":"x"}},
+    {"op":"status"},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"mid"},
+    {"op":"status","domain":"alpha"},
+    {"op":"status","domain":"beta"},
+    {"op":"resolve","target":"m.onContextChange#1"},
+    {"op":"status","domain":"mid"},
+    {"op":"reject","target":"b.onContextChange#1","error":{"code":"GENERAL","message":"b failed"}},
+    {"op":"status","domain":"beta"},
+    {"op":"resolve","target":"p.onContextChange#1"},
+    {"op":"status"}
+  ]
+}

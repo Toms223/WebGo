@@ -1,6 +1,7 @@
 package base
 
 import (
+	"net/url"
 	"regexp"
 	"slices"
 	"strings"
@@ -9,7 +10,6 @@ import (
 	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/Toms223/WebGo/page"
 )
 
 var entries = []nav.Entry{
@@ -18,27 +18,17 @@ var entries = []nav.Entry{
 }
 
 type stubScreen struct {
-	route   string
-	mounted bool
+	app.Compo
+	route string
 }
 
-func (s *stubScreen) Content() app.UI {
+func (s *stubScreen) Render() app.UI {
 	return app.Div().Class("stub").Text(s.route)
 }
 
 func (s *stubScreen) Route() string { return s.route }
 
-func (s *stubScreen) OnMount(ctx app.Context) page.Screen {
-	s.mounted = true
-	return s
-}
-
-func (s *stubScreen) OnDismount() page.Screen {
-	s.mounted = false
-	return s
-}
-
-func (s *stubScreen) Mounted() bool { return s.mounted }
+func (s *stubScreen) CompoID() string { return s.route }
 
 type contextHost struct {
 	app.Compo
@@ -69,6 +59,22 @@ func captureContext(t *testing.T) (app.Context, app.TestEngine) {
 		t.Fatal("the context host was never updated, so no Context was captured")
 	}
 	return ctx, engine
+}
+
+func mountShell(t *testing.T, route string) (*app.Shell[State], app.Context, app.TestEngine) {
+	t.Helper()
+	shellPage, err := New(entries, []app.Routed{&stubScreen{route: route}})
+	if err != nil {
+		t.Fatalf("building the shell failed: %v", err)
+	}
+	ctx, engine := captureContext(t)
+	ctx.Page().ReplaceURL(&url.URL{Path: route})
+	shellPage.OnNav(ctx)
+	if err := engine.Load(shellPage); err != nil {
+		t.Fatalf("mounting the shell failed: %v", err)
+	}
+	engine.ConsumeAll()
+	return shellPage, ctx, engine
 }
 
 func elementFor(html, tag, text string) string {
@@ -122,51 +128,26 @@ func TestLayoutBodyReplacesRatherThanAppends(t *testing.T) {
 
 func TestErrorStateIsRendered(t *testing.T) {
 	layout := NewLayout(entries)
-	out := app.HTMLString(layout.Error(page.ErrNoRoute))
-	if !strings.Contains(out, page.ErrNoRoute.Error()) {
+	out := app.HTMLString(layout.Error(app.ErrNoRoute))
+	if !strings.Contains(out, app.ErrNoRoute.Error()) {
 		t.Errorf("expected the error to be described, got %s", out)
 	}
 }
 
 func TestBaseMountsAndRendersWithoutPanicking(t *testing.T) {
-	shellPage, err := New(entries, []page.Screen{&stubScreen{route: "/"}})
-	if err != nil {
-		t.Fatalf("building the base failed: %v", err)
-	}
+	shellPage, _, _ := mountShell(t, "/start")
 
-	ctx, _ := captureContext(t)
-	if panicked := func() (panicked bool) {
-		defer func() {
-			if recover() != nil {
-				panicked = true
-			}
-		}()
-		shellPage.OnMount(ctx)
-		return false
-	}(); panicked {
-		t.Fatal("expected mounting the base not to panic")
+	out := app.HTMLString(shellPage)
+	if !strings.Contains(out, `class="side-nav"`) {
+		t.Errorf("expected the layout's navigation in the shell, got %s", out)
 	}
-
-	out := app.HTMLString(shellPage.Render())
-	if strings.Contains(out, "shell-loading") {
-		t.Errorf("expected the shell to have progressed past its loading state, got %s", out)
-	}
-	if !mainContent.MatchString(out) {
-		t.Errorf("expected the mounted shell's main content wrapper, got %s", out)
-	}
-	if !strings.Contains(out, `class="stub"`) {
-		t.Errorf("expected the selected screen's content inside the shell, got %s", out)
+	if !strings.Contains(out, `<div class="stub">/start</div>`) {
+		t.Errorf("expected the selected screen's text inside the shell, got %s", out)
 	}
 }
 
 func TestActivateUpdatesRenderedNavigationHighlight(t *testing.T) {
-	shellPage, err := New(entries, []page.Screen{&stubScreen{route: "/markdown"}})
-	if err != nil {
-		t.Fatalf("building the base failed: %v", err)
-	}
-
-	ctx, _ := captureContext(t)
-	shellPage.OnMount(ctx)
+	shellPage, ctx, _ := mountShell(t, "/markdown")
 	Activate(ctx, "/markdown")
 
 	out := app.HTMLString(shellPage.Render())
@@ -375,4 +356,45 @@ func TestDrawRendersTheLandingShellForHome(t *testing.T) {
 	if strings.Contains(out, `<aside`) {
 		t.Errorf("expected no sidebar on the landing page, got %s", out)
 	}
+}
+
+func TestLayoutKeepsMainAtTheSameChildIndexInEveryVariant(t *testing.T) {
+	layout := NewLayout(entries)
+	layout.Body(app.Div().Class("content").Text("body"))
+	viewModel, err := newShellModel("shell-main-index")
+	if err != nil {
+		t.Fatalf("building the shell model failed: %v", err)
+	}
+
+	viewModel.State().Active = HomeRoute
+	landing := rootChildIndex(app.HTMLString(layout.Draw(viewModel)), "main")
+	viewModel.State().Active = entries[0].Route
+	sidebar := rootChildIndex(app.HTMLString(layout.Draw(viewModel)), "main")
+
+	if landing < 0 || landing != sidebar {
+		t.Errorf("expected <main> at the same child index of the root, got %d on the landing and %d on a docs page", landing, sidebar)
+	}
+}
+
+var tagPattern = regexp.MustCompile(`<(/?)([a-z0-9]+)[^>]*?(/?)>`)
+
+func rootChildIndex(html, tag string) int {
+	depth, index := 0, -1
+	for _, m := range tagPattern.FindAllStringSubmatch(html, -1) {
+		closing, name, selfClosing := m[1] == "/", m[2], m[3] == "/"
+		if closing {
+			depth--
+			continue
+		}
+		if depth == 1 {
+			index++
+			if name == tag {
+				return index
+			}
+		}
+		if !selfClosing && !slices.Contains([]string{"br", "hr", "img", "input", "link", "meta"}, name) {
+			depth++
+		}
+	}
+	return -1
 }

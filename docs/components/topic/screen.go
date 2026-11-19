@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/Toms223/WebGo/app"
-	"github.com/Toms223/WebGo/data"
-	"github.com/Toms223/WebGo/page"
 )
 
 const (
@@ -31,8 +29,8 @@ type Config struct {
 }
 
 type Screen struct {
-	*page.Page[State]
-	model      *data.ViewModel[State]
+	*app.Screen[State]
+	model      *app.Model[State]
 	layout     *Layout
 	title      string
 	navigate   func(app.Context, *url.URL)
@@ -40,19 +38,19 @@ type Screen struct {
 }
 
 func New(cfg Config) (*Screen, error) {
-	viewModel, err := data.NewViewModel(cfg.Key, &State{})
+	viewModel, err := app.NewModel(cfg.Key, &State{})
 	if err != nil {
 		return nil, err
 	}
 	layout := NewLayout(cfg)
-	built := page.NewPage[State](cfg.Path).
+	built := app.NewScreen[State](cfg.Path).
 		WithLayout(layout).
 		WithModel(viewModel)
 	if err := built.Err(); err != nil {
 		return nil, err
 	}
 	screen := &Screen{
-		Page:       built,
+		Screen:     built,
 		model:      viewModel,
 		layout:     layout,
 		title:      cfg.Title,
@@ -71,14 +69,14 @@ func (s *Screen) Sections() []string {
 	return slugs
 }
 
-func (s *Screen) OnMount(ctx app.Context) page.Screen {
-	s.Page.OnMount(ctx)
+func (s *Screen) OnMount(ctx app.Context) {
+	s.Screen.OnMount(ctx)
 	if s.onActivate != nil {
 		s.onActivate(ctx, s.Route())
 	}
 	s.heading(ctx)
 	if len(s.layout.sections) == 0 {
-		return s
+		return
 	}
 	fragment := ctx.Page().URL().Fragment
 	at, known := s.layout.find(fragment)
@@ -86,7 +84,6 @@ func (s *Screen) OnMount(ctx app.Context) page.Screen {
 	if known {
 		reveal(ctx, target(s.layout.sections[at], fragment), false)
 	}
-	return s
 }
 
 func (s *Screen) OnNav(ctx app.Context) {

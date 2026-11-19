@@ -1,0 +1,12 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"track"},
+{"args":["click",{},{"value":2}],"call":"track","kind":"provider","p":"p"},
+{"args":["p track throw"],"kind":"log","level":"debug","msg":"Error recording tracking event."},
+{"i":2,"kind":"step","op":"status"},
+{"kind":"status","status":"READY"},
+{"i":3,"kind":"step","op":"track"},
+{"args":["again",{},{}],"call":"track","kind":"provider","p":"p"},
+{"args":["p track throw"],"kind":"log","level":"debug","msg":"Error recording tracking event."}
+]

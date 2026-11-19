@@ -1,0 +1,13 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":2,"kind":"step","op":"evaluate"},
+{"args":["f","dflt",{}],"call":"resolveStringEvaluation","kind":"provider","p":"p"},
+{"details":{"errorCode":"FLAG_NOT_FOUND","errorMessage":"nope","flagKey":"f","flagMetadata":{},"reason":"ERROR","value":"dflt"},"kind":"result"},
+{"i":3,"kind":"step","op":"evaluate"},
+{"kind":"log","level":"debug","msg":"Unable to find context for 'm'."},
+{"kind":"log","level":"debug","msg":"no flag found with key absent"},
+{"details":{"errorCode":"FLAG_NOT_FOUND","errorMessage":"no flag found with key absent","flagKey":"absent","flagMetadata":{},"reason":"ERROR","value":"dflt"},"kind":"result"}
+]

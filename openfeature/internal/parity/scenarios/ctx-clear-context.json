@@ -1,0 +1,29 @@
+{
+  "id": "ctx-clear-context",
+  "requirements": ["3.2.2.3","3.2.4.2"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    },
+    "q": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"setContext","context":{"targetingKey":"g"}},
+    {"op":"setContext","domain":"d","context":{"targetingKey":"dd"}},
+    {"op":"setContext","domain":"loose","context":{"targetingKey":"l"}},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"hA"},
+    {"op":"clearContext","domain":"d"},
+    {"op":"getContext","domain":"d"},
+    {"op":"clearContext","domain":"loose"},
+    {"op":"getContext","domain":"loose"},
+    {"op":"clearContext"},
+    {"op":"getContext"},
+    {"op":"getContext","domain":"d"}
+  ]
+}

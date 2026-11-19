@@ -42,7 +42,7 @@ func TestStylesBuild(t *testing.T) {
 		t.Fatalf("theme.css was not written: %v", err)
 	}
 	for _, want := range []string{
-		"@import url(\"https://fonts.googleapis.com/css2?family=Archivo",
+		"@import url(\"https://fonts.googleapis.com/css2?family=Anton",
 		"@layer base, components;",
 		"@layer base {",
 		"@keyframes pulse {",
@@ -151,10 +151,10 @@ func TestStatusRulesPulse(t *testing.T) {
 }
 
 func TestForcedPalettesAreTheDynamicStyle(t *testing.T) {
-	if want := "--ground: #17161C;"; !strings.Contains(ForceDark.CSS(), want) {
+	if want := "--ground: #16151B;"; !strings.Contains(ForceDark.CSS(), want) {
 		t.Errorf("ForceDark lacks %q:\n%s", want, ForceDark.CSS())
 	}
-	if want := "--ground: #F4F0E8;"; !strings.Contains(ForceLight.CSS(), want) {
+	if want := "--ground: #F7F2E6;"; !strings.Contains(ForceLight.CSS(), want) {
 		t.Errorf("ForceLight lacks %q:\n%s", want, ForceLight.CSS())
 	}
 	want := style.Dynamic(append([]style.Item{ForceDark, ForceLight}, applying.Dynamic()...)...)
@@ -190,12 +190,12 @@ func TestNoClassLiteralsInLayouts(t *testing.T) {
 func TestDarkPaletteKeepsStructureVisible(t *testing.T) {
 	css := Root.CSS()
 	for _, want := range []string{
-		"--line: #9791AE;",
-		"--shadow-ink: #4A4760;",
-		"--focus: #F3F0EA;",
+		"--line: #CFC8DA;",
+		"--shadow-ink: #C8127C;",
+		"--focus: #FFE600;",
 		"--mint: #1F6B52;",
-		"--line: #15131A;",
-		"--focus: #15131A;",
+		"--line: #1B1A24;",
+		"--focus: #2C4FA8;",
 	} {
 		if !strings.Contains(css, want) {
 			t.Errorf("Root lacks %q:\n%s", want, css)

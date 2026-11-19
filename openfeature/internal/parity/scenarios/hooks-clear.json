@@ -1,0 +1,33 @@
+{
+  "id": "hooks-clear",
+  "requirements": ["4.4.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "boolean": {
+            "value": true
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "hApi": {},
+    "hClient": {},
+    "hOther": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHooks","level":"api","hooks":["hApi"]},
+    {"op":"addHooks","level":"client:","hooks":["hClient"]},
+    {"op":"addHooks","level":"client:other","hooks":["hOther"]},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false},
+    {"op":"clearHooks","level":"client:"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false},
+    {"op":"clearHooks","level":"api"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false,"domain":"other"}
+  ]
+}

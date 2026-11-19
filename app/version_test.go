@@ -15,7 +15,7 @@ func versionHandler(t *testing.T, dir string) *Handler {
 			t.Fatal(err)
 		}
 	}
-	for name, content := range map[string]string{"a.js": "1", "f.woff2": "1"} {
+	for name, content := range map[string]string{"a.js": "1", "f.woff2": "1", "m.js": "1"} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(content), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -27,6 +27,7 @@ func versionHandler(t *testing.T, dir string) *Handler {
 		Icon:    Icon{Default: "/web/icon.png"},
 		Styles:  []Stylesheet{testSheet("/web/site.css")},
 		WebDir:  dir,
+		Imports: []Module{testModule{testSource{"m", "/web/m.js", nil}}},
 	}
 }
 
@@ -58,6 +59,10 @@ func TestDefaultVersionTracksContent(t *testing.T) {
 		"relative script":  func(dir string, _ *Handler) { write(dir, "a.js", "2") },
 		"attributed font":  func(dir string, _ *Handler) { write(dir, "f.woff2", "2") },
 		"internal urls":    func(_ string, h *Handler) { h.InternalURLs = []string{"https://x"} },
+		"module bytes":     func(dir string, _ *Handler) { write(dir, "m.js", "2") },
+		"module url": func(_ string, h *Handler) {
+			h.Imports = []Module{testModule{testSource{"m", "https://esm.sh/m@1.0.0", nil}}}
+		},
 	}
 	for name, change := range changes {
 		dir := t.TempDir()

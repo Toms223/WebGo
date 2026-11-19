@@ -1,0 +1,25 @@
+{
+  "id": "events-api-replay-per-provider",
+  "requirements": ["5.3.3"],
+  "providers": {
+    "p": {
+      "runsOn": "client"
+    },
+    "q": {
+      "runsOn": "client",
+      "initialize": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","domain":"zeta","provider":"p"},
+    {"op":"setProvider","domain":"mid","provider":"q"},
+    {"op":"setProvider","domain":"alpha","provider":"p"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hA"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_READY","handler":"hZ"},
+    {"op":"addHandler","target":"client:mid","event":"PROVIDER_READY","handler":"hM"},
+    {"op":"addHandler","target":"client:free","event":"PROVIDER_READY","handler":"hF"},
+    {"op":"resolve","target":"q.initialize#1"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hB"}
+  ]
+}

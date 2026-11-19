@@ -1,0 +1,13 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"evaluate"},
+{"args":["f",false,{}],"call":"resolveBooleanEvaluation","kind":"provider","p":"p"},
+{"details":{"flagKey":"f","flagMetadata":{},"value":true},"kind":"result"},
+{"i":2,"kind":"step","op":"evaluate"},
+{"args":["g","",{}],"call":"resolveStringEvaluation","kind":"provider","p":"p"},
+{"details":{"flagKey":"g","flagMetadata":{},"value":"s","variant":"v"},"kind":"result"},
+{"i":3,"kind":"step","op":"evaluate"},
+{"args":["h",0,{}],"call":"resolveNumberEvaluation","kind":"provider","p":"p"},
+{"details":{"flagKey":"h","flagMetadata":{},"reason":"CUSTOM_REASON","value":3},"kind":"result"}
+]

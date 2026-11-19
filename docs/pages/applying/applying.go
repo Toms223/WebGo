@@ -24,7 +24,7 @@ func New() (*topic.Screen, error) {
 			{Title: "Handler and Build", Body: handler},
 			{Title: "Run", Body: run},
 			{Title: "Actions", Body: actions},
-			{Title: "ViewModel and OnAction", Body: viewModel},
+			{Title: "Models and actions", Body: models},
 			{Title: "Errors", Body: errs},
 		},
 		OnActivate: base.Activate,

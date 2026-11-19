@@ -1,6 +1,6 @@
 module github.com/Toms223/WebGo/docs
 
-go 1.27.0
+go 1.27.3
 
 require (
 	github.com/Toms223/WebGo v0.1.0
@@ -10,6 +10,10 @@ require (
 require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/sgtdi/fswatcher/v2 v2.0.0 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	github.com/yuin/goldmark v1.8.6 // indirect
+	golang.org/x/sys v0.49.0 // indirect
 )
+
+replace github.com/Toms223/WebGo => ../

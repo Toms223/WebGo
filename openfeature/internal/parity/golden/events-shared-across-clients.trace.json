@@ -1,0 +1,17 @@
+[
+{"i":0,"kind":"step","op":"addHandler"},
+{"i":1,"kind":"step","op":"addHandler"},
+{"i":2,"kind":"step","op":"addHandler"},
+{"i":3,"kind":"step","op":"setProvider"},
+{"details":{"clientName":"d","domain":"d","providerName":"q"},"event":"PROVIDER_READY","handler":"hA","kind":"event","target":"client:d"},
+{"details":{"clientName":"d","domain":"d","providerName":"q"},"event":"PROVIDER_READY","handler":"hB","kind":"event","target":"client:d"},
+{"kind":"return","op":"setProvider"},
+{"i":4,"kind":"step","op":"addHandler"},
+{"details":{"clientName":"d","domain":"d","providerName":"q"},"event":"PROVIDER_READY","handler":"hC","kind":"event","target":"client:d"},
+{"i":5,"kind":"step","op":"addHandler"},
+{"i":6,"kind":"step","op":"emit"},
+{"details":{"clientName":"d","domain":"d","flagsChanged":["f"],"providerName":"q"},"event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hBc","kind":"event","target":"client:d"},
+{"details":{"clientName":"d","domain":"d","flagsChanged":["f"],"providerName":"q"},"event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hAc","kind":"event","target":"client:d"},
+{"i":7,"kind":"step","op":"status"},
+{"domain":"d","kind":"status","status":"READY"}
+]

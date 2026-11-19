@@ -1,0 +1,20 @@
+{
+  "id": "events-shared-across-clients",
+  "requirements": ["5.2.1"],
+  "providers": {
+    "q": {
+      "runsOn": "client",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_READY","handler":"hA"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_READY","handler":"hB","fresh":true},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hBc","fresh":true},
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_READY","handler":"hC","fresh":true},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hAc"},
+    {"op":"emit","provider":"q","event":"PROVIDER_CONFIGURATION_CHANGED","details":{"flagsChanged":["f"]}},
+    {"op":"status","domain":"d"}
+  ]
+}

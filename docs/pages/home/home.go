@@ -2,9 +2,7 @@ package home
 
 import (
 	"github.com/Toms223/WebGo/app"
-	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/pages/base"
-	"github.com/Toms223/WebGo/page"
 )
 
 const (
@@ -12,29 +10,30 @@ const (
 	Route = base.HomeRoute
 )
 
-type State struct{}
+type State struct {
+	Count int
+}
 
 type Screen struct {
-	*page.Page[State]
+	*app.Screen[State]
 }
 
 func New() (*Screen, error) {
-	viewModel, err := data.NewViewModel("home", &State{})
+	viewModel, err := app.NewModel("home", &State{})
 	if err != nil {
 		return nil, err
 	}
-	built := page.NewPage[State](Route).
+	built := app.NewScreen[State](Route).
 		WithLayout(&Layout{}).
 		WithModel(viewModel)
 	if err := built.Err(); err != nil {
 		return nil, err
 	}
-	return &Screen{Page: built}, nil
+	return &Screen{Screen: built}, nil
 }
 
-func (s *Screen) OnMount(ctx app.Context) page.Screen {
-	s.Page.OnMount(ctx)
+func (s *Screen) OnMount(ctx app.Context) {
+	s.Screen.OnMount(ctx)
 	ctx.Page().SetTitle("WebGo · web apps in Go with typed CSS, pages and state")
 	base.Activate(ctx, Route)
-	return s
 }

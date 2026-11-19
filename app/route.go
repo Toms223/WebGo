@@ -7,13 +7,19 @@ import (
 
 type router struct {
 	mu               sync.RWMutex
-	routes           map[string]func() Composer
+	routes           map[string]routeEntry
 	routesWithRegexp []regexpRoute
+	served           Composer
+}
+
+type routeEntry struct {
+	factory func() Composer
+	cached  bool
 }
 
 func makeRouter() router {
 	return router{
-		routes: make(map[string]func() Composer),
+		routes: make(map[string]routeEntry),
 	}
 }
 
@@ -21,7 +27,17 @@ func (r *router) route(path string, newComponent func() Composer) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	r.routes[path] = newComponent
+	r.routes[path] = routeEntry{factory: newComponent}
+}
+
+func (r *router) serve(paths []string, build func() Composer) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.served = nil
+	for _, path := range paths {
+		r.routes[path] = routeEntry{factory: build, cached: true}
+	}
 }
 
 func (r *router) routeWithRegexp(pattern string, newComponent func() Composer) {
@@ -53,13 +69,23 @@ func (r *router) routed(path string) bool {
 
 func (r *router) createComponent(path string) (Composer, bool) {
 	r.mu.RLock()
-	defer r.mu.RUnlock()
+	entry, routed := r.routes[path]
+	regexps := r.routesWithRegexp
+	r.mu.RUnlock()
 
-	if newComponent, routed := r.routes[path]; routed {
-		return newComponent(), true
+	if routed {
+		if !entry.cached || !isClient {
+			return entry.factory(), true
+		}
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		if r.served == nil {
+			r.served = entry.factory()
+		}
+		return r.served, true
 	}
 
-	for _, rwr := range r.routesWithRegexp {
+	for _, rwr := range regexps {
 		if rwr.regexp.MatchString(path) {
 			return rwr.newComponent(), true
 		}

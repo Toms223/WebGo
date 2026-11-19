@@ -4,12 +4,10 @@ import (
 	"strconv"
 
 	"github.com/Toms223/WebGo/app"
-	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/components/doc"
 	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/pages/base"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/Toms223/WebGo/page"
 	"github.com/Toms223/WebGo/style"
 )
 
@@ -44,7 +42,7 @@ func (a Article) Versions() string {
 }
 
 func Articles() []Article {
-	return []Article{homecoming(), typedInk(), firstLight()}
+	return []Article{firstEdition(), homecoming(), typedInk(), firstLight()}
 }
 
 func Latest() Article { return Articles()[0] }
@@ -60,35 +58,34 @@ func Routes() []string {
 type State struct{}
 
 type Screen struct {
-	*page.Page[State]
+	*app.Screen[State]
 	title string
 }
 
-func (s *Screen) OnMount(ctx app.Context) page.Screen {
-	s.Page.OnMount(ctx)
+func (s *Screen) OnMount(ctx app.Context) {
+	s.Screen.OnMount(ctx)
 	ctx.Page().SetTitle(s.title)
 	base.Activate(ctx, s.Route())
-	return s
 }
 
-func newScreen(key, route, title string, layout page.Layout[State]) (*Screen, error) {
-	viewModel, err := data.NewViewModel(key, &State{})
+func newScreen(key, route, title string, layout app.Layout[State]) (*Screen, error) {
+	viewModel, err := app.NewModel(key, &State{})
 	if err != nil {
 		return nil, err
 	}
-	built := page.NewPage[State](route).WithLayout(layout).WithModel(viewModel)
+	built := app.NewScreen[State](route).WithLayout(layout).WithModel(viewModel)
 	if err := built.Err(); err != nil {
 		return nil, err
 	}
-	return &Screen{Page: built, title: title}, nil
+	return &Screen{Screen: built, title: title}, nil
 }
 
-func Screens() ([]page.Screen, error) {
+func Screens() ([]app.Routed, error) {
 	feed, err := newScreen("news", Route, "News · WebGo", &feedLayout{})
 	if err != nil {
 		return nil, err
 	}
-	screens := []page.Screen{feed}
+	screens := []app.Routed{feed}
 	articles := Articles()
 	for i, a := range articles {
 		layout := &articleLayout{article: a}
@@ -109,18 +106,55 @@ func Screens() ([]page.Screen, error) {
 	return screens, nil
 }
 
-func Cover(a Article, wide bool) app.UI {
-	classes := []app.ClassRule{theme.NewsCover, a.Fill}
-	if wide {
-		classes = []app.ClassRule{theme.NewsCoverWide, a.Fill}
-	}
-	return app.Div().Style(classes...).Aria("hidden", "true").Body(
-		app.Div().Body(
-			app.P().Style(theme.NewsCoverVersion).Text(a.Version),
+func Cover(a Article, _ bool) app.UI {
+	return app.Div().Style(theme.NewsCover).Aria("hidden", "true").Body(append(inks(a),
+		app.Div().Style(theme.NewsCoverText).Body(
+			app.P().Style(theme.NewsCoverLabel).Text("WebGo zine"),
 			app.P().Style(theme.NewsCoverName).Text(a.Codename),
 		),
+		Stamp(a),
 		app.Span().Style(theme.NewsCoverCard).Text(a.Signature),
+	)...)
+}
+
+func Stamp(a Article) app.UI {
+	return app.Span().Style(theme.NewsStamp).Aria("hidden", "true").Body(
+		app.Span().Text("Release"),
+		app.Strong().Text(a.Version),
+		app.Span().Text(a.Codename),
 	)
+}
+
+func inks(a Article) []app.UI {
+	return []app.UI{
+		app.Span().Style(theme.NewsInk, theme.NewsBlock, a.Fill).Aria("hidden", "true"),
+		app.Span().Style(theme.NewsInk, theme.NewsDots).Aria("hidden", "true"),
+		app.Span().Style(theme.NewsInk, theme.NewsDisc).Aria("hidden", "true"),
+	}
+}
+
+func split(lead app.UI, body []app.UI) int {
+	sizes := make([]int, len(body))
+	left, right := len(app.HTMLString(lead)), 0
+	for i, ui := range body {
+		sizes[i] = len(app.HTMLString(ui))
+		right += sizes[i]
+	}
+	cut, best := len(body)/2, -1
+	for i, size := range sizes {
+		if _, ok := body[i].(app.HTMLH2); ok && i > 0 && (best < 0 || abs(left-right) < best) {
+			cut, best = i, abs(left-right)
+		}
+		left, right = left+size, right-size
+	}
+	return cut
+}
+
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
 }
 
 func Meta(a Article, extra ...string) app.UI {
@@ -146,9 +180,9 @@ func (layout) Error(err error) app.UI {
 
 type feedLayout struct{ layout }
 
-func (l *feedLayout) Body(...app.UI) page.Layout[State] { return l }
+func (l *feedLayout) Body(...app.UI) app.Layout[State] { return l }
 
-func (l *feedLayout) Draw(*data.ViewModel[State]) app.HTMLDiv {
+func (l *feedLayout) Draw(*app.Model[State]) app.HTMLDiv {
 	articles := Articles()
 	latest := articles[0]
 	rows := []app.UI{app.H2().Style(theme.NewsSectionTitle).Text("Earlier updates")}
@@ -157,7 +191,7 @@ func (l *feedLayout) Draw(*data.ViewModel[State]) app.HTMLDiv {
 			Cover(a, false),
 			app.Div().Style(theme.NewsStory).Body(
 				app.H3().Style(theme.NewsRowTitle).Text(a.Title),
-				app.P().Style(theme.NewsTeaser).Text(a.Teaser),
+				app.P().Style(theme.NewsTeaser).Body(doc.Inline(a.Teaser)...),
 				Meta(a),
 			),
 		))
@@ -171,7 +205,7 @@ func (l *feedLayout) Draw(*data.ViewModel[State]) app.HTMLDiv {
 			Cover(latest, false),
 			app.Div().Style(theme.NewsStory).Body(
 				app.H2().Style(theme.NewsHeadline).Text(latest.Title),
-				app.P().Style(theme.NewsTeaser).Text(latest.Teaser),
+				app.P().Style(theme.NewsTeaser).Body(doc.Inline(latest.Teaser)...),
 				Meta(latest),
 				app.Span().Style(theme.NewsGo).Text("Read the update →"),
 			),
@@ -188,13 +222,19 @@ type articleLayout struct {
 	older   *Article
 }
 
-func (l *articleLayout) Body(...app.UI) page.Layout[State] { return l }
+func (l *articleLayout) Body(...app.UI) app.Layout[State] { return l }
 
-func (l *articleLayout) Draw(*data.ViewModel[State]) app.HTMLDiv {
+func (l *articleLayout) Draw(*app.Model[State]) app.HTMLDiv {
 	a := l.article
-	short := make([]app.UI, 0, len(a.Short))
-	for _, s := range a.Short {
-		short = append(short, doc.Item(s))
+	summary := func() app.UI {
+		short := make([]app.UI, 0, len(a.Short))
+		for _, s := range a.Short {
+			short = append(short, doc.Item(s))
+		}
+		return app.Div().Style(theme.NewsShort).Body(
+			app.P().Style(theme.NewsShortTitle).Text("The short version"),
+			app.Ul().Body(short...),
+		)
 	}
 	pager := []app.UI{}
 	if l.older != nil {
@@ -203,22 +243,43 @@ func (l *articleLayout) Draw(*data.ViewModel[State]) app.HTMLDiv {
 	if l.newer != nil {
 		pager = append(pager, pagerLink("Newer update", *l.newer))
 	}
+	cut := split(summary(), a.Body())
+	body := a.Body()
 	return app.Div().Style(theme.NewsArticle).Body(
 		app.A().Style(theme.NewsBack).Href(nav.Href(Route)).Text("← All news"),
-		Cover(a, true),
-		app.Article().Style(theme.NewsColumn).Body(
-			app.H1().Style(theme.NewsTitle).Text(a.Title),
-			app.P().Style(theme.NewsIntro).Text(a.Teaser),
-			Meta(a, a.Codename, "By the WebGo team"),
-			app.Div().Style(theme.NewsShort).Body(
-				app.P().Style(theme.NewsShortTitle).Text("The short version"),
-				app.Ul().Body(short...),
+		app.Header().Style(theme.NewsIssue).Body(append(inks(a),
+			app.Div().Style(theme.NewsCoverText).Body(
+				app.P().Style(theme.NewsCoverLabel).Text("Issue "+a.Version+" · codename "+a.Codename),
+				app.H1().Style(theme.NewsTitle).Text(a.Title),
+				Meta(a, "By the WebGo team"),
 			),
-			app.Div().Style(theme.Doc, theme.NewsBody).Body(a.Body()...),
-			app.P().Style(theme.NewsSign).Text(a.SignOff),
-			app.Nav().Style(theme.NewsPager).Aria("label", "More updates").Body(pager...),
+			Stamp(a),
+		)...),
+		app.Article().Style(theme.NewsSpread).Body(
+			app.Span().Style(theme.NewsStaple).Aria("hidden", "true"),
+			app.Span().Style(theme.NewsStapleLow).Aria("hidden", "true"),
+			app.Div().Style(theme.NewsPage).Body(
+				runhead(a.Codename, a.Date),
+				summary(),
+				app.Div().Style(theme.NewsText).Body(body[0]),
+				app.Div().Style(theme.NewsText, theme.NewsDrop).Body(body[1:cut]...),
+				app.Span().Style(theme.NewsFolio).Aria("hidden", "true").Text("02"),
+			),
+			app.Div().Style(theme.NewsPage).Body(
+				runhead("WebGo zine", "No. "+a.Version),
+				app.P().Style(theme.NewsPull).Body(doc.Inline(a.Teaser)...),
+				app.Div().Style(theme.NewsText).Body(body[cut:]...),
+				app.P().Style(theme.NewsSign).Text(a.SignOff),
+				app.P().Style(theme.NewsEndmark).Text("End of issue "+a.Version),
+				app.Span().Style(theme.NewsFolioRight).Aria("hidden", "true").Text("03"),
+			),
 		),
+		app.Nav().Style(theme.NewsPager).Aria("label", "More updates").Body(pager...),
 	)
+}
+
+func runhead(left, right string) app.UI {
+	return app.Div().Style(theme.NewsRunhead).Aria("hidden", "true").Body(app.Span().Text(left), app.Span().Text(right))
 }
 
 func pagerLink(label string, a Article) app.UI {

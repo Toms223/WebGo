@@ -1,0 +1,31 @@
+{
+  "id": "eval-error-stale-reconciling-still-evaluate",
+  "requirements": ["1.7.1","1.7.2.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "events": true,
+      "onContextChange": "deferred",
+      "flags": {
+        "f": {
+          "boolean": {
+            "value": true,
+            "reason": "CACHED"
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"emit","provider":"p","event":"PROVIDER_ERROR","details":{"message":"e"}},
+    {"op":"status"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false},
+    {"op":"emit","provider":"p","event":"PROVIDER_STALE"},
+    {"op":"status"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false},
+    {"op":"setContext","context":{"targetingKey":"r"}},
+    {"op":"status"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false}
+  ]
+}

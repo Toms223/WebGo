@@ -15,11 +15,11 @@ func architectureDiagram() app.UI {
 }
 
 func lifecycleDiagram() app.UI {
-	return d.Figure("Hooks in the order they run. OnPreRender runs only on the server; OnMount and the hooks after it only in the browser.",
+	return d.Figure("Hooks in the order they run. OnPreRender runs only on the server; OnMount and the hooks after it only in the browser. OnLoad runs again after each OnUpdate.",
 		d.Lane("server", "Prerendering a page",
 			d.Flow(d.Box(d.Plain, "OnInit", "defaults, no context"), d.Box(d.Sun, "OnPreRender", "title and description"), d.Box(d.Plain, "OnNav", "reads the URL"), d.Box(d.Lilac, "HTML", "sent to the browser"))),
 		d.Lane("browser", "A mounted component",
-			d.Flow(d.Box(d.Plain, "OnInit", ""), d.Box(d.Lime, "OnMount", "in the DOM"), d.Box(d.Lime, "OnNav", "every navigation"), d.Box(d.Lilac, "OnUpdate · OnResize", "OnAppUpdate · OnAppInstallChange"), d.Box(d.Coral, "OnDismount", "stop what OnMount started"))),
+			d.Flow(d.Box(d.Plain, "OnInit", ""), d.Box(d.Lime, "OnMount", "in the DOM"), d.Box(d.Sun, "OnLoad", "own goroutine, render held"), d.Box(d.Lime, "OnNav", "every navigation"), d.Box(d.Lilac, "OnUpdate · OnResize", "OnAppUpdate · OnAppInstallChange"), d.Box(d.Coral, "OnDismount", "stop what OnMount started"))),
 	)
 }
 

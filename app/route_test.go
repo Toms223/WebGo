@@ -136,3 +136,59 @@ func TestRoutes(t *testing.T) {
 		})
 	}
 }
+
+func serveTestShell(t *testing.T, build func() *Shell[screenState]) {
+	t.Helper()
+	screens := build().Screens
+	Serve(build)
+	t.Cleanup(func() {
+		routes.mu.Lock()
+		defer routes.mu.Unlock()
+		for _, screen := range screens {
+			delete(routes.routes, screen.Route())
+		}
+		routes.served = nil
+	})
+}
+
+func servedShell(layout *shellLayout, screens ...Routed) func() *Shell[screenState] {
+	return func() *Shell[screenState] {
+		shell, _ := NewShell[screenState](layout, newScreenModel("ada"), screens...)
+		return shell
+	}
+}
+
+func twoScreenShell(t *testing.T) func() *Shell[screenState] {
+	t.Setenv("GOAPP_ROOT_PREFIX", "")
+	return servedShell(&shellLayout{name: "shell"}, newRoutedStub("/", "a"), newRoutedStub("/b", "b"))
+}
+
+func TestServeRegistersEveryScreenRoute(t *testing.T) {
+	serveTestShell(t, twoScreenShell(t))
+
+	require.True(t, routes.routed("/"))
+	require.True(t, routes.routed("/b"))
+}
+
+func TestServeReturnsTheSameShellInTheBrowser(t *testing.T) {
+	asClient(t)
+	serveTestShell(t, twoScreenShell(t))
+
+	first, ok := routes.createComponent("/")
+	require.True(t, ok)
+	second, ok := routes.createComponent("/b")
+	require.True(t, ok)
+
+	require.Same(t, first, second)
+}
+
+func TestServeReturnsAFreshShellOnTheServer(t *testing.T) {
+	serveTestShell(t, twoScreenShell(t))
+
+	first, ok := routes.createComponent("/")
+	require.True(t, ok)
+	second, ok := routes.createComponent("/")
+	require.True(t, ok)
+
+	require.NotSame(t, first, second)
+}

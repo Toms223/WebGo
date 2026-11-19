@@ -1,0 +1,44 @@
+{
+  "id": "ctx-forces-ready",
+  "requirements": ["5.3.4.1"],
+  "partial": "D10",
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "initialize": "deferred",
+      "onContextChange": "sync"
+    },
+    "q": {
+      "runsOn": "client",
+      "initialize": "deferred",
+      "onContextChange": "sync"
+    },
+    "r": {
+      "runsOn": "client",
+      "initialize": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"reject","target":"p.initialize#1","error":{"code":"PROVIDER_FATAL","message":"dead"}},
+    {"op":"status"},
+    {"op":"setContext","context":{"targetingKey":"a"}},
+    {"op":"status"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true},
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"status","domain":"d"},
+    {"op":"setContext","domain":"d","context":{"targetingKey":"b"}},
+    {"op":"status","domain":"d"},
+    {"op":"resolve","target":"q.initialize#1"},
+    {"op":"status","domain":"d"},
+    {"op":"setProvider","domain":"e","provider":"r"},
+    {"op":"reject","target":"r.initialize#1","error":{"code":"GENERAL","message":"err"}},
+    {"op":"status","domain":"e"},
+    {"op":"setContext","domain":"e","context":{"targetingKey":"c"}},
+    {"op":"status","domain":"e"}
+  ]
+}

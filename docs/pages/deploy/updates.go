@@ -19,7 +19,7 @@ type AppUpdater interface {
 	OnAppUpdate(Context)
 }`),
 		doc.H("Version"),
-		doc.P("When `Version` is empty, the handler computes it as a hash of what the browser would download: the handler's settings, the generated scripts and stylesheet, the resolved style links, and the bytes of every local `/web/` file the page uses (`app.wasm`, the icons, `Image`, styles, scripts, fonts and `CacheableResources`). A file that is missing hashes as missing."),
+		doc.P("When `Version` is empty, the handler computes it as a hash of what the browser would download: the handler's settings, the generated scripts and stylesheet, the resolved style links, and the bytes of every local `/web/` file the page uses (`app.wasm`, the icons, `Image`, styles, scripts, modules, fonts and `CacheableResources`). A file that is missing hashes as missing."),
 		doc.List(
 			doc.Item("Restarting the server, or running several replicas of the same build, gives the same version. Leaving `Version` empty is the recommended setting in production."),
 			doc.Item("Rebuilding `app.wasm`, or changing any file the page uses, gives a new version."),
@@ -34,7 +34,7 @@ type AppUpdater interface {
 			doc.Item("The new worker activates at once. It deletes the other `app-` caches, keeps caches with any other name, and takes control of the open pages."),
 			doc.Item("Each open page that was controlled by the old worker reloads itself once, and runs the new version. A first visit, where no worker was in control yet, does not reload."),
 		),
-		doc.P("The worker stores `/`, `/app.css`, `/app.js`, `/manifest.webmanifest`, `/wasm_exec.js`, `/web/app.wasm`, the icons, the fonts, the stylesheet links, the scripts and `CacheableResources`, all resolved through `Resources`. It answers only `GET` requests for those same-origin URLs, from its cache and else from the network. Other requests, cross-origin files and other page routes go to the network as usual."),
+		doc.P("The worker stores `/`, `/app.css`, `/app.js`, `/manifest.webmanifest`, `/wasm_exec.js`, `/web/app.wasm`, the icons, the fonts, the stylesheet links, the scripts, the local module files and `CacheableResources`, all resolved through `Resources`. It answers only `GET` requests for those same-origin URLs, from its cache and else from the network. Other requests, cross-origin files and other page routes go to the network as usual."),
 		doc.P("The update checker is an inline `<script>`. A Content Security Policy without `'unsafe-inline'` or a matching hash blocks it: automatic updates stop, and the rest of the app works."),
 		doc.H("DisableAutoUpdate"),
 		doc.P("`DisableAutoUpdate: true` stops step 4, the reload. The checks still run and the new worker still takes control, so the open page keeps running the old `app.wasm` with the new worker until it reloads. Use it when a reload would lose work, such as a half-filled form, and let the user choose when:"),

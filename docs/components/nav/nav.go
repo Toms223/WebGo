@@ -16,6 +16,9 @@ type Entry struct {
 }
 
 func Href(route string) string {
+	if app.IsServer {
+		return route
+	}
 	return strings.TrimSuffix(app.Getenv("GOAPP_ROOT_PREFIX"), "/") + route
 }
 

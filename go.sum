@@ -1,8 +1,12 @@
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/sgtdi/fswatcher/v2 v2.0.0 h1:xT2DO0e0tcWLUsKnSTKtgg/ClNG3mRTcCHvLVKYqm/g=
+github.com/sgtdi/fswatcher/v2 v2.0.0/go.mod h1:anIzbsO9BVYahrzkEencSQmLfHdIVH3KxD1B3foidzo=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 github.com/yuin/goldmark v1.8.6 h1:d0VcaP1sx9GkFVkoW+KtggpGi2KZ965i14b0+bDQST4=
 github.com/yuin/goldmark v1.8.6/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
-go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
-go.yaml.in/yaml/v3 v3.0.5/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
+go.yaml.in/yaml/v3 v3.0.6 h1:zcDfvjXEqTQmpjniUBLc91xYJMB2c4QOFxEF/LCEckM=
+go.yaml.in/yaml/v3 v3.0.6/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
+golang.org/x/sys v0.49.0 h1:XbzkgYJHdqh/8m2Uu0W/dQv8nktxx4BFHp1M0gROTXA=
+golang.org/x/sys v0.49.0/go.mod h1:hNLxWAXmnKAxqDtdwIYC4bM9oQPEecfsnNMuSxOs3og=

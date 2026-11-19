@@ -1,0 +1,44 @@
+{
+  "id": "lifecycle-one-instance-two-domains",
+  "requirements": ["1.1.2.2","2.4.1","5.1.2"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "initialize": "deferred",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"api-stale"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"api-config"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_READY","handler":"cz-ready"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_ERROR","handler":"cz-error"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_STALE","handler":"cz-stale"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"cz-config"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_CONTEXT_CHANGED","handler":"cz-ctx"},
+    {"op":"addHandler","target":"client:zeta","event":"PROVIDER_RECONCILING","handler":"cz-recon"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_READY","handler":"ca-ready"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_ERROR","handler":"ca-error"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_STALE","handler":"ca-stale"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"ca-config"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_CONTEXT_CHANGED","handler":"ca-ctx"},
+    {"op":"addHandler","target":"client:alpha","event":"PROVIDER_RECONCILING","handler":"ca-recon"},
+    {"op":"setProvider","domain":"zeta","provider":"p"},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"alpha"},
+    {"op":"setProvider","domain":"alpha","provider":"p"},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"alpha"},
+    {"op":"resolve","target":"p.initialize#1"},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"alpha"},
+    {"op":"emit","provider":"p","event":"PROVIDER_STALE","details":{"message":"old"}},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"alpha"},
+    {"op":"status"}
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "id": "mem-put-configuration",
+  "requirements": ["2.2.1","5.1.1"],
+  "providers": {
+    "mem": {
+      "memory": {
+        "zulu": {
+          "variants": {
+            "on": true
+          },
+          "defaultVariant": "on"
+        },
+        "alpha": {
+          "variants": {
+            "a": "old"
+          },
+          "defaultVariant": "a"
+        },
+        "kilo": {
+          "variants": {
+            "k": 1
+          },
+          "defaultVariant": "k"
+        }
+      }
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hA"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hC"},
+    {"op":"setProvider","provider":"mem"},
+    {"op":"evaluate","type":"string","flag":"alpha","default":"x"},
+    {"op":"evaluate","type":"boolean","flag":"zulu","default":false},
+    {"op":"putConfiguration","provider":"mem","flags":{"mike":{"variants":{"m":"M"},"defaultVariant":"m"},"alpha":{"variants":{"a":"new"},"defaultVariant":"a"},"bravo":{"variants":{"b":false},"defaultVariant":"b","disabled":true}}},
+    {"op":"status"},
+    {"op":"evaluate","type":"string","flag":"alpha","default":"x"},
+    {"op":"evaluate","type":"boolean","flag":"zulu","default":false},
+    {"op":"evaluate","type":"string","flag":"mike","default":"x"},
+    {"op":"evaluate","type":"boolean","flag":"bravo","default":true},
+    {"op":"putConfiguration","provider":"mem","flags":{}},
+    {"op":"evaluate","type":"string","flag":"alpha","default":"x"},
+    {"op":"putConfiguration","provider":"mem","flags":{"b":{"variants":{"v":"B"},"defaultVariant":"v"},"10":{"variants":{"v":"ten"},"defaultVariant":"v"},"2":{"variants":{"v":"two"},"defaultVariant":"v"},"a":{"variants":{"v":"A"},"defaultVariant":"v"}}},
+    {"op":"putConfiguration","provider":"mem","flags":{"7":{"variants":{"v":"seven"},"defaultVariant":"v"},"a":{"variants":{"v":"A"},"defaultVariant":"v"}}}
+  ]
+}

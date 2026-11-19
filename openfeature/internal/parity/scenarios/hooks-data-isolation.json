@@ -1,0 +1,30 @@
+{
+  "id": "hooks-data-isolation",
+  "requirements": ["4.6.1","4.6.2"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "boolean": {
+            "value": true
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "hd": {
+      "data": true
+    },
+    "he": {
+      "data": true
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHooks","level":"api","hooks":["hd"]},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false,"hooks":["hd","he"]},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false,"hooks":["he"]}
+  ]
+}

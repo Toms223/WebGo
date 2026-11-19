@@ -8,148 +8,102 @@ import (
 
 func model() []app.UI {
 	return []app.UI{
-		doc.P("`ViewModel[T]` lives in the `data` package. A `ViewModel[T]` binds a state value of type `T` to a key in the app's state store, described under ", doc.A("/actions#state", "State and actions"), "."),
+		doc.P("A `Model[T]` binds a state value of type `T` to a key in the app's state store, described under ", doc.A("/actions#state", "State and actions"), "."),
 		modelDiagram(),
-		doc.P("The counter below is one `ViewModel` driving a component that observes it with `Get(ctx).Observe(ctx)` in `OnMount`. `+1` and `Reset` go through `Load(ctx).Apply(...).Set()`, so the count changes on screen but is not stored; `Save` goes through `SetAndPersist`, so the count survives a reload. Each piece is described below."),
+		doc.P("The counter below is one `Model` driving a component that observes it with `Get(ctx).Observe(ctx)` in `OnMount`. `+1` and `Reset` go through `Load(ctx).Apply(...).Set()`, so the count changes on screen but is not stored; `Save` goes through `SetAndPersist`, so the count survives a reload. Each piece is described below."),
 		doc.Example(demos.CounterExample),
-		doc.Go(`type ViewModel[T any] struct {
+		doc.Go(`type Model[T any] struct {
 	// unexported fields
 }`),
-		doc.H("NewViewModel"),
-		doc.Go(`func NewViewModel[T any](key string, value *T) (*ViewModel[T], error)`),
+		doc.H("NewModel"),
+		doc.Go(`func NewModel[T any](key string, value *T) (*Model[T], error)`),
 		doc.List(
 			doc.Item("If `value` is `nil`, it returns an error (`\"value is nil\"`)."),
 			doc.Item("If `key` is `\"\"`, it returns an error (`\"key is empty\"`)."),
-			doc.Item("Otherwise, it returns a `*ViewModel[T]` that holds `value` directly — no copy is made, so later changes made through the returned `ViewModel` are visible through the original pointer, and vice versa."),
+			doc.Item("Otherwise, it returns a `*Model[T]` that holds `value` itself, without a copy, so changes through the model are visible through the original pointer, and the other way round, until `Apply` replaces the pointer."),
 		),
-		doc.P("`NewViewModel` does not read or write the state store. The value passed in is used as-is until `Get` or `Load` is called."),
+		doc.P("`NewModel` does not read or write the state store. The value passed in is used as it is until `Get` or `Load` is called."),
 		doc.H("Get"),
-		doc.Go(`func (v *ViewModel[T]) Get(ctx app.Context) *ViewModel[T]`),
-		doc.P("`Get` reads the current value for the model's key from the state store into the model's existing state value, and returns the model itself. If the key has never been written, or the stored value is a different type, `Get` leaves the model's state unchanged."),
+		doc.Go(`func (m *Model[T]) Get(ctx app.Context) *Model[T]`),
+		doc.P("`Get` reads the stored value for the model's key into the model's state, and returns the model. If the key has never been written, or the stored value is of another type, the state is left unchanged."),
 		doc.H("State"),
-		doc.Go(`func (v *ViewModel[T]) State() *T`),
-		doc.P("`State` returns the model's current in-memory state pointer. It does not touch the state store — call `Get` or `Load` first if the state needs to be refreshed from the store."),
+		doc.Go(`func (m *Model[T]) State() *T`),
+		doc.P("`State` returns the model's in-memory state pointer. It does not touch the store; call `Get` or `Load` first to refresh it."),
 		doc.H("Load"),
-		doc.Go(`func (v *ViewModel[T]) Load(ctx app.Context) *Action[T]`),
-		doc.P("`Load` refreshes the model's state from the store (the same read `Get` performs), then returns a new `*Action[T]` bound to `ctx` and the model, ready for `Apply`, `Set`, or `SetAndPersist`."),
+		doc.Go(`func (m *Model[T]) Load(ctx app.Context) *Change[T]`),
+		doc.P("`Load` refreshes the state from the store, as `Get` does, then returns a `*Change[T]` bound to `ctx` and the model, ready for `Apply`, `Set` or `SetAndPersist`."),
 		doc.H("Observe"),
-		doc.Go(`func (v *ViewModel[T]) Observe(ctx app.Context) app.Observer`),
-		doc.P("`Observe` returns an `app.Observer` that watches the model's key in the state store. It fires when the store's value for that key changes through `Set` or `SetAndPersist` — not on a direct write to the model's in-memory state."),
-		doc.H("OnAction"),
-		doc.Go(`func (v *ViewModel[T]) OnAction(ctx app.Context) {
-	if v.source != nil && v.source.Mounted() {
-		return
-	}
-	v.source = ctx.Src()
-	ctx.ObserveState(v.key, v.state).OnChange(func() {
-		ctx.NewActionWithValue(v.key, v.state)
-	})
-}`),
-		doc.P("`OnAction` turns state changes into app actions. Each `Set` or `SetAndPersist` through the model fires an action named after the model's key, whose value is the model's `*T`. A direct write to the in-memory state fires nothing."),
-		doc.List(
-			doc.Item("Call it in `OnMount`."),
-			doc.Item("Use the same key in `style.When` and `style.Compute`: the key is the action name, and `*T` is the type the binding receives."),
-			doc.Item("Call it from lifecycle hooks only, never from `Render`."),
-		),
-		doc.P("It registers once per model, however many components call it. It registers again only when the component it registered on has dismounted, so a component that mounts again after a navigation calls it again in its own `OnMount`. The ", doc.A("/applying", "Applying"), " page shows it driving dynamic rules."),
-		doc.H("Action.Apply"),
-		doc.Go(`type Action[T any] struct {
+		doc.Go(`func (m *Model[T]) Observe(ctx app.Context) app.Observer`),
+		doc.P("`Observe` returns an `app.Observer` of the model's key. It fires on `Set` and `SetAndPersist`, not on a direct write to the state. The observer follows the model, not the pointer it held when it started, so it keeps working after `Apply` returns a new pointer."),
+		doc.H("Actions"),
+		doc.P("Every `Set` or `SetAndPersist` through the model fires an app action named after the model's key, whose value is the model's `*T`. The state store posts it, so there is nothing to register. A direct write to the state fires nothing."),
+		doc.P("Use the key as the action name in `style.When` and `style.Compute` and the page's CSS follows the state; the ", doc.A("/applying#models-and-actions", "Applying"), " page shows it. Use it with `ctx.Handle` to react in a component."),
+		doc.H("Change.Apply"),
+		doc.Go(`type Change[T any] struct {
 	// unexported fields
 }
 
-func (a *Action[T]) Apply(verb func(ctx app.Context, state *T) *T) *Action[T]`),
-		doc.P("`Apply` calls `verb` with the action's context and the model's current in-memory state, then returns the action itself. If `verb` returns a non-nil pointer, the model's in-memory state is replaced with that pointer. If `verb` returns `nil`, the model's state is left unchanged."),
-		doc.P("Return the same pointer you were given rather than a fresh `&T{...}`: the observer registered at `Page.OnMount` still holds the previous pointer, so returning a new one detaches the model from that observer and the page silently stops updating."),
-		doc.P("Calls to `Apply` chain: each call's `verb` sees the state left by the previous call."),
-		doc.P("`Apply` only changes the model's in-memory state. It does not publish anything to the state store — call `Set` or `SetAndPersist` for that."),
+func (c *Change[T]) Apply(verb func(ctx app.Context, state *T) *T) *Change[T]`),
+		doc.P("`Apply` calls `verb` with the change's context and the model's current state, and returns the change. If `verb` returns a non-nil pointer, the model's state is replaced with it; if it returns `nil`, the state is left as it is."),
+		doc.P("The result may be a fresh pointer, such as `&T{...}`: observers and actions follow the model, not the pointer."),
+		doc.P("Calls to `Apply` chain: each `verb` sees the state the previous one left. `Apply` changes memory only. Nothing reaches the store until `Set` or `SetAndPersist`."),
 		doc.H("Set"),
-		doc.Go(`func (a *Action[T]) Set() *ViewModel[T]`),
-		doc.P("`Set` writes the model's current in-memory state (as left by any `Apply` calls, or as it was when `Load` ran if `Apply` was never called) to the state store, and returns the model. `Set` does not write to local storage."),
+		doc.Go(`func (c *Change[T]) Set() *Model[T]`),
+		doc.P("`Set` writes the model's current state, as `Apply` left it, to the store, which notifies observers and fires the model's action. It returns the model. It does not write to local storage."),
 		doc.H("SetAndPersist"),
-		doc.Go(`func (a *Action[T]) SetAndPersist(value *T) *ViewModel[T]`),
-		doc.P("`SetAndPersist` sets the model's in-memory state directly to `value` (ignoring whatever `Apply` may have built up), writes `value` to the state store, and persists a snapshot of `value` to local storage. It returns the model."),
-		doc.P("The local storage snapshot is fixed at the moment `SetAndPersist` runs. Later direct changes to the model's in-memory state do not change what was persisted."),
+		doc.Go(`func (c *Change[T]) SetAndPersist(value *T) *Model[T]`),
+		doc.P("`SetAndPersist` replaces the model's state with `value`, discarding earlier `Apply` calls, writes it to the store, and persists a snapshot to local storage. It returns the model."),
+		doc.P("The snapshot is fixed when `SetAndPersist` runs. Later direct changes to the state do not change what was persisted."),
 	}
 }
 
 func errorsSection() []app.UI {
 	return []app.UI{
-		doc.P("The `page` package exports four sentinel errors:"),
+		doc.P("The `app` package exports four sentinel errors for screens and shells:"),
 		doc.List(
-			doc.Item("`ErrNoLayout` — a `Page` or `Base` has no layout."),
-			doc.Item("`ErrNoModel` — a `Page` or `Base` has no model."),
-			doc.Item("`ErrNoScreens` — `NewBase` was called with a `nil` screens slice."),
-			doc.Item("`ErrNoRoute` — a `Base`'s current selection does not match any screen's route."),
+			doc.Item("`ErrNoLayout`: a `Screen` or `Shell` has no layout."),
+			doc.Item("`ErrNoModel`: a `Screen` or `Shell` has no model."),
+			doc.Item("`ErrNoScreens`: `NewShell` was called with a `nil` screens slice."),
+			doc.Item("`ErrNoRoute`: no screen of a `Shell` matches the current route."),
 		),
-		doc.P("Check for a specific one with `errors.Is`, for example `errors.Is(p.Err(), page.ErrNoModel)`."),
+		doc.P("Check for one with `errors.Is`, for example `errors.Is(s.Err(), app.ErrNoModel)`."),
 	}
 }
 
 func fetchingExample() []app.UI {
 	return []app.UI{
-		doc.P("Storing a fetched value and reading it back in a layout's `Draw`:"),
-		doc.Go(`package main
-
-import (
-	"github.com/Toms223/WebGo/data"
-	"github.com/Toms223/WebGo/page"
-	"github.com/Toms223/WebGo/app"
-)
-
-type AppState struct {
-	User string
+		doc.P("A screen that fetches its data before it draws, with `WithLoader`:"),
+		doc.Go(`type Profile struct {
+	Name string
 }
 
-func fetchUser() string {
-	return "ada"
-}
-
-func loadUser(ctx app.Context, vm *data.ViewModel[AppState]) {
-	ctx.Async(func() {
-		user := fetchUser()
-		ctx.Dispatch(func(ctx app.Context) {
-			vm.Load(ctx).
-				Apply(func(ctx app.Context, state *AppState) *AppState {
-					state.User = user
-					return state
-				}).
-				Set()
-		})
-	})
-}
-
-type AppLayout struct {
-	body []app.UI
-}
-
-func (l *AppLayout) Loading() app.UI {
-	return app.Text("loading")
-}
-
-func (l *AppLayout) Error(err error) app.UI {
-	return app.Text(err.Error())
-}
-
-func (l *AppLayout) Body(content ...app.UI) page.Layout[AppState] {
-	l.body = content
-	return l
-}
-
-func (l *AppLayout) Draw(m *data.ViewModel[AppState]) app.HTMLDiv {
-	current := m.State()
-	return app.Div().Text(current.User)
-}
-
-func main() {
-	vm, err := data.NewViewModel("app-state", &AppState{})
+func fetchProfile(ctx app.Context, p *Profile) error {
+	res, err := http.Get("/api/profile")
 	if err != nil {
-		panic(err)
+		return err
 	}
-	layout := &AppLayout{}
-	layout.Draw(vm)
+	defer res.Body.Close()
+	return json.NewDecoder(res.Body).Decode(p)
+}
 
-	_ = loadUser
+var profile, _ = app.NewModel("profile", &Profile{})
+
+func profileScreen() *app.Screen[Profile] {
+	return app.NewScreen[Profile]("/profile").
+		WithLayout(&profileLayout{}).
+		WithModel(profile).
+		WithLoader(fetchProfile)
 }`),
-		doc.P("`loadUser` fetches the user, then applies and publishes the new state through the model. `Draw` reads the same model's current state back out with `State()` on every render."),
+		doc.P("`profileScreen` builds a new screen on each call, so it can be called inside the `build` function passed to ", doc.A("#serve", "Serve"), ", which must return new screens every time."),
+		doc.List(
+			doc.Item("`fetchProfile` runs on its own goroutine, so a blocking call does not freeze the page. It fills a copy of the state."),
+			doc.Item("While it runs, the screen shows its layout's `Loading()`. The rest of the shell keeps rendering."),
+			doc.Item("When it returns `nil`, the copy becomes the model's state through `Set`, and the layout's `Draw` reads it with `m.State()`. When it returns an error, the layout's `Error(err)` shows."),
+		),
+		doc.P("In the demo below, a 600 ms `time.Sleep` stands in for the fetch. The screen sits inside a plain component rather than a `Shell`. Load again gives it a new route, so its `CompoID` changes, it is mounted fresh, and the loader runs again."),
+		doc.Example(demos.LoaderExample),
+		doc.H("Loading side by side"),
+		doc.P("The load phase is not limited to screens. Any component that implements `app.Loader` is held until its own `OnLoad` returns, and the hold is per component. Below, two parts load for 300 ms and 900 ms next to each other: each shows its own `Loading()` and draws when its own load is done, without waiting for the other. Load again changes an exported field of both, so each loads again after its update."),
+		doc.Example(demos.SiblingsExample),
 	}
 }

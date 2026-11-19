@@ -5,10 +5,8 @@ import (
 	"strings"
 
 	"github.com/Toms223/WebGo/app"
-	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/components/nav"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/Toms223/WebGo/page"
 )
 
 const mainID = "main"
@@ -29,19 +27,19 @@ func NewLayout(entries []nav.Entry) *Layout {
 }
 
 func (l *Layout) Loading() app.UI {
-	return app.Div().Style(theme.Shell, theme.ShellLoading).Text("Loading")
+	return app.Div().Style(theme.ShellLoading).Text("Loading")
 }
 
 func (l *Layout) Error(err error) app.UI {
-	return app.Div().Style(theme.Shell, theme.ShellError).Text(err.Error())
+	return app.Div().Style(theme.ShellError).Text(err.Error())
 }
 
-func (l *Layout) Body(content ...app.UI) page.Layout[State] {
+func (l *Layout) Body(content ...app.UI) app.Layout[State] {
 	l.body = content
 	return l
 }
 
-func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
+func (l *Layout) Draw(m *app.Model[State]) app.HTMLDiv {
 	state := m.State()
 	if state.Active == HomeRoute || state.Active == NewsRoute || strings.HasPrefix(state.Active, NewsRoute+"/") {
 		return l.landing(state)

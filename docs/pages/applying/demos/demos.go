@@ -1,7 +1,7 @@
 package demos
 
 import (
-	"github.com/Toms223/WebGo/data"
+	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/style"
 )
 
@@ -13,8 +13,8 @@ func Dynamic() []style.Item {
 	return []style.Item{DemoCompact, DemoAccent, DemoPulse, DemoBanner, DemoOutline}
 }
 
-func model[T any](key string, value *T) *data.ViewModel[T] {
-	m, err := data.NewViewModel(key, value)
+func model[T any](key string, value *T) *app.Model[T] {
+	m, err := app.NewModel(key, value)
 	if err != nil {
 		panic(err)
 	}

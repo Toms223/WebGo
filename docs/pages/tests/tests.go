@@ -175,7 +175,7 @@ func stateAndActions() []app.UI {
 			doc.Item("`SetState` and `NewAction` only queue work. Call `ConsumeAll` before checking the result."),
 			doc.Item("Global handlers registered with `app.Handle` do not run in a test engine. Call the handler function directly, with `ctx` and an `app.Action`."),
 			doc.Item("`Persist` writes to the engine's in-memory storage. `Broadcast` logs that it is not supported."),
-			doc.Item("Each engine has its own state store, but a `data.ViewModel` keeps its own `*T`, often in a package variable. Tests that share one model share its value."),
+			doc.Item("Each engine has its own state store, but an `app.Model` keeps its own `*T`, often in a package variable. Tests that share one model share its value."),
 		),
 		doc.P("With `results` from the search example on ", doc.A("/actions#handling-actions", "State and actions"), ":"),
 		doc.Go(`func TestResultsFollowTheSearch(t *testing.T) {

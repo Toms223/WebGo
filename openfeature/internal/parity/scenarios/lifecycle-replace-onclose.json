@@ -1,0 +1,35 @@
+{
+  "id": "lifecycle-replace-onclose",
+  "requirements": ["1.1.2.2","2.5.1"],
+  "providers": {
+    "p1": {
+      "runsOn": "client",
+      "onClose": "deferred"
+    },
+    "p2": {
+      "runsOn": "client",
+      "onClose": "sync"
+    },
+    "p3": {
+      "runsOn": "client",
+      "onClose": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","domain":"d","provider":"p1"},
+    {"op":"setProvider","provider":"p1"},
+    {"op":"status","domain":"d"},
+    {"op":"status"},
+    {"op":"setProvider","provider":"p2"},
+    {"op":"status"},
+    {"op":"providerMetadata"},
+    {"op":"setProvider","domain":"d","provider":"p2"},
+    {"op":"status","domain":"d"},
+    {"op":"resolve","target":"p1.onClose#1"},
+    {"op":"setProvider","domain":"d","provider":"p3"},
+    {"op":"setProvider","domain":"d","provider":"p2"},
+    {"op":"reject","target":"p3.onClose#1","error":{"code":"GENERAL","message":"close failed"}},
+    {"op":"status","domain":"d"},
+    {"op":"providerMetadata","domain":"d"}
+  ]
+}

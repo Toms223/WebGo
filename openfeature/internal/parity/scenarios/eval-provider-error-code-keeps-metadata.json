@@ -1,0 +1,45 @@
+{
+  "id": "eval-provider-error-code-keeps-metadata",
+  "requirements": ["1.4.8","1.4.10"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "number": {
+            "value": 7,
+            "variant": "seven",
+            "reason": "STATIC",
+            "errorCode": "TYPE_MISMATCH",
+            "errorMessage": "not a number",
+            "flagMetadata": {
+              "a": 1,
+              "s": "x"
+            }
+          }
+        },
+        "g": {
+          "boolean": {
+            "value": true,
+            "errorCode": "WEIRD_CODE",
+            "errorMessage": "odd"
+          }
+        },
+        "h": {
+          "string": {
+            "errorCode": "PARSE_ERROR"
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"number","flag":"f","default":1,"hooks":["h"]},
+    {"op":"evaluate","type":"boolean","flag":"g","default":false},
+    {"op":"evaluate","type":"string","flag":"h","default":"z"}
+  ]
+}

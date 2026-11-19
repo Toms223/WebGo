@@ -1,0 +1,16 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"evaluate"},
+{"context":{},"defaultValue":1,"flagKey":"f","flagValueType":"number","h":"h","kind":"hook","providerName":"p","stage":"before"},
+{"args":["f",1,{}],"call":"resolveNumberEvaluation","kind":"provider","p":"p"},
+{"context":{},"defaultValue":1,"error":{"code":"TYPE_MISMATCH","message":"not a number"},"flagKey":"f","flagValueType":"number","h":"h","kind":"hook","providerName":"p","stage":"error"},
+{"context":{},"defaultValue":1,"details":{"errorCode":"TYPE_MISMATCH","errorMessage":"not a number","flagKey":"f","flagMetadata":{"a":1,"s":"x"},"reason":"ERROR","value":1},"flagKey":"f","flagValueType":"number","h":"h","kind":"hook","providerName":"p","stage":"finally"},
+{"details":{"errorCode":"TYPE_MISMATCH","errorMessage":"not a number","flagKey":"f","flagMetadata":{"a":1,"s":"x"},"reason":"ERROR","value":1},"kind":"result"},
+{"i":2,"kind":"step","op":"evaluate"},
+{"args":["g",false,{}],"call":"resolveBooleanEvaluation","kind":"provider","p":"p"},
+{"details":{"errorCode":"GENERAL","errorMessage":"odd","flagKey":"g","flagMetadata":{},"reason":"ERROR","value":false},"kind":"result"},
+{"i":3,"kind":"step","op":"evaluate"},
+{"args":["h","z",{}],"call":"resolveStringEvaluation","kind":"provider","p":"p"},
+{"details":{"errorCode":"PARSE_ERROR","errorMessage":"","flagKey":"h","flagMetadata":{},"reason":"ERROR","value":"z"},"kind":"result"}
+]

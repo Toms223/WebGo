@@ -81,6 +81,10 @@ type Handler struct {
 	// and async, defer or crossorigin to set that attribute.
 	Scripts []string
 
+	// Imports are ES modules loaded through one importmap before app.wasm
+	// starts. Build checks them; page code reaches them with script.Use.
+	Imports []Module
+
 	// CacheableResources are extra files precached for offline use. Icon,
 	// Styles, Libraries, Scripts and Fonts are precached already.
 	CacheableResources []string
@@ -142,6 +146,7 @@ type Handler struct {
 	cachedPWAResources   *memoryCache
 	initErr              error
 	styleLinks           []string
+	imports              []importEntry
 	libraryLinks         []string
 	built                bool
 }
@@ -321,8 +326,14 @@ func (h *Handler) makeAppJS() []byte {
 		}
 	}
 
+	names := make([]string, 0, len(h.imports))
+	for _, e := range h.imports {
+		names = append(names, e.name)
+	}
+
 	s := appJS
 	s = strings.ReplaceAll(s, "{{.Env}}", jsonString(h.Env))
+	s = strings.ReplaceAll(s, "{{.Imports}}", jsonString(names))
 	s = strings.ReplaceAll(s, "{{.LoadingLabel}}", h.LoadingLabel)
 	s = strings.ReplaceAll(s, "{{.Wasm}}", h.Resources.Resolve("/web/app.wasm"))
 	s = strings.ReplaceAll(s, "{{.WasmContentLength}}", h.WasmContentLength)
@@ -352,6 +363,7 @@ func (h *Handler) makeAppWorkerJS() []byte {
 	setResources(h.Icon.Default, h.Icon.Large, h.Icon.Maskable)
 	setResources(h.headLinks()...)
 	setResources(h.Scripts...)
+	setResources(h.importURLs()...)
 	setResources(h.CacheableResources...)
 
 	resourcesTocache := make([]string, 0, len(resources))
@@ -668,6 +680,9 @@ func (h *Handler) servePage(w http.ResponseWriter, r *http.Request) {
 		privateBody(
 			Head().Body(
 				Meta().Charset("UTF-8"),
+				If(len(h.imports) > 0, func() UI {
+					return Raw(`<script type="importmap">` + h.importMapJSON() + `</script>`)
+				}),
 				Meta().
 					Name("author").
 					Content(page.Author()),

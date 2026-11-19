@@ -61,3 +61,10 @@ func TestRenderLabelsEachGroupOnce(t *testing.T) {
 		t.Errorf("expected one Guides and one Core group, got %s", out)
 	}
 }
+
+func TestHrefLeavesThePrefixToTheServerResolver(t *testing.T) {
+	t.Setenv("GOAPP_ROOT_PREFIX", "/WebGo")
+	if got := Href("/state"); got != "/state" {
+		t.Errorf("Href(\"/state\") = %q on the server, want %q: the handler's resolver adds the prefix", got, "/state")
+	}
+}

@@ -1,0 +1,26 @@
+{
+  "id": "ctx-domain-without-provider",
+  "requirements": ["3.2.2.3","3.2.4.2"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"client:nobody","event":"PROVIDER_RECONCILING","handler":"cn-recon"},
+    {"op":"addHandler","target":"client:nobody","event":"PROVIDER_CONTEXT_CHANGED","handler":"cn-ctx"},
+    {"op":"addHandler","target":"client:nobody","event":"PROVIDER_ERROR","handler":"cn-error"},
+    {"op":"addHandler","target":"client:nobody","event":"PROVIDER_READY","handler":"cn-ready"},
+    {"op":"setContext","domain":"nobody","context":{"targetingKey":"n"}},
+    {"op":"status","domain":"nobody"},
+    {"op":"getContext","domain":"nobody"},
+    {"op":"getContext"},
+    {"op":"evaluate","type":"string","flag":"f","default":"s","domain":"nobody"}
+  ]
+}

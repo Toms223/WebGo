@@ -1,0 +1,16 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"evaluate"},
+{"context":{},"defaultValue":"d","flagKey":"f","flagValueType":"string","h":"h","hints":{"k":"v","n":1,"nested":{"a":[true]}},"kind":"hook","providerName":"p","stage":"before"},
+{"args":["f","d",{}],"call":"resolveStringEvaluation","kind":"provider","p":"p"},
+{"context":{},"defaultValue":"d","details":{"flagKey":"f","flagMetadata":{},"value":"s"},"flagKey":"f","flagValueType":"string","h":"h","hints":{"k":"v","n":1,"nested":{"a":[true]}},"kind":"hook","providerName":"p","stage":"after"},
+{"context":{},"defaultValue":"d","details":{"flagKey":"f","flagMetadata":{},"value":"s"},"flagKey":"f","flagValueType":"string","h":"h","hints":{"k":"v","n":1,"nested":{"a":[true]}},"kind":"hook","providerName":"p","stage":"finally"},
+{"details":{"flagKey":"f","flagMetadata":{},"value":"s"},"kind":"result"},
+{"i":2,"kind":"step","op":"evaluate"},
+{"context":{},"defaultValue":"d","flagKey":"g","flagValueType":"string","h":"h","hints":{"k":"w"},"kind":"hook","providerName":"p","stage":"before"},
+{"args":["g","d",{}],"call":"resolveStringEvaluation","kind":"provider","p":"p"},
+{"context":{},"defaultValue":"d","error":{"message":"g"},"flagKey":"g","flagValueType":"string","h":"h","hints":{"k":"w"},"kind":"hook","providerName":"p","stage":"error"},
+{"context":{},"defaultValue":"d","details":{"errorCode":"GENERAL","errorMessage":"g","flagKey":"g","flagMetadata":{},"reason":"ERROR","value":"d"},"flagKey":"g","flagValueType":"string","h":"h","hints":{"k":"w"},"kind":"hook","providerName":"p","stage":"finally"},
+{"details":{"errorCode":"GENERAL","errorMessage":"g","flagKey":"g","flagMetadata":{},"reason":"ERROR","value":"d"},"kind":"result"}
+]

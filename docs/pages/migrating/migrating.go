@@ -17,9 +17,10 @@ func New() (*topic.Screen, error) {
 		Key:   "migrating",
 		Path:  Route,
 		Title: Title,
-		Lead:  "Move an app from go-app v11 and WebGo v0.0.5 to WebGo v0.1.0.",
+		Lead:  "Move an app to WebGo v1.0.0, from WebGo v0.1.0, or from go-app v11 and WebGo v0.0.5.",
 		Intro: intro,
 		Sections: []topic.Section{
+			{Title: "From v0.1.0", Body: fromV010},
 			{Title: "Import paths", Body: imports},
 			{Title: "Element styles", Body: elementStyles},
 			{Title: "One handler", Body: oneHandler},
@@ -33,8 +34,49 @@ func New() (*topic.Screen, error) {
 
 func intro() []app.UI {
 	return []app.UI{
-		doc.P("WebGo v0.1.0 contains go-app v11.0.5's `pkg/app` as its own `app` package. Components, routing, the context, state and actions keep their names and signatures. What changes is the import path, the inline-style setters, the handler, the update flow and a few rendering details."),
+		doc.P("Coming from WebGo v0.1.0, only ", doc.A("#from-v0-1-0", "From v0.1.0"), " applies: the `page` and `data` packages moved into `app`. Coming from go-app v11 or WebGo v0.0.5, read the other sections first, then that one."),
+		doc.P("Since v0.1.0, WebGo contains go-app v11.0.5's `pkg/app` as its own `app` package. Components, routing, the context, state and actions keep their names and signatures. What changes is the import path, the inline-style setters, the handler, the update flow and a few rendering details."),
 		doc.P("Each section shows the code before and after. The compiler finds the syntax changes; the behaviour changes are listed under ", doc.A("#behaviour-changes-without-syntax-changes", "Behaviour changes without syntax changes"), " and ", doc.A("#service-worker-and-updates", "Service worker and updates"), "."),
+	}
+}
+
+func fromV010() []app.UI {
+	return []app.UI{
+		doc.P("The `page` and `data` packages are deleted. Screens, the shell and models are `app` types now, next to `Compo`, and a screen is a component that the engine routes to. Before:"),
+		doc.Go(`settings := page.NewPage[AppState]("/settings").
+	WithLayout(&settingsLayout{}).
+	WithModel(model)
+
+base, err := page.NewBase(&shellLayout{}, shellModel, []page.Screen{home, settings})
+
+for _, route := range []string{"/", "/settings"} {
+	app.Route(route, func() app.Composer { return base })
+}`),
+		doc.P("After:"),
+		doc.Go(`app.Serve(func() *app.Shell[ShellState] {
+	settings := app.NewScreen[AppState]("/settings").
+		WithLayout(&settingsLayout{}).
+		WithModel(model).
+		WithLoader(fetchSettings)
+
+	shell, err := app.NewShell(&shellLayout{}, shellModel, home, settings)
+	if err != nil {
+		panic(err)
+	}
+	return shell
+})`),
+		doc.List(
+			doc.Item("`page.NewPage` becomes `app.NewScreen`, and `page.Page[T]` becomes `app.Screen[T]`."),
+			doc.Item("`page.NewBase(layout, model, []page.Screen{...})` becomes `app.NewShell(layout, model, screens...)`. Build it inside the function passed to `app.Serve`, which registers every screen's route. Build the screens there too: the server calls the function once per request."),
+			doc.Item("`data.NewViewModel` and `data.ViewModel[T]` become `app.NewModel` and `app.Model[T]`. `data.Action[T]`, returned by `Load`, becomes `app.Change[T]`. `Apply` and `Set` keep their signatures."),
+			doc.Item("`page.Layout[T]` becomes `app.Layout[T]`, with the same four methods. `Draw` takes `*app.Model[T]`. `page.Screen` becomes `app.Routed`: a component with a `Route()`."),
+			doc.Item("Delete every `OnAction` call. Every `Set` now fires the action named after the model's key, so styles bound to it follow on their own."),
+			doc.Item("Screens have no `Content()`, `OnMount`/`OnDismount` returning a screen, or `Mounted()`. A screen draws with `Render` like any component."),
+			doc.Item("`BasePath()` is gone. The shell reads the mount prefix from `GOAPP_ROOT_PREFIX`, which `app.Handler` sets from `Resources`; read it with `app.Getenv` if you need it."),
+			doc.Item("If you faked loading with a flag set in `OnMount`, move the fetch into `WithLoader`, or into `OnLoad` on any component. Its `Loading()` shows until it returns, and its `Error(err)` when it fails. See ", doc.A("/state#onload", "OnLoad"), "."),
+		),
+		doc.Sh(`go get github.com/Toms223/WebGo@v1.0.0
+go mod tidy`),
 	}
 }
 
@@ -51,12 +93,12 @@ func imports() []app.UI {
 )`),
 		doc.P("After:"),
 		doc.Go(`import "github.com/Toms223/WebGo/app"`),
-		doc.Plain(`require github.com/Toms223/WebGo v0.1.0`),
-		doc.Sh(`go get github.com/Toms223/WebGo@v0.1.0
+		doc.Plain(`require github.com/Toms223/WebGo v1.0.0`),
+		doc.Sh(`go get github.com/Toms223/WebGo@v1.0.0
 go mod tidy`),
 		doc.List(
 			doc.Item("Replace every `github.com/maxence-charriere/go-app/v11/pkg/app` import with `github.com/Toms223/WebGo/app`. The package name is still `app`."),
-			doc.Item("The two cannot be mixed. `page`, `data`, `markdown` and `style` take and return WebGo's `app` types, and go-app's `app.UI` is a different type: the compiler reports `cannot use … (variable of type \"github.com/maxence-charriere/go-app/v11/pkg/app\".UI) as \"github.com/Toms223/WebGo/app\".UI`."),
+			doc.Item("The two cannot be mixed. `markdown`, `style` and `script` take and return WebGo's `app` types, and go-app's `app.UI` is a different type: the compiler reports `cannot use … (variable of type \"github.com/maxence-charriere/go-app/v11/pkg/app\".UI) as \"github.com/Toms223/WebGo/app\".UI`."),
 			doc.Item("The `serve` package is gone, under ", doc.A("#one-handler", "One handler"), "."),
 			doc.Item("WebGo needs Go 1.27; go-app v11.0.5 needed 1.26. Build `app.wasm` with the same Go version as the server, because WebGo embeds a single `wasm_exec.js` instead of choosing one by Go version."),
 		),
@@ -91,7 +133,7 @@ func elementStyles() []app.UI {
 		doc.Go(`app.Div().Style(theme.Card, theme.Compact)`),
 		doc.P("A rule that has no class name is logged and skipped. See ", doc.A("/styling", "Styling"), "."),
 		doc.H("Generic code"),
-		doc.P("`page.Layout[T].Draw` returns `app.HTMLDiv`, and a type that implements it must use WebGo's. Helpers that styled several element types can use the new `app.Styler[E]` constraint:"),
+		doc.P("`app.Layout[T].Draw` returns `app.HTMLDiv`, and a type that implements it must use WebGo's. Helpers that styled several element types can use the new `app.Styler[E]` constraint:"),
 		doc.Go(`func card[E any](e app.Styler[E]) E {
 	return e.Style(theme.Card)
 }`),
@@ -199,8 +241,8 @@ func packages() []app.UI {
 	return []app.UI{
 		doc.P("Only go-app's `pkg/app` became part of WebGo. Its other packages have no WebGo import path:"),
 		doc.List(
-			doc.Item("`ui`, go-app's layout components. Use plain elements styled with the ", doc.A("/styling", "style"), " package, and ", doc.A("/state", "page.Base"), " for the shell."),
-			doc.Item("`analytics`. Add the provider's snippet to `Handler.RawHeaders` or `Handler.Scripts`, and call it through `app.Window()`."),
+			doc.Item("`ui`, go-app's layout components. Use plain elements styled with the ", doc.A("/styling", "style"), " package, and ", doc.A("/state#shell", "app.Shell"), " for the shell."),
+			doc.Item("`analytics`. Declare the provider's module in `Handler.Imports` with a `script.Script[T]` wrapper, see ", doc.A("/scripts", "Scripts"), ", and call the wrapper from components. A classic snippet still goes in `RawHeaders`."),
 			doc.Item("`cache`, an in-memory cache interface. Use a map guarded by a `sync.Mutex`, or a cache library."),
 			doc.Item("`cli`. Use `flag` from the standard library, or a library such as `cobra`."),
 			doc.Item("`logs`. Use `app.Log` and `app.Logf`, which write to the browser console in the browser and to standard output on the server, or `log/slog`. Replace `app.DefaultLogger` to send them elsewhere."),

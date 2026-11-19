@@ -1,0 +1,39 @@
+{
+  "id": "hooks-order-four-levels",
+  "requirements": ["4.4.1","4.4.2","4.3.3.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "hooks": [
+        "hProv"
+      ],
+      "flags": {
+        "f": {
+          "boolean": {
+            "value": true,
+            "reason": "STATIC"
+          }
+        },
+        "g": {
+          "boolean": {
+            "errorCode": "GENERAL",
+            "errorMessage": "g failed"
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "hApi": {},
+    "hClient": {},
+    "hInv": {},
+    "hProv": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHooks","level":"api","hooks":["hApi"]},
+    {"op":"addHooks","level":"client:","hooks":["hClient"]},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false,"hooks":["hInv"]},
+    {"op":"evaluate","type":"boolean","flag":"g","default":false,"hooks":["hInv"]}
+  ]
+}

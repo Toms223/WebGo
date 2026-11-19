@@ -55,11 +55,14 @@ app.Ul().Body(
 
 func lifecycle() []app.UI {
 	return []app.UI{
-		doc.P("A component opts into lifecycle events by implementing one-method interfaces. Each method is called on the UI goroutine. Every hook that takes a `Context`, except `OnUpdate`, is run through `ctx.Dispatch`, so the component renders again after it returns."),
+		doc.P("A component opts into lifecycle events by implementing one-method interfaces. Each method is called on the UI goroutine, except `OnLoad`, which runs on its own goroutine. Every hook that takes a `Context`, except `OnUpdate` and `OnLoad`, is run through `ctx.Dispatch`, so the component renders again after it returns."),
 		lifecycleDiagram(),
 		doc.Go(`type Initializer interface{ OnInit() }
 type PreRenderer interface{ OnPreRender(Context) }
 type Mounter interface{ OnMount(Context) }
+type Loader interface{ OnLoad(Context) error }
+type LoadingRenderer interface{ Loading() UI }
+type LoadErrorRenderer interface{ Error(error) UI }
 type Navigator interface{ OnNav(Context) }
 type Updater interface{ OnUpdate(Context) }
 type Resizer interface{ OnResize(Context) }
@@ -71,6 +74,9 @@ type DismountEnforcer interface{ CompoID() string }`),
 			doc.Item("`OnInit` runs once, before the first `Render`, on the server and in the browser. It has no context; use it to set defaults."),
 			doc.Item("`OnPreRender` runs on the server only, while the page is prerendered. Use it to set the title and description of the served HTML through `ctx.Page()`."),
 			doc.Item("`OnMount` runs in the browser only, once the component is in the DOM. It is the place to read state, start observers and start timers."),
+			doc.Item("`OnLoad` runs in the browser only, on its own goroutine, after `OnMount` and again after each `OnUpdate`. The component is not rendered until it returns. The hold is per component: its siblings and ancestors keep rendering. When the component was dismounted or a newer load started, the hold and the error of the superseded load are dropped, but side effects a plain `OnLoad` makes on its own fields are not. A `Screen`'s loader result is dropped too, because the screen checks the load before it publishes."),
+			doc.Item("`Loading` is what a `Loader` shows while `OnLoad` runs. Without it, nothing is drawn until the load finishes."),
+			doc.Item("`Error` is what a `Loader` shows when `OnLoad` returns an error. Without it, `Render` runs as if the load had succeeded. The next load, after a remount or an `OnUpdate`, tries again."),
 			doc.Item("`OnNav` runs on every navigation, including the first load, back and forward, and a change of fragment only, in every mounted component that implements it. It also runs on the server while a page is prerendered. See ", doc.A("/routing#fragments-and-onnav", "Fragments and OnNav"), "."),
 			doc.Item("`OnUpdate` runs when a parent's render changed one of the component's exported fields, after the fields are copied and before the component renders."),
 			doc.Item("`OnResize` runs after the window is resized (debounced by 250 ms) and when an ancestor calls `ctx.ResizeContent()`."),
@@ -104,7 +110,7 @@ func (c *clock) Render() app.UI {
 	})
 }`),
 		doc.P("The server never calls `OnMount`, so it prerenders `--:--:--`. In the browser the clock ticks once a second. It stops by itself when the component is dismounted, because `After` skips its function once the component is gone, and the loop is not rescheduled."),
-		doc.P("WebGo's `page.Page` and `page.Base` implement `OnMount`, `OnNav` and `OnDismount` for you and hand them to screens; see ", doc.A("/state#base", "Base"), "."),
+		doc.P("`app.Screen` implements `OnMount`, `OnLoad`, `Loading` and `Error` for you, and `app.Shell` implements `OnMount` and `OnNav`; see ", doc.A("/state", "Pages, layouts and state"), "."),
 	}
 }
 
@@ -149,7 +155,7 @@ func (q *quote) OnMount(ctx app.Context) {
 	})
 }`),
 		doc.Note("There is no `Update` method on `app.Compo`. Writing a field from another goroutine without `Dispatch` is a data race, and nothing renders it until something else flags the component."),
-		doc.P("For state shared by several components, WebGo's `data.ViewModel` wraps the state store with typed reads, writes and observers; see ", doc.A("/state#model", "Model"), ". The store itself is on ", doc.A("/actions#state", "State and actions"), "."),
+		doc.P("For state shared by several components, `app.Model` wraps the state store with typed reads, writes and observers; see ", doc.A("/state#model", "Model"), ". The store itself is on ", doc.A("/actions#state", "State and actions"), "."),
 	}
 }
 

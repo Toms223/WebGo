@@ -141,7 +141,7 @@ func TestEngineNavigate(t *testing.T) {
 		e := newTestEngine()
 		e.routes.route("/", NewZeroComponentFactory(&hello{}))
 
-		os.Setenv("GOAPP_ROOT_PREFIX", "/prefix")
+		t.Setenv("GOAPP_ROOT_PREFIX", "/prefix")
 		destination, _ := url.Parse("/prefix")
 		e.Navigate(destination, true)
 		require.Equal(t, "/prefix", e.lastVisitedURL.Path)
@@ -292,4 +292,68 @@ func TestEngineEncode(t *testing.T) {
 
 func newTestEngine() *engineX {
 	return NewTestEngine().(*engineX)
+}
+
+func navigateTo(t *testing.T, e *engineX, path string) {
+	t.Helper()
+	destination, err := url.Parse(path)
+	require.NoError(t, err)
+	e.page().ReplaceURL(destination)
+	e.Navigate(destination, false)
+	e.ConsumeAll()
+}
+
+func TestNavigateHandsTheRootItsPath(t *testing.T) {
+	asClient(t)
+	t.Setenv("GOAPP_ROOT_PREFIX", "")
+	a := newRoutedStub("/a", "a")
+	b := newRoutedStub("/b", "b")
+	layout := &shellLayout{name: "shell"}
+	serveTestShell(t, servedShell(layout, a, b))
+	e := newTestEngine()
+	e.routes = &routes
+
+	navigateTo(t, e, "/b")
+
+	require.Equal(t, 1, b.mountCalls)
+	require.Zero(t, a.mountCalls)
+	require.Empty(t, layout.errs)
+}
+
+func TestNavigatingBetweenScreensKeepsTheShell(t *testing.T) {
+	asClient(t)
+	t.Setenv("GOAPP_ROOT_PREFIX", "")
+	a := newRoutedStub("/a", "a")
+	b := newRoutedStub("/b", "b")
+	layout := &shellLayout{name: "shell"}
+	serveTestShell(t, servedShell(layout, a, b))
+	e := newTestEngine()
+	e.routes = &routes
+
+	navigateTo(t, e, "/a")
+	shell := e.body.body()[0]
+	navigateTo(t, e, "/b")
+
+	require.IsType(t, &Shell[screenState]{}, shell)
+	require.Same(t, shell, e.body.body()[0])
+	require.Equal(t, 1, a.mountCalls)
+	require.Equal(t, 1, a.dismountCalls)
+	require.Equal(t, 1, b.mountCalls)
+}
+
+func TestNavigateStripsThePrefixBeforeSetPath(t *testing.T) {
+	asClient(t)
+	a := newRoutedStub("/a", "a")
+	b := newRoutedStub("/b", "b")
+	layout := &shellLayout{name: "shell"}
+	serveTestShell(t, servedShell(layout, a, b))
+	t.Setenv("GOAPP_ROOT_PREFIX", "/WebGo")
+	e := newTestEngine()
+	e.routes = &routes
+
+	navigateTo(t, e, "/WebGo/b")
+
+	require.Equal(t, 1, b.mountCalls)
+	require.Zero(t, a.mountCalls)
+	require.Empty(t, layout.errs)
 }

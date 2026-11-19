@@ -1,0 +1,35 @@
+{
+  "id": "lifecycle-clear-providers",
+  "requirements": ["1.6.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onClose": "sync"
+    },
+    "q": {
+      "runsOn": "client",
+      "onClose": "sync",
+      "onContextChange": "sync"
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"addHooks","level":"api","hooks":["h"]},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hA"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"setProvider","domain":"zeta","provider":"q"},
+    {"op":"setProvider","domain":"alpha","provider":"q"},
+    {"op":"setContext","context":{"targetingKey":"g"}},
+    {"op":"setContext","domain":"zeta","context":{"targetingKey":"z"}},
+    {"op":"clearProviders"},
+    {"op":"status"},
+    {"op":"status","domain":"zeta"},
+    {"op":"providerMetadata","domain":"zeta"},
+    {"op":"getContext","domain":"zeta"},
+    {"op":"getContext"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true}
+  ]
+}

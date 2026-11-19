@@ -1,0 +1,98 @@
+{
+  "id": "mem-evaluation-feature",
+  "requirements": ["1.3.1.1","1.4.1.1","2.2.1","3.2.2.1"],
+  "providers": {
+    "mem": {
+      "memory": {
+        "boolean-flag": {
+          "disabled": false,
+          "variants": {
+            "on": true,
+            "off": false
+          },
+          "defaultVariant": "on"
+        },
+        "string-flag": {
+          "disabled": false,
+          "variants": {
+            "greeting": "hi",
+            "parting": "bye"
+          },
+          "defaultVariant": "greeting"
+        },
+        "integer-flag": {
+          "disabled": false,
+          "variants": {
+            "one": 1,
+            "ten": 10
+          },
+          "defaultVariant": "ten"
+        },
+        "float-flag": {
+          "disabled": false,
+          "variants": {
+            "tenth": 0.1,
+            "half": 0.5
+          },
+          "defaultVariant": "half"
+        },
+        "object-flag": {
+          "disabled": false,
+          "variants": {
+            "empty": {},
+            "template": {
+              "showImages": true,
+              "title": "Check out these pics!",
+              "imagesPerPage": 100
+            }
+          },
+          "defaultVariant": "template"
+        },
+        "context-aware": {
+          "disabled": false,
+          "variants": {
+            "internal": "INTERNAL",
+            "external": "EXTERNAL"
+          },
+          "defaultVariant": "external",
+          "contextEvaluator": {
+            "match": {
+              "fn": "Sulisław",
+              "ln": "Świętopełk",
+              "age": 29,
+              "customer": false
+            },
+            "variant": "internal"
+          }
+        },
+        "wrong-flag": {
+          "disabled": false,
+          "variants": {
+            "one": "uno",
+            "two": "dos"
+          },
+          "defaultVariant": "one"
+        }
+      }
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"mem"},
+    {"op":"evaluate","type":"boolean","flag":"boolean-flag","default":false},
+    {"op":"evaluate","type":"string","flag":"string-flag","default":"bye"},
+    {"op":"evaluate","type":"number","flag":"integer-flag","default":1},
+    {"op":"evaluate","type":"number","flag":"float-flag","default":0.1},
+    {"op":"evaluate","type":"object","flag":"object-flag","default":null},
+    {"op":"evaluate","type":"boolean","flag":"boolean-flag","default":false},
+    {"op":"evaluate","type":"string","flag":"string-flag","default":"bye"},
+    {"op":"evaluate","type":"number","flag":"integer-flag","default":1},
+    {"op":"evaluate","type":"number","flag":"float-flag","default":0.1},
+    {"op":"evaluate","type":"object","flag":"object-flag","default":null},
+    {"op":"setContext","context":{"fn":"Sulisław","ln":"Świętopełk","age":29,"customer":false}},
+    {"op":"evaluate","type":"string","flag":"context-aware","default":"EXTERNAL"},
+    {"op":"setContext","context":{}},
+    {"op":"evaluate","type":"string","flag":"context-aware","default":"nope"},
+    {"op":"evaluate","type":"string","flag":"missing-flag","default":"uh-oh"},
+    {"op":"evaluate","type":"number","flag":"wrong-flag","default":13}
+  ]
+}

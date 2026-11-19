@@ -1,0 +1,22 @@
+{
+  "id": "ctx-handler-reads-status",
+  "requirements": ["5.3.4.2","5.3.4.3"],
+  "partial": "D10",
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"hR","readStatus":""},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"hC","readStatus":""},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"hE","readStatus":""},
+    {"op":"setContext","context":{"targetingKey":"a"}},
+    {"op":"resolve","target":"p.onContextChange#1"},
+    {"op":"setContext","context":{"targetingKey":"b"}},
+    {"op":"reject","target":"p.onContextChange#2","error":{"code":"GENERAL","message":"x"}},
+    {"op":"status"}
+  ]
+}

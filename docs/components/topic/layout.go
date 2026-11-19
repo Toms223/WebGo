@@ -1,10 +1,11 @@
 package topic
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/Toms223/WebGo/app"
-	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/theme"
-	"github.com/Toms223/WebGo/page"
 )
 
 const (
@@ -34,12 +35,12 @@ func (l *Layout) Error(err error) app.UI {
 	return app.Div().Style(theme.Topic, theme.TopicError).Text(err.Error())
 }
 
-func (l *Layout) Body(content ...app.UI) page.Layout[State] {
+func (l *Layout) Body(content ...app.UI) app.Layout[State] {
 	l.body = content
 	return l
 }
 
-func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
+func (l *Layout) Draw(m *app.Model[State]) app.HTMLDiv {
 	state := m.State()
 	header := []app.UI{app.H1().Style(theme.TopicTitle).Text(l.title)}
 	if l.lead != "" {
@@ -53,7 +54,7 @@ func (l *Layout) Draw(m *data.ViewModel[State]) app.HTMLDiv {
 	if len(l.sections) > 0 {
 		at := l.index(state.Active)
 		children = append(children, NewRail(l.sections, at, l.visit))
-		main = append(main, l.section(at, state.Turn), l.pager(at))
+		main = append(main, l.section(at, state.Turn), l.pager(at), folio(at))
 	}
 	children = append(children, app.Div().Style(theme.TopicMain).Body(main...))
 	return app.Div().Style(theme.Topic).ID(topicID).Body(children...)
@@ -88,7 +89,11 @@ func (l *Layout) section(at, turn int) app.UI {
 	if turn%2 == 1 {
 		classes = append(classes, theme.TurnB)
 	}
-	body := append([]app.UI{app.H2().Style(theme.SectionHeading).ID(headingID).TabIndex(-1).Text(s.Title)}, anchor(s.Body(), s.Subs)...)
+	heading := app.H2().Style(theme.SectionHeading).ID(headingID).TabIndex(-1).Body(
+		app.Span().Style(theme.SectionNumber).Aria("hidden", "true").Text("§"+strconv.Itoa(at+1)),
+		app.Text(s.Title),
+	)
+	body := append([]app.UI{heading}, anchor(s.Body(), s.Subs)...)
 	return app.Section().Style(classes...).ID(sectionID).Body(body...)
 }
 
@@ -101,6 +106,10 @@ func (l *Layout) pager(at int) app.UI {
 		links = append(links, l.pagerLink(l.sections[at+1], "Next", true))
 	}
 	return app.Nav().Style(theme.Pager).Aria("label", "Neighbouring sections").Body(links...)
+}
+
+func folio(at int) app.UI {
+	return app.Span().Style(theme.TopicFolio).Aria("hidden", "true").Text(fmt.Sprintf("%02d", at+1))
 }
 
 func (l *Layout) pagerLink(s section, label string, next bool) app.UI {

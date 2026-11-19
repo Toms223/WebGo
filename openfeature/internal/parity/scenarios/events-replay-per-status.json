@@ -1,0 +1,40 @@
+{
+  "id": "events-replay-per-status",
+  "requirements": ["5.3.3","1.7.2.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "initialize": "deferred",
+      "onContextChange": "deferred",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"h1"},
+    {"op":"resolve","target":"p.initialize#1"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"h2"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"h3"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"h3b"},
+    {"op":"emit","provider":"p","event":"PROVIDER_STALE"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"h4"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_STALE","handler":"h5"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"h5b"},
+    {"op":"emit","provider":"p","event":"PROVIDER_ERROR","details":{"message":"e"}},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"h6"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"h7"},
+    {"op":"emit","provider":"p","event":"PROVIDER_ERROR","details":{"message":"f","errorCode":"PROVIDER_FATAL"}},
+    {"op":"status"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"h8"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"h9"},
+    {"op":"setContext","context":{"targetingKey":"u"}},
+    {"op":"status"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"h10"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_RECONCILING","handler":"h11"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"h12"},
+    {"op":"resolve","target":"p.onContextChange#1"},
+    {"op":"status"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONTEXT_CHANGED","handler":"h13"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"h14"}
+  ]
+}

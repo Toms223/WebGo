@@ -33,19 +33,19 @@ func New() (*topic.Screen, error) {
 
 func intro() []app.UI {
 	return []app.UI{
-		doc.Note("This guide targets `github.com/Toms223/WebGo v0.1.0`. `v0.0.1` and `v0.0.2` do not work and should not be used."),
+		doc.Note("This guide targets `github.com/Toms223/WebGo v1.0.0`. `v0.0.1` and `v0.0.2` do not work and should not be used."),
 	}
 }
 
 func install() []app.UI {
 	return []app.UI{
 		doc.P("Run this in your module:"),
-		doc.Sh(`go get github.com/Toms223/WebGo@v0.1.0`),
+		doc.Sh(`go get github.com/Toms223/WebGo@v1.0.0`),
 		doc.P("This adds WebGo to your `go.mod`. Everything comes from this one module, including the `app` package at `github.com/Toms223/WebGo/app`."),
 		doc.H("Requirements"),
 		doc.List(
 			doc.Item("Go, matching the version required by your `go.mod`."),
-			doc.Item("`github.com/Toms223/WebGo`, version `v0.1.0` or later."),
+			doc.Item("`github.com/Toms223/WebGo`, version `v1.0.0` or later."),
 		),
 	}
 }
@@ -79,7 +79,7 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }`),
 		doc.P("`app.RunWhenOnBrowser` starts the app when the compiled binary is running inside a browser as WebAssembly. When the same binary runs on the server, this call does nothing and execution continues to the `http.Handle` and `http.ListenAndServe` calls, which serve the page and the compiled `app.wasm` file to the browser."),
-		doc.P("This example uses a plain `app.Compo` component. To build pages with WebGo's `Page` and `ViewModel` types instead, see the ", doc.A("/state", "pages and state guide"), "."),
+		doc.P("This example uses a plain `app.Compo` component. To build pages with WebGo's `Screen`, `Shell` and `Model` types instead, see the ", doc.A("/state", "pages and state guide"), "."),
 	}
 }
 
@@ -131,10 +131,10 @@ go build -o generate .
 func nextSteps() []app.UI {
 	return []app.UI{
 		doc.List(
-			doc.Item("See the ", doc.A("/state", "pages and state guide"), " for building pages with `Page`, `Base`, and `ViewModel`."),
+			doc.Item("See the ", doc.A("/state", "pages and state guide"), " for building pages with `Screen`, `Shell` and `Model`."),
 			doc.Item("See the ", doc.A("/markdown", "markdown guide"), " for rendering markdown content inside a page."),
 			doc.Item("See the ", doc.A("/styling", "Styling page"), " for writing typed CSS rules with the `style`, `css`, `kw`, `media`, `container` and `supports` packages: selectors, nesting, at-rules and `!important`."),
-			doc.Item("See the ", doc.A("/applying", "Applying page"), " for delivering those rules: stylesheets, `app.Handler`, `style.Run`, and rules driven by actions and `ViewModel.OnAction`."),
+			doc.Item("See the ", doc.A("/applying", "Applying page"), " for delivering those rules: stylesheets, `app.Handler`, `style.Run`, and rules driven by the actions every model `Set` fires."),
 		),
 	}
 }

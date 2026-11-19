@@ -1,0 +1,22 @@
+{
+  "id": "lifecycle-provider-metadata",
+  "requirements": ["1.1.5","1.2.2"],
+  "providers": {
+    "p": {
+      "name": "alpha-provider",
+      "runsOn": "client",
+      "metadata": {
+        "version": "1.2"
+      }
+    }
+  },
+  "steps": [
+    {"op":"providerMetadata"},
+    {"op":"setProvider","domain":"d","provider":"p"},
+    {"op":"providerMetadata","domain":"d"},
+    {"op":"providerMetadata","domain":"other"},
+    {"op":"providerMetadata"},
+    {"op":"clientMetadata","domain":"d","version":"3"},
+    {"op":"status","domain":"d"}
+  ]
+}

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/Toms223/WebGo/app"
+	demos "github.com/Toms223/WebGo/docs/pages/scripts/demos"
 	"github.com/Toms223/WebGo/docs/theme"
 )
 
@@ -13,6 +14,7 @@ func Handler(repository, webDir string) (*app.Handler, error) {
 		Description: "Documentation for the WebGo framework",
 		Lang:        "en",
 		Icon:        app.Icon{Default: "/web/icon.png", Large: "/web/icon.png", SVG: "/web/icon.svg"},
+		Imports:     []app.Module{demos.Confetti{}},
 		Styles:      theme.Styles(),
 		WebDir:      webDir,
 	}

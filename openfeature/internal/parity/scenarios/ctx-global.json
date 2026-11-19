@@ -1,0 +1,35 @@
+{
+  "id": "ctx-global",
+  "requirements": ["3.2.2.1","3.2.2.2","3.3.2.1","3.2.4.1","5.3.4.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "sync",
+      "flags": {
+        "f": {
+          "boolean": {
+            "value": true
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_RECONCILING","handler":"c-recon"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONTEXT_CHANGED","handler":"c-ctx"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"c-error"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"c-ready"},
+    {"op":"setContext","context":{"targetingKey":"u1","tier":"gold","n":1,"when":{"$date":"2024-02-03T04:05:06.007Z"},"tags":["a","b"]}},
+    {"op":"status"},
+    {"op":"getContext"},
+    {"op":"getContext","domain":"nobody"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false},
+    {"op":"setContext","context":{}},
+    {"op":"getContext"}
+  ]
+}

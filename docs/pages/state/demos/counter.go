@@ -5,7 +5,6 @@ import (
 
 	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/css"
-	"github.com/Toms223/WebGo/data"
 	"github.com/Toms223/WebGo/docs/components/example"
 	"github.com/Toms223/WebGo/kw"
 	"github.com/Toms223/WebGo/style"
@@ -65,8 +64,8 @@ func (d *counterDemo) save(ctx app.Context, e app.Event) {
 	counter.Load(ctx).SetAndPersist(counter.State())
 }
 
-func mustModel[T any](key string, value *T) *data.ViewModel[T] {
-	m, err := data.NewViewModel(key, value)
+func mustModel[T any](key string, value *T) *app.Model[T] {
+	m, err := app.NewModel(key, value)
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +73,7 @@ func mustModel[T any](key string, value *T) *data.ViewModel[T] {
 }
 
 func Items() []style.Item {
-	return []style.Item{CounterBox}
+	return []style.Item{CounterBox, LoaderBox, SiblingRow, SiblingBox, SiblingReady}
 }
 
 const counterSource = `const CounterKey = "demo/counter"
@@ -124,5 +123,5 @@ func (d *counterDemo) save(ctx app.Context, e app.Event) {
 var CounterExample = example.Example{Name: "counter.go", Source: counterSource, Live: CounterDemo}
 
 func Examples() []example.Example {
-	return []example.Example{CounterExample}
+	return []example.Example{CounterExample, LoaderExample, SiblingsExample}
 }

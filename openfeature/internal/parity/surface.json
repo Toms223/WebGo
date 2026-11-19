@@ -1,0 +1,734 @@
+{
+  "OpenFeature": {
+    "go": "openfeature"
+  },
+  "OpenFeature.setProvider": {
+    "go": "SetProvider"
+  },
+  "OpenFeature.setProviderAndWait": {
+    "go": "SetProviderAndWait"
+  },
+  "OpenFeature.getProvider": {
+    "go": "GetProvider"
+  },
+  "OpenFeature.getProviderMetadata": {
+    "go": "ProviderMetadata"
+  },
+  "OpenFeature.providerMetadata": {
+    "go": "ProviderMetadata"
+  },
+  "OpenFeature.setContext": {
+    "go": "SetContext"
+  },
+  "OpenFeature.getContext": {
+    "go": "GetContext"
+  },
+  "OpenFeature.clearContext": {
+    "go": "ClearContext"
+  },
+  "OpenFeature.clearContexts": {
+    "go": "ClearContexts"
+  },
+  "OpenFeature.addHooks": {
+    "go": "AddHooks"
+  },
+  "OpenFeature.getHooks": {
+    "go": "Hooks"
+  },
+  "OpenFeature.clearHooks": {
+    "go": "ClearHooks"
+  },
+  "OpenFeature.addHandler": {
+    "go": "AddHandler"
+  },
+  "OpenFeature.getHandlers": {
+    "go": "Handlers"
+  },
+  "OpenFeature.clearHandlers": {
+    "go": "ClearHandlers"
+  },
+  "OpenFeature.getClient": {
+    "go": [
+      "GetClient",
+      "GetClientVersion"
+    ]
+  },
+  "OpenFeature.setLogger": {
+    "go": "SetLogger"
+  },
+  "OpenFeature.clearProviders": {
+    "go": "ClearProviders"
+  },
+  "OpenFeature.close": {
+    "go": "Close"
+  },
+  "OpenFeature.removeHandler": {
+    "deviation": "D1"
+  },
+  "OpenFeature.getProviderStatus": {
+    "go": "ProviderStatus"
+  },
+  "OpenFeature.runProviderContextChangeHandler": {
+    "internal": "reconcile"
+  },
+  "OpenFeature.setAwaitableProvider": {
+    "internal": "setAwaitableProvider"
+  },
+  "OpenFeature.getProviderForClient": {
+    "internal": "wrapperFor"
+  },
+  "OpenFeature.buildAndCacheEventEmitterForClient": {
+    "internal": "emitterFor"
+  },
+  "OpenFeature.getUnboundEmitters": {
+    "internal": "unboundEmitters"
+  },
+  "OpenFeature.getAssociatedEventEmitters": {
+    "internal": "associatedEmitters"
+  },
+  "OpenFeature.transferListeners": {
+    "internal": "transferListeners"
+  },
+  "OpenFeature.clearProvidersAndSetDefault": {
+    "internal": "close"
+  },
+  "OpenFeature.getProviderInstanceBinding": {
+    "internal": "instanceBinding"
+  },
+  "OpenFeature.assertDomainScopedBindingAllowed": {
+    "internal": "setAwaitableProvider"
+  },
+  "OpenFeature.allProviders": {
+    "internal": "inAll"
+  },
+  "OpenFeature.handleShutdownError": {
+    "internal": "shutdownError"
+  },
+  "Client.getBooleanValue": {
+    "go": "Client.Boolean"
+  },
+  "Client.getBooleanDetails": {
+    "go": "Client.BooleanDetails"
+  },
+  "Client.getStringValue": {
+    "go": "Client.String"
+  },
+  "Client.getStringDetails": {
+    "go": "Client.StringDetails"
+  },
+  "Client.getNumberValue": {
+    "go": "Client.Number"
+  },
+  "Client.getNumberDetails": {
+    "go": "Client.NumberDetails"
+  },
+  "Client.getObjectValue": {
+    "go": "Client.Object"
+  },
+  "Client.getObjectDetails": {
+    "go": "Client.ObjectDetails"
+  },
+  "Client.track": {
+    "go": "Client.Track"
+  },
+  "Client.addHooks": {
+    "go": "Client.AddHooks"
+  },
+  "Client.getHooks": {
+    "go": "Client.Hooks"
+  },
+  "Client.clearHooks": {
+    "go": "Client.ClearHooks"
+  },
+  "Client.setLogger": {
+    "go": "Client.SetLogger"
+  },
+  "Client.addHandler": {
+    "go": "Client.AddHandler"
+  },
+  "Client.getHandlers": {
+    "go": "Client.Handlers"
+  },
+  "Client.metadata": {
+    "go": "Client.Metadata"
+  },
+  "Client.providerStatus": {
+    "go": "Client.ProviderStatus"
+  },
+  "Client.removeHandler": {
+    "deviation": "D1"
+  },
+  "ProviderEvents": {
+    "go": "Event"
+  },
+  "ClientProviderEvents": {
+    "go": "Event"
+  },
+  "AllProviderEvents": {
+    "go": "Event"
+  },
+  "ProviderEvents.Ready": {
+    "go": "EventReady",
+    "value": "PROVIDER_READY"
+  },
+  "ProviderEvents.Error": {
+    "go": "EventError",
+    "value": "PROVIDER_ERROR"
+  },
+  "ProviderEvents.ConfigurationChanged": {
+    "go": "EventConfigurationChanged",
+    "value": "PROVIDER_CONFIGURATION_CHANGED"
+  },
+  "ProviderEvents.ContextChanged": {
+    "go": "EventContextChanged",
+    "value": "PROVIDER_CONTEXT_CHANGED"
+  },
+  "ProviderEvents.Reconciling": {
+    "go": "EventReconciling",
+    "value": "PROVIDER_RECONCILING"
+  },
+  "ProviderEvents.Stale": {
+    "go": "EventStale",
+    "value": "PROVIDER_STALE"
+  },
+  "ProviderStatus": {
+    "go": "Status"
+  },
+  "ClientProviderStatus": {
+    "go": "Status"
+  },
+  "AllProviderStatus": {
+    "go": "Status"
+  },
+  "ProviderStatus.NOT_READY": {
+    "go": "StatusNotReady",
+    "value": "NOT_READY"
+  },
+  "ProviderStatus.READY": {
+    "go": "StatusReady",
+    "value": "READY"
+  },
+  "ProviderStatus.ERROR": {
+    "go": "StatusError",
+    "value": "ERROR"
+  },
+  "ProviderStatus.STALE": {
+    "go": "StatusStale",
+    "value": "STALE"
+  },
+  "ProviderStatus.FATAL": {
+    "go": "StatusFatal",
+    "value": "FATAL"
+  },
+  "ProviderStatus.RECONCILING": {
+    "go": "StatusReconciling",
+    "value": "RECONCILING"
+  },
+  "ErrorCode": {
+    "go": "ErrorCode"
+  },
+  "ErrorCode.PROVIDER_NOT_READY": {
+    "go": "CodeProviderNotReady",
+    "value": "PROVIDER_NOT_READY"
+  },
+  "ErrorCode.PROVIDER_FATAL": {
+    "go": "CodeProviderFatal",
+    "value": "PROVIDER_FATAL"
+  },
+  "ErrorCode.FLAG_NOT_FOUND": {
+    "go": "CodeFlagNotFound",
+    "value": "FLAG_NOT_FOUND"
+  },
+  "ErrorCode.PARSE_ERROR": {
+    "go": "CodeParseError",
+    "value": "PARSE_ERROR"
+  },
+  "ErrorCode.TYPE_MISMATCH": {
+    "go": "CodeTypeMismatch",
+    "value": "TYPE_MISMATCH"
+  },
+  "ErrorCode.TARGETING_KEY_MISSING": {
+    "go": "CodeTargetingKeyMissing",
+    "value": "TARGETING_KEY_MISSING"
+  },
+  "ErrorCode.INVALID_CONTEXT": {
+    "go": "CodeInvalidContext",
+    "value": "INVALID_CONTEXT"
+  },
+  "ErrorCode.GENERAL": {
+    "go": "CodeGeneral",
+    "value": "GENERAL"
+  },
+  "StandardResolutionReasons": {
+    "go": "Reason"
+  },
+  "StandardResolutionReasons.STATIC": {
+    "go": "ReasonStatic",
+    "value": "STATIC"
+  },
+  "StandardResolutionReasons.DEFAULT": {
+    "go": "ReasonDefault",
+    "value": "DEFAULT"
+  },
+  "StandardResolutionReasons.TARGETING_MATCH": {
+    "go": "ReasonTargetingMatch",
+    "value": "TARGETING_MATCH"
+  },
+  "StandardResolutionReasons.SPLIT": {
+    "go": "ReasonSplit",
+    "value": "SPLIT"
+  },
+  "StandardResolutionReasons.CACHED": {
+    "go": "ReasonCached",
+    "value": "CACHED"
+  },
+  "StandardResolutionReasons.DISABLED": {
+    "go": "ReasonDisabled",
+    "value": "DISABLED"
+  },
+  "StandardResolutionReasons.UNKNOWN": {
+    "go": "ReasonUnknown",
+    "value": "UNKNOWN"
+  },
+  "StandardResolutionReasons.STALE": {
+    "go": "ReasonStale",
+    "value": "STALE"
+  },
+  "StandardResolutionReasons.ERROR": {
+    "go": "ReasonError",
+    "value": "ERROR"
+  },
+  "OpenFeatureError": {
+    "go": "Error"
+  },
+  "FlagNotFoundError": {
+    "go": "Error",
+    "code": "FLAG_NOT_FOUND"
+  },
+  "GeneralError": {
+    "go": "Error",
+    "code": "GENERAL"
+  },
+  "InvalidContextError": {
+    "go": "Error",
+    "code": "INVALID_CONTEXT"
+  },
+  "ParseError": {
+    "go": "Error",
+    "code": "PARSE_ERROR"
+  },
+  "ProviderFatalError": {
+    "go": "Error",
+    "code": "PROVIDER_FATAL"
+  },
+  "ProviderNotReadyError": {
+    "go": "Error",
+    "code": "PROVIDER_NOT_READY"
+  },
+  "TargetingKeyMissingError": {
+    "go": "Error",
+    "code": "TARGETING_KEY_MISSING"
+  },
+  "TypeMismatchError": {
+    "go": "Error",
+    "code": "TYPE_MISMATCH"
+  },
+  "InMemoryProvider": {
+    "go": "memprovider.Provider"
+  },
+  "TypedInMemoryProvider": {
+    "go": "memprovider.Provider"
+  },
+  "InMemoryProvider.putConfiguration": {
+    "go": "memprovider.Provider.PutConfiguration"
+  },
+  "InMemoryProvider.resolveBooleanEvaluation": {
+    "go": "memprovider.Provider.ResolveBoolean"
+  },
+  "InMemoryProvider.resolveNumberEvaluation": {
+    "go": "memprovider.Provider.ResolveNumber"
+  },
+  "InMemoryProvider.resolveStringEvaluation": {
+    "go": "memprovider.Provider.ResolveString"
+  },
+  "InMemoryProvider.resolveObjectEvaluation": {
+    "go": "memprovider.Provider.ResolveObject"
+  },
+  "InMemoryProvider.resolveAndCheckFlag": {
+    "internal": "memprovider resolve"
+  },
+  "InMemoryProvider.resolveFlagWithReason": {
+    "internal": "memprovider resolve"
+  },
+  "InMemoryProvider.lookupFlagValue": {
+    "internal": "memprovider resolve"
+  },
+  "TypedInMemoryProvider.putConfiguration": {
+    "go": "memprovider.Provider.PutConfiguration"
+  },
+  "TypedInMemoryProvider.resolveBooleanEvaluation": {
+    "go": "memprovider.Provider.ResolveBoolean"
+  },
+  "TypedInMemoryProvider.resolveNumberEvaluation": {
+    "go": "memprovider.Provider.ResolveNumber"
+  },
+  "TypedInMemoryProvider.resolveStringEvaluation": {
+    "go": "memprovider.Provider.ResolveString"
+  },
+  "TypedInMemoryProvider.resolveObjectEvaluation": {
+    "go": "memprovider.Provider.ResolveObject"
+  },
+  "TypedInMemoryProvider.resolveAndCheckFlag": {
+    "internal": "memprovider resolve"
+  },
+  "TypedInMemoryProvider.resolveFlagWithReason": {
+    "internal": "memprovider resolve"
+  },
+  "TypedInMemoryProvider.lookupFlagValue": {
+    "internal": "memprovider resolve"
+  },
+  "NOOP_PROVIDER": {
+    "go": "NoopProvider"
+  },
+  "OpenFeatureEventEmitter": {
+    "go": "Emitter"
+  },
+  "OpenFeatureEventEmitter.emit": {
+    "go": "Emitter.Emit"
+  },
+  "OpenFeatureEventEmitter.addHandler": {
+    "go": "Emitter.AddHandler"
+  },
+  "OpenFeatureEventEmitter.removeHandler": {
+    "deviation": "D1"
+  },
+  "OpenFeatureEventEmitter.removeAllHandlers": {
+    "go": "Emitter.RemoveAllHandlers"
+  },
+  "OpenFeatureEventEmitter.getHandlers": {
+    "go": "Emitter.Handlers"
+  },
+  "OpenFeatureEventEmitter.setLogger": {
+    "go": "Emitter.SetLogger"
+  },
+  "MapHookData": {
+    "go": "HookData"
+  },
+  "MapHookData.set": {
+    "go": "HookData.Set"
+  },
+  "MapHookData.get": {
+    "go": "HookData.Get"
+  },
+  "MapHookData.has": {
+    "go": "HookData.Has"
+  },
+  "MapHookData.delete": {
+    "go": "HookData.Delete"
+  },
+  "MapHookData.clear": {
+    "go": "HookData.Clear"
+  },
+  "withFrameworkMetadata": {
+    "deviation": "D6"
+  },
+  "MultiProvider": {
+    "deviation": "D8"
+  },
+  "FirstMatchStrategy": {
+    "deviation": "D8"
+  },
+  "FirstSuccessfulStrategy": {
+    "deviation": "D8"
+  },
+  "ComparisonStrategy": {
+    "deviation": "D8"
+  },
+  "BaseEvaluationStrategy": {
+    "deviation": "D8"
+  },
+  "BaseFirstMatchStrategy": {
+    "deviation": "D8"
+  },
+  "BaseFirstSuccessfulStrategy": {
+    "deviation": "D8"
+  },
+  "BaseComparisonStrategy": {
+    "deviation": "D8"
+  },
+  "StatusTracker": {
+    "deviation": "D8"
+  },
+  "AggregateError": {
+    "deviation": "D8"
+  },
+  "ErrorWithCode": {
+    "deviation": "D8"
+  },
+  "constructAggregateError": {
+    "deviation": "D8"
+  },
+  "throwAggregateErrorFromPromiseResults": {
+    "deviation": "D8"
+  },
+  "ServerProviderEvents": {
+    "go": "Event"
+  },
+  "ServerProviderStatus": {
+    "go": "Status"
+  },
+  "OpenFeatureAPI": {
+    "go": "package openfeature"
+  },
+  "OpenFeatureCommonAPI": {
+    "go": "package openfeature"
+  },
+  "DefaultLogger": {
+    "go": "DefaultLogger"
+  },
+  "DefaultLogger.error": {
+    "go": "Logger.Error"
+  },
+  "DefaultLogger.warn": {
+    "go": "Logger.Warn"
+  },
+  "DefaultLogger.info": {
+    "go": "Logger.Info"
+  },
+  "DefaultLogger.debug": {
+    "go": "Logger.Debug"
+  },
+  "TelemetryAttribute": {
+    "go": "TelemetryAttribute*"
+  },
+  "TelemetryAttribute.KEY": {
+    "go": "TelemetryAttributeKey",
+    "value": "feature_flag.key"
+  },
+  "TelemetryAttribute.ERROR_CODE": {
+    "go": "TelemetryAttributeErrorCode",
+    "value": "error.type"
+  },
+  "TelemetryAttribute.ERROR_MESSAGE": {
+    "go": "TelemetryAttributeErrorMessage",
+    "value": "error.message"
+  },
+  "TelemetryAttribute.VARIANT": {
+    "go": "TelemetryAttributeVariant",
+    "value": "feature_flag.result.variant"
+  },
+  "TelemetryAttribute.VALUE": {
+    "go": "TelemetryAttributeValue",
+    "value": "feature_flag.result.value"
+  },
+  "TelemetryAttribute.CONTEXT_ID": {
+    "go": "TelemetryAttributeContextID",
+    "value": "feature_flag.context.id"
+  },
+  "TelemetryAttribute.REASON": {
+    "go": "TelemetryAttributeReason",
+    "value": "feature_flag.result.reason"
+  },
+  "TelemetryAttribute.PROVIDER": {
+    "go": "TelemetryAttributeProvider",
+    "value": "feature_flag.provider.name"
+  },
+  "TelemetryAttribute.FLAG_SET_ID": {
+    "go": "TelemetryAttributeFlagSetID",
+    "value": "feature_flag.set.id"
+  },
+  "TelemetryAttribute.VERSION": {
+    "go": "TelemetryAttributeVersion",
+    "value": "feature_flag.version"
+  },
+  "TelemetryFlagMetadata": {
+    "go": "TelemetryFlagMetadata*"
+  },
+  "TelemetryFlagMetadata.CONTEXT_ID": {
+    "go": "TelemetryFlagMetadataContextID",
+    "value": "contextId"
+  },
+  "TelemetryFlagMetadata.FLAG_SET_ID": {
+    "go": "TelemetryFlagMetadataFlagSetID",
+    "value": "flagSetId"
+  },
+  "TelemetryFlagMetadata.VERSION": {
+    "go": "TelemetryFlagMetadataVersion",
+    "value": "version"
+  },
+  "createEvaluationEvent": {
+    "go": "CreateEvaluationEvent"
+  },
+  "ProviderWrapper": {
+    "internal": "providerWrapper"
+  },
+  "GenericEventEmitter": {
+    "internal": "Emitter internals (emitter.go)"
+  },
+  "SafeLogger": {
+    "internal": "newSafeLogger"
+  },
+  "LOG_LEVELS": {
+    "internal": "safeLogger level methods"
+  },
+  "instantiateErrorByErrorCode": {
+    "go": "NewError"
+  },
+  "statusMatchesEvent": {
+    "internal": "statusMatchesEvent"
+  },
+  "isObject": {
+    "internal": "not needed: Go has typed parameters"
+  },
+  "isString": {
+    "internal": "not needed: Go has typed parameters"
+  },
+  "objectOrUndefined": {
+    "internal": "not needed: Go options replace overloads"
+  },
+  "stringOrUndefined": {
+    "internal": "not needed: Go options replace overloads"
+  },
+  "type:EvaluationContext": {
+    "go": "Context"
+  },
+  "type:FlagMetadata": {
+    "go": "FlagMetadata"
+  },
+  "type:ResolutionDetails": {
+    "go": "ResolutionDetails"
+  },
+  "type:EvaluationDetails": {
+    "go": "EvaluationDetails"
+  },
+  "type:ProviderMetadata": {
+    "go": "Metadata"
+  },
+  "type:ClientMetadata": {
+    "go": "ClientMetadata"
+  },
+  "type:ClientMetadata.sdk": {
+    "deviation": "D6"
+  },
+  "type:ClientMetadata.framework": {
+    "deviation": "D6"
+  },
+  "type:TrackingEventDetails": {
+    "go": "TrackingDetails"
+  },
+  "type:Logger": {
+    "go": "Logger"
+  },
+  "type:EventHandler": {
+    "go": "Handler"
+  },
+  "type:EventDetails": {
+    "go": "EventDetails"
+  },
+  "type:EventOptions.signal": {
+    "deviation": "D1"
+  },
+  "type:Hook": {
+    "go": "Hook"
+  },
+  "type:HookContext": {
+    "go": "HookContext"
+  },
+  "type:HookHints": {
+    "go": "HookHints"
+  },
+  "type:Hook.before.returnValue": {
+    "absent": "4.3.3.1"
+  },
+  "type:EvaluationOptions.hooks": {
+    "go": "WithHooks"
+  },
+  "type:EvaluationOptions.hookHints": {
+    "go": "WithHookHints"
+  },
+  "type:EvaluationOptions.context": {
+    "absent": "3.2.2.2"
+  },
+  "type:Client.setContext": {
+    "absent": "3.2.2.2"
+  },
+  "type:TransactionContextPropagator": {
+    "absent": "3.3.2.1"
+  },
+  "type:FlagValueType": {
+    "go": "FlagType"
+  },
+  "type:FlagValueType.boolean": {
+    "go": "TypeBoolean",
+    "value": "boolean"
+  },
+  "type:FlagValueType.string": {
+    "go": "TypeString",
+    "value": "string"
+  },
+  "type:FlagValueType.number": {
+    "go": "TypeNumber",
+    "value": "number"
+  },
+  "type:FlagValueType.object": {
+    "go": "TypeObject",
+    "value": "object"
+  },
+  "type:Provider": {
+    "go": "Provider"
+  },
+  "type:Provider.metadata": {
+    "go": "Provider.Metadata"
+  },
+  "type:Provider.resolveBooleanEvaluation": {
+    "go": "Provider.ResolveBoolean"
+  },
+  "type:Provider.resolveStringEvaluation": {
+    "go": "Provider.ResolveString"
+  },
+  "type:Provider.resolveNumberEvaluation": {
+    "go": "Provider.ResolveNumber"
+  },
+  "type:Provider.resolveObjectEvaluation": {
+    "go": "Provider.ResolveObject"
+  },
+  "type:Provider.initialize": {
+    "go": "Initializer"
+  },
+  "type:Provider.onContextChange": {
+    "go": "ContextChanger"
+  },
+  "type:Provider.onClose": {
+    "go": "Closer"
+  },
+  "type:Provider.track": {
+    "go": "Tracker"
+  },
+  "type:Provider.hooks": {
+    "go": "Hooked"
+  },
+  "type:Provider.events": {
+    "go": "Eventer"
+  },
+  "type:Provider.runsOn": {
+    "go": "RunsOn"
+  },
+  "type:Provider.domainScoped": {
+    "go": "DomainScoped"
+  },
+  "type:Provider.initialize.nonPromise": {
+    "deviation": "D7"
+  },
+  "type:Provider.onContextChange.syncThrow": {
+    "deviation": "D2"
+  },
+  "type:ProviderEvents.rebindForwarding": {
+    "deviation": "D3"
+  },
+  "type:EvaluationContext.frozen": {
+    "deviation": "D4"
+  },
+  "type:Client.getNumberValue.int": {
+    "deviation": "D5"
+  }
+}

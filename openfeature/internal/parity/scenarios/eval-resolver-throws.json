@@ -1,0 +1,39 @@
+{
+  "id": "eval-resolver-throws",
+  "requirements": ["1.4.10"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "boolean": {
+            "throw": {
+              "code": "PARSE_ERROR",
+              "message": "bad json"
+            }
+          },
+          "string": {
+            "throw": {
+              "message": "plain error"
+            }
+          },
+          "number": {
+            "throw": {
+              "code": "PROVIDER_NOT_READY",
+              "message": "later"
+            }
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true,"hooks":["h"]},
+    {"op":"evaluate","type":"string","flag":"f","default":"s"},
+    {"op":"evaluate","type":"number","flag":"f","default":3}
+  ]
+}

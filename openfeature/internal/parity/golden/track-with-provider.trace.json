@@ -1,0 +1,19 @@
+[
+{"i":0,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":1,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":2,"kind":"step","op":"setContext"},
+{"kind":"return","op":"setContext"},
+{"i":3,"kind":"step","op":"setContext"},
+{"kind":"log","level":"debug","msg":"Unable to find context for 'd'."},
+{"kind":"return","op":"setContext"},
+{"i":4,"kind":"step","op":"track"},
+{"args":["click",{"targetingKey":"u"},{"k":"v","nested":{"a":[1]},"value":1.5}],"call":"track","kind":"provider","p":"p"},
+{"i":5,"kind":"step","op":"track"},
+{"args":["view",{"targetingKey":"u"},{}],"call":"track","kind":"provider","p":"p"},
+{"i":6,"kind":"step","op":"track"},
+{"args":["buy",{"targetingKey":"du"},{"value":0}],"call":"track","kind":"provider","p":"q"},
+{"i":7,"kind":"step","op":"status"},
+{"kind":"status","status":"READY"}
+]

@@ -49,7 +49,6 @@ type framesDemo struct{ app.Compo }
 func FramesDemo() app.UI { return &framesDemo{} }
 
 func (d *framesDemo) OnMount(ctx app.Context) {
-	speed.OnAction(ctx)
 	speed.Load(ctx).Set()
 }
 

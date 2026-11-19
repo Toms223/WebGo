@@ -1,0 +1,34 @@
+{
+  "id": "eval-no-reason-kept",
+  "requirements": ["1.4.7"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "boolean": {
+            "value": true
+          }
+        },
+        "g": {
+          "string": {
+            "value": "s",
+            "variant": "v"
+          }
+        },
+        "h": {
+          "number": {
+            "value": 3,
+            "reason": "CUSTOM_REASON"
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false},
+    {"op":"evaluate","type":"string","flag":"g","default":""},
+    {"op":"evaluate","type":"number","flag":"h","default":0}
+  ]
+}

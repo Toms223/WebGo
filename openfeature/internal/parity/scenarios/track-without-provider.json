@@ -1,0 +1,15 @@
+{
+  "id": "track-without-provider",
+  "requirements": ["6.1.2.1","2.7.2"],
+  "providers": {
+    "p": {
+      "runsOn": "client"
+    }
+  },
+  "steps": [
+    {"op":"track","name":"early"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"track","name":"click"},
+    {"op":"status"}
+  ]
+}

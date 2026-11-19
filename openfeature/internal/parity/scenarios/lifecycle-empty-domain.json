@@ -1,0 +1,30 @@
+{
+  "id": "lifecycle-empty-domain",
+  "requirements": ["1.1.2.2","5.2.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "events": true
+    },
+    "q": {
+      "runsOn": "client",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"hDefault"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"hEmpty","literalDomain":true},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_STALE","handler":"hEmptyStale","literalDomain":true},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_STALE","handler":"hDefaultStale"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"hApiStale"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"emit","provider":"p","event":"PROVIDER_STALE","details":{"message":"m"}},
+    {"op":"clientMetadata"},
+    {"op":"clientMetadata","domain":"","literalDomain":true},
+    {"op":"status"},
+    {"op":"status","domain":"","literalDomain":true},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_STALE","handler":"hEmptyLate","literalDomain":true},
+    {"op":"setProvider","domain":"","provider":"q","literalDomain":true},
+    {"op":"setProviderAndWait","domain":"","provider":"q","literalDomain":true}
+  ]
+}

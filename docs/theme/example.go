@@ -13,11 +13,9 @@ var Example = style.Class("example").Set(
 	css.Margin(css.Rem(0.35), css.Px(0)),
 	css.MinWidth(css.Px(0)),
 	line,
-	css.BorderRadius(css.Var("r-l")),
-	css.BoxShadow(css.Var("shadow")),
-	css.Background(css.Var("code")),
+	css.BoxShadow(css.Var("shadow-l")),
 	css.Overflow(kw.Hidden),
-)
+).Set(printout...)
 
 var ExampleBar = style.Class("example-bar").Set(
 	css.Display(kw.Flex),
@@ -26,8 +24,8 @@ var ExampleBar = style.Class("example-bar").Set(
 	css.JustifyContent(kw.SpaceBetween),
 	css.Gap(css.Rem(0.5)),
 	css.Padding(css.Rem(0.45), css.Rem(0.6), css.Rem(0.45), css.Rem(1)),
-	css.BorderBottom(css.Var("border"), kw.Solid, css.Var("line")),
-	css.Background(css.Var("lilac")),
+	css.BorderBottom(css.Px(2), kw.Dashed, css.Var("on-fill")),
+	css.Background(css.Var("sun")),
 	css.Color(css.Var("on-fill")),
 )
 
@@ -39,15 +37,14 @@ var ExampleTools = style.Class("example-tools").Set(
 
 var ExampleName = style.Class("example-name").
 	Set(label...).
-	Set(css.LetterSpacing(css.Em(0.1)), css.TextTransform(kw.None))
+	Set(css.FontSize(css.Rem(0.875)), css.LetterSpacing(css.Em(0.02)), css.TextTransform(kw.None))
 
 var ExampleTabs = style.Class("example-tabs").Set(
 	css.Display(kw.Flex),
 	css.Gap(css.Rem(0.3)),
 	css.Padding(css.Px(3)),
-	line,
-	css.BorderRadius(css.Px(999)),
-	css.Background(css.Var("panel")),
+	css.Border(css.Px(2), kw.Solid, css.Var("on-fill")),
+	css.Background(css.Var("code")),
 )
 
 var ExampleTab = style.Class("example-tab").
@@ -56,9 +53,9 @@ var ExampleTab = style.Class("example-tab").
 		css.Position(kw.Relative),
 		css.Padding(css.Rem(0.25), css.Rem(0.7)),
 		css.Border(css.Px(0)),
-		css.BorderRadius(css.Px(999)),
 		css.Background(kw.Transparent),
-		css.Color(css.Var("ink")),
+		css.Color(css.Var("code-on")),
+		css.FontSize(css.Rem(0.8125)),
 		css.Cursor(kw.Pointer),
 		css.Transition(css.Raw("background 120ms ease, color 120ms ease")),
 	).
@@ -67,8 +64,8 @@ var ExampleTab = style.Class("example-tab").
 	After(hitArea...)
 
 var ExampleTabOn = style.Class("example-tab-on").
-	Set(css.Background(css.Var("tab")), css.Color(css.Var("tab-on"))).
-	Hover(css.Background(css.Var("tab")))
+	Set(css.Background(css.Var("on-fill")), css.Color(css.Var("sun"))).
+	Hover(css.Background(css.Var("on-fill")))
 
 var hitArea = []css.Property{
 	css.Content(css.String("")),
@@ -88,13 +85,14 @@ var ExampleMore = style.Class("example-more").
 		css.MinHeight(css.Px(44)),
 		css.Padding(css.Rem(0.4), css.Rem(1)),
 		css.Border(css.Px(0)),
-		css.BorderTop(css.Var("border"), kw.Solid, css.Var("line")),
+		css.BorderTop(css.Px(2), kw.Dashed, css.Var("line")),
 		css.Background(css.Var("code")),
 		css.Color(css.Var("code-on")),
+		css.FontSize(css.Rem(0.8125)),
 		css.TextAlign(kw.Left),
 		css.Cursor(kw.Pointer),
 	).
-	Hover(css.Color(css.Var("code-fn"))).
+	Hover(css.Background(css.Var("code-mark"))).
 	FocusVisible(css.Outline(css.Px(3), kw.Solid, css.Var("code-on")), css.OutlineOffset(css.Px(-5)))
 
 var CopyButton = style.Class("copy").
@@ -102,11 +100,11 @@ var CopyButton = style.Class("copy").
 	Set(
 		css.Position(kw.Relative),
 		css.Padding(css.Rem(0.2), css.Rem(0.65)),
-		line,
-		css.BorderRadius(css.Px(999)),
-		css.Background(css.Var("panel")),
-		css.Color(css.Var("ink")),
-		css.FontSize(css.Rem(0.7)),
+		css.Border(css.Px(2), kw.Solid, css.Var("on-fill")),
+		css.BoxShadow(css.Raw("2px 2px 0 var(--on-fill)")),
+		css.Background(css.Var("code")),
+		css.Color(css.Var("code-on")),
+		css.FontSize(css.Rem(0.8125)),
 		css.Cursor(kw.Pointer),
 		css.Transition(css.Raw("transform 120ms ease, box-shadow 120ms ease")),
 	).
@@ -119,8 +117,8 @@ var CopyFloat = style.Class("copy-float").Set(
 	css.Position(kw.Absolute),
 	css.Top(css.Rem(0.6)),
 	css.Right(css.Rem(0.75)),
-	css.ZIndex(css.Int(1)),
-	css.Background(css.Var("lilac")),
+	css.ZIndex(css.Int(3)),
+	css.Background(css.Var("sun")),
 	css.Color(css.Var("on-fill")),
 )
 
@@ -138,6 +136,7 @@ var ExampleCode = style.Class("example-code").Set(
 
 var ExamplePre = Example.Descendant(ExampleCode).Set(
 	css.Margin(css.Px(0)),
+	css.Padding(css.Rem(1.1), css.Rem(1.25)),
 	css.Border(css.Px(0)),
 	css.BorderRadius(css.Px(0)),
 	css.BoxShadow(kw.None),
@@ -153,14 +152,15 @@ var ExampleLabel = style.Class("example-label").
 		css.Padding(css.Rem(0.45), css.Rem(1)),
 		css.BorderTop(css.Var("border"), kw.Solid, css.Var("line")),
 		css.BorderBottom(css.Var("border"), kw.Solid, css.Var("line")),
-		css.Background(css.Var("sun")),
-		css.Color(css.Var("on-fill")),
+		css.Background(css.Var("ink-blue")),
+		css.Color(css.Var("on-blue")),
+		css.FontSize(css.Rem(0.8125)),
 	).
 	Before(
 		css.Content(css.String("")),
-		css.Width(css.Px(9)),
-		css.Height(css.Px(9)),
-		css.Border(css.Px(1.5), kw.Solid, css.Var("line")),
+		css.Width(css.Px(10)),
+		css.Height(css.Px(10)),
+		css.Border(css.Px(2), kw.Solid, css.Var("on-blue")),
 		css.BorderRadius(css.Pct(50)),
 		css.Background(css.Var("coral")),
 	)

@@ -138,13 +138,13 @@ func (e *engineX) Navigate(destination *url.URL, updateHistory bool) {
 		return
 	}
 
-	path := strings.TrimPrefix(destination.Path, Getenv("GOAPP_ROOT_PREFIX"))
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
+	path := trimBasePath(normalizePath(destination.Path), rootPrefix())
 	root, ok := e.routes.createComponent(path)
 	if !ok {
 		root = notFoundComponent()
+	}
+	if r, ok := root.(routed); ok {
+		r.setPath(path)
 	}
 
 	if err := e.Load(root); err != nil {
@@ -153,6 +153,8 @@ func (e *engineX) Navigate(destination *url.URL, updateHistory bool) {
 			Wrap(err))
 	}
 }
+
+type routed interface{ setPath(path string) }
 
 func (e *engineX) initBrowser() {
 	if IsServer {

@@ -26,7 +26,7 @@ func New() (*topic.Screen, error) {
 			{Title: "Persisting and broadcasting", Body: persisting},
 			{Title: "Actions", Body: actions},
 			{Title: "Handling actions", Body: handling},
-			{Title: "Choosing between state, actions and ViewModel", Body: choosing},
+			{Title: "Choosing between state, actions and models", Body: choosing},
 		},
 		OnActivate: base.Activate,
 	})
@@ -35,7 +35,7 @@ func New() (*topic.Screen, error) {
 func intro() []app.UI {
 	return []app.UI{
 		doc.P("This page covers the two ways components in the `app` package talk to each other without holding references: states, which are named values any component can read and observe, and actions, which are named events carrying a value. This is go-app's state and action system, now part of WebGo's `app` package."),
-		doc.P("WebGo builds on both. `data.ViewModel`, on ", doc.A("/state", "Pages, layouts and state"), ", is a typed wrapper over one state, and dynamic styles, on ", doc.A("/applying#actions", "Applying"), ", react to actions. The UI goroutine, `Dispatch` and `Async` are on ", doc.A("/browser", "Concurrency and the browser"), "."),
+		doc.P("WebGo builds on both. `app.Model`, on ", doc.A("/state", "Pages, layouts and state"), ", is a typed wrapper over one state, and dynamic styles, on ", doc.A("/applying#actions", "Applying"), ", react to actions. The UI goroutine, `Dispatch` and `Async` are on ", doc.A("/browser", "Concurrency and the browser"), "."),
 	}
 }
 
@@ -49,6 +49,7 @@ func (ctx Context) DelState(state string)`),
 		doc.List(
 			doc.Item("`SetState` stores `v` under the key, replacing the previous value and its expiry."),
 			doc.Item("For every component observing the key, it queues a delivery on the UI goroutine: the value is copied into the observer's receiver, its `OnChange` runs, and the component re-renders. Observers do not see the value during the `SetState` call, only when the UI goroutine gets to it."),
+			doc.Item("It also posts an action named after the key, with `v` as its value, so an action handler or a dynamic style can follow the state."),
 			doc.Item("It returns a `State`, whose methods persist, expire or broadcast the value just set. They are under ", doc.A("#persisting-and-broadcasting", "Persisting and broadcasting"), "."),
 			doc.Item("A pointer is stored as the pointer. Readers get a copy of what it points to at the time they read, so changing the pointed-to value after `SetState` changes what later readers get without notifying observers. Call `SetState` again after a change."),
 		),

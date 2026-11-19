@@ -185,16 +185,15 @@ func (m *stateManager) getStoredState(ctx Context, state string, receiver any) e
 	}
 
 	if len(value.EncryptedValue) != 0 {
-		return ctx.Decrypt(value.EncryptedValue, receiver)
+		return ctx.Decrypt(value.EncryptedValue, receiverOf(receiver))
 	} else if len(value.Value) != 0 {
-		return json.Unmarshal(value.Value, receiver)
+		return json.Unmarshal(value.Value, receiverOf(receiver))
 	}
 	return nil
 }
 
 func (m *stateManager) Set(ctx Context, state string, v any) State {
 	m.mutex.Lock()
-	defer m.mutex.Unlock()
 
 	if m.states == nil {
 		m.states = make(map[string]State)
@@ -237,6 +236,9 @@ func (m *stateManager) Set(ctx Context, state string, v any) State {
 			}
 		})
 	}
+	m.mutex.Unlock()
+
+	ctx.postAction(ctx, Action{Name: state, Value: v})
 
 	return State{
 		value:     v,
@@ -366,7 +368,7 @@ func (m *stateManager) handleBroadcast(ctx Context, data Value) {
 				return
 			}
 
-			if err := json.Unmarshal(value, o.receiver); err != nil {
+			if err := json.Unmarshal(value, receiverOf(o.receiver)); err != nil {
 				Log(errors.New("storing broadcast state value into receiver failed").
 					WithTag("state", state).
 					WithTag("observer-type", reflect.TypeOf(o.source)).
@@ -417,7 +419,17 @@ func (m *stateManager) CleanupExpiredPersistedStates(ctx Context) {
 	})
 }
 
+type stateReceiver interface{ target() any }
+
+func receiverOf(recv any) any {
+	if r, ok := recv.(stateReceiver); ok {
+		return r.target()
+	}
+	return recv
+}
+
 func storeValue(recv, v any) error {
+	recv = receiverOf(recv)
 	dst := reflect.ValueOf(recv)
 	if dst.Kind() != reflect.Ptr {
 		return errors.New("receiver is not a pointer")

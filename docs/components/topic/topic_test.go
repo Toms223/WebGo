@@ -2,13 +2,13 @@ package topic
 
 import (
 	"net/url"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
 
 	"github.com/Toms223/WebGo/app"
 	"github.com/Toms223/WebGo/docs/components/doc"
-	"github.com/Toms223/WebGo/page"
 )
 
 type host struct {
@@ -95,16 +95,6 @@ func TestRouteIsDerivedFromPath(t *testing.T) {
 	}
 }
 
-func TestContentIsLoadingBeforeMount(t *testing.T) {
-	screen, err := New(Config{Key: "markdown", Path: "/markdown", Title: "Markdown"})
-	if err != nil {
-		t.Fatalf("building the screen failed: %v", err)
-	}
-	if out := app.HTMLString(screen.Content()); !strings.Contains(out, "topic-loading") {
-		t.Errorf("expected the loading state before mount, got %s", out)
-	}
-}
-
 func TestOnActivateReceivesTheRoute(t *testing.T) {
 	var seen string
 	cfg := sectioned
@@ -124,7 +114,7 @@ func TestLayoutBodyReplacesRatherThanAppends(t *testing.T) {
 	}
 }
 
-var _ page.Screen = (*Screen)(nil)
+var _ app.Routed = (*Screen)(nil)
 
 func TestSectionsGetUniqueSlugs(t *testing.T) {
 	screen, _, _ := mount(t, sectioned, "/styling")
@@ -162,22 +152,27 @@ func TestUnknownFragmentFallsBackToTheFirstSection(t *testing.T) {
 	}
 }
 
+var numberedHeading = regexp.MustCompile(`class="section-number">§1</span>\s*Overview\s*</h2>`)
+
 func TestDrawRendersOnlyTheActiveSection(t *testing.T) {
 	screen, _, _ := mount(t, sectioned, "/styling")
-	out := app.HTMLString(screen.Content())
+	out := app.HTMLString(screen.Render())
 	for _, want := range []string{
 		`class="topic"`, `id="topic"`,
 		`<h1 class="topic-title">Styling</h1>`,
 		`class="topic-lead">Typed CSS.</p>`,
 		"Lead paragraph.",
 		`class="rail"`, `class="rail-count">1 of 3`,
-		`class="section-heading"`, `>Overview</h2>`,
+		`class="section-heading"`,
 		"Overview body.",
 		`class="pager"`, "Next", "Values",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected %q in the topic, got %s", want, out)
 		}
+	}
+	if !numberedHeading.MatchString(out) {
+		t.Errorf("expected the numbered Overview heading, got %s", out)
 	}
 	for _, unwanted := range []string{"Values body.", "Previous", "turn-b"} {
 		if strings.Contains(out, unwanted) {
@@ -188,7 +183,7 @@ func TestDrawRendersOnlyTheActiveSection(t *testing.T) {
 
 func TestDrawWithoutSectionsRendersTheIntroOnly(t *testing.T) {
 	screen, _, _ := mount(t, Config{Key: "start", Path: "/start", Title: "Start", Intro: text("Plain text.")}, "")
-	out := app.HTMLString(screen.Content())
+	out := app.HTMLString(screen.Render())
 	if strings.Contains(out, `class="rail"`) || strings.Contains(out, `class="pager"`) {
 		t.Errorf("expected no rail or pager without sections, got %s", out)
 	}
@@ -207,7 +202,7 @@ func TestActivateUpdatesActiveAndAlternatesTheTurn(t *testing.T) {
 	if got := screen.model.State().Active; got != "values" {
 		t.Fatalf("expected Activate to select values, got %q", got)
 	}
-	out := app.HTMLString(screen.Content())
+	out := app.HTMLString(screen.Render())
 	for _, want := range []string{"Values body.", "turn-b", "Previous", "Overview", "Next", "CSS()"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected %q in the values section, got %s", want, out)
@@ -219,7 +214,7 @@ func TestActivateUpdatesActiveAndAlternatesTheTurn(t *testing.T) {
 
 	screen.Activate(ctx, "css")
 	engine.ConsumeAll()
-	if out := app.HTMLString(screen.Content()); strings.Contains(out, "turn-b") || strings.Contains(out, "Next") {
+	if out := app.HTMLString(screen.Render()); strings.Contains(out, "turn-b") || strings.Contains(out, "Next") {
 		t.Errorf("expected the third switch to drop turn-b and the last section to have no Next, got %s", out)
 	}
 }

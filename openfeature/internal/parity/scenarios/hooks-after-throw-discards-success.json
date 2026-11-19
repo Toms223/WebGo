@@ -1,0 +1,34 @@
+{
+  "id": "hooks-after-throw-discards-success",
+  "requirements": ["4.4.6"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "string": {
+            "value": "good",
+            "variant": "g",
+            "reason": "STATIC",
+            "flagMetadata": {
+              "m": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "ha": {
+      "throwIn": [
+        "after"
+      ]
+    },
+    "ho": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"string","flag":"f","default":"fallback","hooks":["ho","ha"]},
+    {"op":"evaluate","type":"string","flag":"f","default":"fallback","hooks":["ha","ho"]}
+  ]
+}

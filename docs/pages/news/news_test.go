@@ -46,8 +46,8 @@ func TestEveryPageRenders(t *testing.T) {
 func TestCatchUpListsWhatIsNewer(t *testing.T) {
 	articles := Articles()
 	c := &catchUp{}
-	if got := app.HTMLString(c.answer(articles)); !strings.Contains(got, "You missed 2 updates.") || !strings.Contains(got, "@v"+articles[0].Version) {
-		t.Fatalf("default answer should list both newer updates and the latest go get:\n%s", got)
+	if got := app.HTMLString(c.answer(articles)); !strings.Contains(got, "You missed 3 updates.") || !strings.Contains(got, "@v"+articles[0].Version) {
+		t.Fatalf("default answer should list every newer update and the latest go get:\n%s", got)
 	}
 	c.from = 2
 	if got := app.HTMLString(c.answer(articles)); !strings.Contains(got, "You missed one update.") || !strings.Contains(got, articles[0].Title) {
@@ -56,5 +56,18 @@ func TestCatchUpListsWhatIsNewer(t *testing.T) {
 	c.from = 1
 	if got := app.HTMLString(c.answer(articles)); !strings.Contains(got, "up to date.") {
 		t.Fatalf("on the latest version there is nothing to catch up on:\n%s", got)
+	}
+}
+
+func TestSplitTurnsThePageAtAHeading(t *testing.T) {
+	for _, a := range Articles() {
+		body := a.Body()
+		cut := split(app.P(), body)
+		if _, ok := body[cut].(app.HTMLH2); cut < 1 || cut >= len(body) || !ok {
+			t.Errorf("%s splits at %d of %d, not at a heading", a.Slug, cut, len(body))
+		}
+	}
+	if got := split(app.P(), []app.UI{app.P(), app.P(), app.P()}); got != 1 {
+		t.Errorf("without headings the split is the middle, got %d", got)
 	}
 }

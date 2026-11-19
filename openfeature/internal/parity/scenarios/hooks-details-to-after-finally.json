@@ -1,0 +1,41 @@
+{
+  "id": "hooks-details-to-after-finally",
+  "requirements": ["4.3.6","4.3.7"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "object": {
+            "value": {
+              "x": 1
+            },
+            "variant": "x",
+            "reason": "SPLIT",
+            "flagMetadata": {
+              "team": "core"
+            }
+          }
+        },
+        "g": {
+          "object": {
+            "errorCode": "INVALID_CONTEXT",
+            "errorMessage": "ctx",
+            "flagMetadata": {
+              "team": "edge"
+            }
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"setContext","context":{"targetingKey":"t"}},
+    {"op":"evaluate","type":"object","flag":"f","default":{},"hooks":["h"]},
+    {"op":"evaluate","type":"object","flag":"g","default":[],"hooks":["h"]}
+  ]
+}

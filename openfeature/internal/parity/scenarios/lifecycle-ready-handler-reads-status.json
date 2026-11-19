@@ -1,0 +1,31 @@
+{
+  "id": "lifecycle-ready-handler-reads-status",
+  "requirements": ["5.3.1","1.7.1"],
+  "providers": {
+    "p0": {
+      "runsOn": "client",
+      "initialize": "deferred"
+    },
+    "q": {
+      "runsOn": "client"
+    },
+    "r": {
+      "runsOn": "client",
+      "initialize": "deferred"
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"hA","readStatus":"d"},
+    {"op":"addHandler","target":"client:d","event":"PROVIDER_READY","handler":"hC","readStatus":"d"},
+    {"op":"addHandler","target":"client:e","event":"PROVIDER_READY","handler":"hE","readStatus":"e"},
+    {"op":"setProvider","provider":"p0"},
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"status","domain":"d"},
+    {"op":"setProvider","domain":"e","provider":"r"},
+    {"op":"status","domain":"e"},
+    {"op":"resolve","target":"r.initialize#1"},
+    {"op":"status","domain":"e"},
+    {"op":"resolve","target":"p0.initialize#1"},
+    {"op":"status"}
+  ]
+}

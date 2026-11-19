@@ -1,0 +1,37 @@
+{
+  "id": "lifecycle-context-arg",
+  "requirements": ["3.2.2.1","3.2.2.3"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "initialize": "sync",
+      "onContextChange": "sync"
+    },
+    "q": {
+      "runsOn": "client",
+      "initialize": "sync",
+      "onContextChange": "sync"
+    },
+    "r": {
+      "runsOn": "client",
+      "initialize": "sync"
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"api-stale"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"api-config"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"setProvider","provider":"p","context":{"targetingKey":"g","plan":"pro"}},
+    {"op":"setProvider","domain":"zeta","provider":"q","context":{"targetingKey":"z"}},
+    {"op":"setProviderAndWait","domain":"alpha","provider":"r"},
+    {"op":"getContext"},
+    {"op":"getContext","domain":"zeta"},
+    {"op":"getContext","domain":"alpha"},
+    {"op":"status"},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"alpha"}
+  ]
+}

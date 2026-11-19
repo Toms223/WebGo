@@ -1,0 +1,40 @@
+{
+  "id": "events-provider-emits-each",
+  "requirements": ["5.1.1","5.1.2","5.3.5","1.7.2.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"api-stale"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"api-config"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"c-ready"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"c-error"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_STALE","handler":"c-stale"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"c-config"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONTEXT_CHANGED","handler":"c-ctx"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_RECONCILING","handler":"c-recon"},
+    {"op":"setProvider","provider":"p"},
+    {"op":"status"},
+    {"op":"emit","provider":"p","event":"PROVIDER_READY"},
+    {"op":"status"},
+    {"op":"emit","provider":"p","event":"PROVIDER_ERROR","details":{"message":"broken"}},
+    {"op":"status"},
+    {"op":"emit","provider":"p","event":"PROVIDER_ERROR","details":{"message":"dead","errorCode":"PROVIDER_FATAL"}},
+    {"op":"status"},
+    {"op":"emit","provider":"p","event":"PROVIDER_STALE","details":{"message":"old"}},
+    {"op":"status"},
+    {"op":"emit","provider":"p","event":"PROVIDER_CONFIGURATION_CHANGED","details":{"flagsChanged":["b","a"],"metadata":{"k":"v","n":1}}},
+    {"op":"status"},
+    {"op":"emit","provider":"p","event":"PROVIDER_RECONCILING"},
+    {"op":"status"},
+    {"op":"emit","provider":"p","event":"PROVIDER_READY","details":{"message":"back"}},
+    {"op":"status"}
+  ]
+}

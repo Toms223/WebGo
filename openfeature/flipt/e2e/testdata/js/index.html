@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>flipt parity: js</title>
+<script type="importmap">__IMPORTMAP__</script>
+<script type="module">
+import { OpenFeature } from "@openfeature/web-sdk";
+import { FliptWebProvider } from "@openfeature/flipt-web-provider";
+
+const url = new URLSearchParams(location.search).get("flipt");
+const contexts = [
+  { targetingKey: "u1", fizz: "buzz" },
+  { targetingKey: "u1" },
+  { targetingKey: "" },
+  { targetingKey: "u1", fizz: 1 },
+];
+const flags = ["flag1", "flag_boolean", "missing"];
+const client = OpenFeature.getClient();
+const record = (run, step) => ({
+  run,
+  step,
+  status: client.providerStatus,
+  details: flags.flatMap((f) => [
+    client.getBooleanDetails(f, false),
+    client.getStringDetails(f, "def"),
+    client.getNumberDetails(f, 1.5),
+    client.getObjectDetails(f, { d: 1 }),
+  ]),
+});
+
+try {
+  const out = [];
+  for (let i = 0; i < contexts.length; i++) {
+    await OpenFeature.setProviderAndWait(new FliptWebProvider("default", { url }), contexts[i]).catch(() => {});
+    out.push(record(i, "setProviderAndWait"));
+    await OpenFeature.setContext(contexts[(i + 1) % contexts.length]);
+    out.push(record(i, "setContext"));
+  }
+  window.parityResult = out;
+} catch (e) {
+  window.parityError = String((e && e.stack) || e);
+}
+window.parityDone = true;
+</script>
+</head>
+<body>flipt parity: js</body>
+</html>

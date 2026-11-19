@@ -17,7 +17,7 @@ func New() (*topic.Screen, error) {
 		Key:   "deploy",
 		Path:  Route,
 		Title: Title,
-		Lead:  "Configure app.Handler, serve static files, prerender pages, ship updates and publish a static site.",
+		Lead:  "Configure app.Handler, serve static files, prerender pages, ship updates, publish a static site and run it locally.",
 		Intro: intro,
 		Sections: []topic.Section{
 			{Title: "The handler", Body: handler},
@@ -26,6 +26,7 @@ func New() (*topic.Screen, error) {
 			{Title: "Versions and updates", Body: updates},
 			{Title: "Installing the app", Body: installing},
 			{Title: "Static sites and GitHub Pages", Body: staticSites},
+			{Title: "Running locally", Body: local},
 			{Title: "Libraries", Body: libraries},
 		},
 		OnActivate: base.Activate,

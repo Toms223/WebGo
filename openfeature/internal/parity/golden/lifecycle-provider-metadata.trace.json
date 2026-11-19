@@ -1,0 +1,16 @@
+[
+{"i":0,"kind":"step","op":"providerMetadata"},
+{"kind":"metadata","value":{"name":"No-op Provider"},"which":"provider"},
+{"i":1,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":2,"kind":"step","op":"providerMetadata"},
+{"kind":"metadata","value":{"name":"alpha-provider","version":"1.2"},"which":"provider"},
+{"i":3,"kind":"step","op":"providerMetadata"},
+{"kind":"metadata","value":{"name":"No-op Provider"},"which":"provider"},
+{"i":4,"kind":"step","op":"providerMetadata"},
+{"kind":"metadata","value":{"name":"No-op Provider"},"which":"provider"},
+{"i":5,"kind":"step","op":"clientMetadata"},
+{"kind":"metadata","value":{"domain":"d","name":"d","paradigm":"client","providerMetadata":{"name":"alpha-provider","version":"1.2"},"version":"3"},"which":"client"},
+{"i":6,"kind":"step","op":"status"},
+{"domain":"d","kind":"status","status":"READY"}
+]

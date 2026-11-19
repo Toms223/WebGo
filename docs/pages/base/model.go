@@ -2,7 +2,6 @@ package base
 
 import (
 	"github.com/Toms223/WebGo/app"
-	"github.com/Toms223/WebGo/data"
 )
 
 const shellKey = "shell"
@@ -24,11 +23,11 @@ func (s *State) IsDark() bool {
 
 var shell = mustShellModel(shellKey)
 
-func newShellModel(key string) (*data.ViewModel[State], error) {
-	return data.NewViewModel(key, &State{Title: "WebGo"})
+func newShellModel(key string) (*app.Model[State], error) {
+	return app.NewModel(key, &State{Title: "WebGo"})
 }
 
-func mustShellModel(key string) *data.ViewModel[State] {
+func mustShellModel(key string) *app.Model[State] {
 	viewModel, err := newShellModel(key)
 	if err != nil {
 		panic(err)

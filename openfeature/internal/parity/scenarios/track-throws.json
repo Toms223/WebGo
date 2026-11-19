@@ -1,0 +1,16 @@
+{
+  "id": "track-throws",
+  "requirements": ["6.1.2.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "track": "throw"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"track","name":"click","details":{"value":2}},
+    {"op":"status"},
+    {"op":"track","name":"again"}
+  ]
+}

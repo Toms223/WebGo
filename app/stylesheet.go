@@ -63,12 +63,13 @@ const (
 	cssExtension  = ".css"
 )
 
-// Build resolves Styles: it checks that static files exist under WebDir and
-// writes generated stylesheets there, skipping unchanged files. It is optional,
+// Build resolves Styles and Imports: it checks that static files and local
+// modules exist under WebDir and writes generated stylesheets there, skipping
+// unchanged files. It is optional,
 // since ServeHTTP and GenerateStaticWebsite run it, but calling it at startup
 // reports errors before the first request. Errors wrap ErrMissingStyle,
-// ErrPathOutsideWeb, ErrNotCSSPath or ErrDuplicatePath, so match them with
-// errors.Is.
+// ErrPathOutsideWeb, ErrNotCSSPath, ErrDuplicatePath, ErrMissingModule,
+// ErrDuplicateModule or ErrInvalidModule, so match them with errors.Is.
 func (h *Handler) Build() error {
 	plan, err := resolveStyles(h.Styles, h.webDir())
 	if err != nil {
@@ -77,7 +78,12 @@ func (h *Handler) Build() error {
 	if err := plan.apply(); err != nil {
 		return err
 	}
+	imports, err := resolveImports(h.Imports, h.webDir())
+	if err != nil {
+		return err
+	}
 	h.styleLinks = plan.links
+	h.imports = imports
 	h.built = true
 	return nil
 }

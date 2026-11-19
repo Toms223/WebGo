@@ -65,7 +65,7 @@ func (k *KeyframesRule) CSSFor(action string, v any) string
 func FrameAt(stop css.Percentage, props ...css.Property) Frame
 func FrameFrom(props ...css.Property) Frame
 func FrameTo(props ...css.Property) Frame`),
-		doc.P("Each demo below keeps its state in a `data.ViewModel` whose key is the action name. `OnAction` turns every change of that state into an action carrying the `*T`. See ", doc.A("#viewmodel-and-onaction", "ViewModel and OnAction"), "."),
+		doc.P("Each demo below keeps its state in an `app.Model` whose key is the action name. Every `Set` of that model fires an action carrying the `*T`. See ", doc.A("#models-and-actions", "Models and actions"), "."),
 		doc.H("When"),
 		doc.P("`When` decides presence. Its function's result says whether the rule is present. The rule's declared blocks are what is inserted."),
 		doc.Example(demos.WhenExample),
@@ -179,42 +179,28 @@ func (t *toggle) flip(ctx app.Context, e app.Event) {
 	}
 }
 
-func viewModel() []app.UI {
+func models() []app.UI {
 	return []app.UI{
-		doc.Go(`func (v *ViewModel[T]) OnAction(ctx app.Context) {
-	if v.source != nil && v.source.Mounted() {
-		return
-	}
-	v.source = ctx.Src()
-	ctx.ObserveState(v.key, v.state).OnChange(func() {
-		ctx.NewActionWithValue(v.key, v.state)
-	})
-}`),
-		doc.P("`OnAction` observes the ViewModel's key in the app state store. Each `Set` or `SetAndPersist` through the ViewModel fires an action named after the key, whose value is the ViewModel's `*T`. A typed binding on that name receives the pointer."),
+		doc.P("Every `Set` or `SetAndPersist` through an `app.Model` fires an app action named after the model's key, whose value is the model's `*T`. The state store posts it, so there is nothing to register. A typed binding on that name receives the pointer."),
 		doc.List(
-			doc.Item("Call it in `OnMount`. Call it from lifecycle hooks only, never from `Render`."),
-			doc.Item("Use the ViewModel's key as the action name in `When` and `Compute`."),
-			doc.Item("It registers once per ViewModel, however many components call it. It registers again only when the component it registered on has dismounted."),
+			doc.Item("Use the model's key as the action name in `When` and `Compute`."),
 			doc.Item("A direct write to the state, without `Set`, fires nothing."),
+			doc.Item("`Apply` may return a fresh pointer. The action carries the model's state at `Set`, so bindings follow the model, not the pointer."),
 		),
-		doc.P("The demos build each ViewModel with a small helper:"),
-		doc.Go(`func model[T any](key string, value *T) *data.ViewModel[T] {
-	m, err := data.NewViewModel(key, value)
+		doc.P("The demos build each model with a small helper:"),
+		doc.Go(`func model[T any](key string, value *T) *app.Model[T] {
+	m, err := app.NewModel(key, value)
 	if err != nil {
 		panic(err)
 	}
 	return m
 }`),
-		doc.P("The `when` demo's ViewModel and component:"),
+		doc.P("The `when` demo's model and component:"),
 		doc.Go(`var compact = model(CompactKey, &Compact{})
 
 type whenDemo struct{ app.Compo }
 
 func WhenDemo() app.UI { return &whenDemo{} }
-
-func (d *whenDemo) OnMount(ctx app.Context) {
-	compact.OnAction(ctx)
-}
 
 func (d *whenDemo) Render() app.UI {
 	return app.Div().Body(
@@ -233,11 +219,10 @@ func (d *whenDemo) toggle(ctx app.Context, e app.Event) {
 		return c
 	}).Set()
 }`),
-		doc.P("A `Compute` rule without `Initially(true)` starts absent. To apply the current value at once, call `Set` after `OnAction` in `OnMount`:"),
+		doc.P("A `Compute` rule without `Initially(true)` starts absent. To apply the current value at once, call `Set` in `OnMount`:"),
 		doc.Go(`func (d *computeDemo) OnMount(ctx app.Context) {
-	accent.OnAction(ctx)
 	accent.Load(ctx).Set()
 }`),
-		doc.P("The ", doc.A("/state", "Pages, layouts and state"), " page describes `ViewModel`, `Load`, `Apply` and `Set`."),
+		doc.P("The ", doc.A("/state#model", "Pages, layouts and state"), " page describes `Model`, `Load`, `Apply` and `Set`."),
 	}
 }

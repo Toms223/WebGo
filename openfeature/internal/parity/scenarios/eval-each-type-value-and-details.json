@@ -1,0 +1,67 @@
+{
+  "id": "eval-each-type-value-and-details",
+  "requirements": ["1.3.1.1","1.3.2.1","1.4.2.1","1.4.1.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "boolean": {
+            "value": true,
+            "variant": "v-boolean",
+            "reason": "TARGETING_MATCH",
+            "flagMetadata": {
+              "t": "boolean",
+              "n": 1,
+              "ok": true
+            }
+          },
+          "string": {
+            "value": "on",
+            "variant": "v-string",
+            "reason": "TARGETING_MATCH",
+            "flagMetadata": {
+              "t": "string",
+              "n": 1,
+              "ok": true
+            }
+          },
+          "number": {
+            "value": 42,
+            "variant": "v-number",
+            "reason": "TARGETING_MATCH",
+            "flagMetadata": {
+              "t": "number",
+              "n": 1,
+              "ok": true
+            }
+          },
+          "object": {
+            "value": {
+              "a": [
+                1,
+                "x"
+              ],
+              "b": null
+            },
+            "variant": "v-object",
+            "reason": "TARGETING_MATCH",
+            "flagMetadata": {
+              "t": "object",
+              "n": 1,
+              "ok": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false},
+    {"op":"evaluate","type":"string","flag":"f","default":"off"},
+    {"op":"evaluate","type":"number","flag":"f","default":0},
+    {"op":"evaluate","type":"object","flag":"f","default":{}},
+    {"op":"evaluate","type":"boolean","flag":"missing","default":true}
+  ]
+}

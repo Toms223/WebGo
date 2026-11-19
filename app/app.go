@@ -40,8 +40,9 @@ const (
 )
 
 var (
-	routes = makeRouter()
-	window = newBrowserWindow()
+	isClient = IsClient
+	routes   = makeRouter()
+	window   = newBrowserWindow()
 )
 
 // Getenv returns the variable k, or "" when it is unset. In the browser it
@@ -120,6 +121,15 @@ func displayLoadError(err any) {
 // are updated instead of remounting it.
 func Route(path string, newComponent func() Composer) {
 	routes.route(path, newComponent)
+}
+
+// Serve routes each screen route of the shell that build returns to that shell, built once in the browser and per request on the server; regexp routes are not supported.
+func Serve[U any](build func() *Shell[U]) {
+	var paths []string
+	for _, screen := range build().Screens {
+		paths = append(paths, screen.Route())
+	}
+	routes.serve(paths, func() Composer { return build() })
 }
 
 // RouteWithRegexp is like Route but matches paths against the regular

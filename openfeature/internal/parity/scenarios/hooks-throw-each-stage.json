@@ -1,0 +1,53 @@
+{
+  "id": "hooks-throw-each-stage",
+  "requirements": ["4.4.3","4.4.4","4.4.5","4.4.6","4.4.7"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "flags": {
+        "f": {
+          "boolean": {
+            "value": true,
+            "reason": "STATIC"
+          }
+        },
+        "g": {
+          "boolean": {
+            "errorCode": "GENERAL",
+            "errorMessage": "g failed"
+          }
+        }
+      }
+    }
+  },
+  "hooks": {
+    "hb": {
+      "throwIn": [
+        "before"
+      ]
+    },
+    "ha": {
+      "throwIn": [
+        "after"
+      ]
+    },
+    "he": {
+      "throwIn": [
+        "error"
+      ]
+    },
+    "hf": {
+      "throwIn": [
+        "finally"
+      ]
+    },
+    "ho": {}
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false,"hooks":["ho","hb","he"]},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false,"hooks":["ho","ha","hf"]},
+    {"op":"evaluate","type":"boolean","flag":"g","default":false,"hooks":["ho","he","hf"]},
+    {"op":"evaluate","type":"boolean","flag":"f","default":false,"hooks":["hf","ho"]}
+  ]
+}

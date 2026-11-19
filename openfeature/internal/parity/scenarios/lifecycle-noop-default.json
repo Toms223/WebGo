@@ -1,0 +1,26 @@
+{
+  "id": "lifecycle-noop-default",
+  "requirements": ["1.1.2.2","1.7.1"],
+  "providers": {},
+  "steps": [
+    {"op":"status"},
+    {"op":"providerMetadata"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_READY","handler":"api-ready"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_ERROR","handler":"api-error"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_STALE","handler":"api-stale"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"api-config"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"api-ctx"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_RECONCILING","handler":"api-recon"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_READY","handler":"c-ready"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_ERROR","handler":"c-error"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_STALE","handler":"c-stale"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"c-config"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONTEXT_CHANGED","handler":"c-ctx"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_RECONCILING","handler":"c-recon"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true},
+    {"op":"evaluate","type":"string","flag":"f","default":"x"},
+    {"op":"evaluate","type":"number","flag":"f","default":2},
+    {"op":"evaluate","type":"object","flag":"f","default":{"a":1}},
+    {"op":"clientMetadata"}
+  ]
+}

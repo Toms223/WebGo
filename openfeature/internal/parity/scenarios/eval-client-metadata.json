@@ -1,0 +1,21 @@
+{
+  "id": "eval-client-metadata",
+  "requirements": ["1.2.2"],
+  "providers": {
+    "q": {
+      "name": "qq",
+      "runsOn": "client"
+    }
+  },
+  "hooks": {
+    "h": {}
+  },
+  "steps": [
+    {"op":"clientMetadata"},
+    {"op":"clientMetadata","domain":"d","version":"2.0"},
+    {"op":"setProvider","domain":"d","provider":"q"},
+    {"op":"clientMetadata","domain":"d"},
+    {"op":"clientMetadata","version":"1"},
+    {"op":"evaluate","type":"boolean","flag":"f","default":true,"domain":"d","hooks":["h"]}
+  ]
+}

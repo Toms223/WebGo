@@ -13,7 +13,7 @@ func newRootCommand() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: false,
 	}
-	root.AddCommand(newStaticCommand())
+	root.AddCommand(newStaticCommand(), newDevCommand())
 	return root
 }
 

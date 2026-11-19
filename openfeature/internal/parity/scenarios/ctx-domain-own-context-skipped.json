@@ -1,0 +1,36 @@
+{
+  "id": "ctx-domain-own-context-skipped",
+  "requirements": ["3.2.2.3","3.2.4.1"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    },
+    "z": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    },
+    "m": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    },
+    "a": {
+      "runsOn": "client",
+      "onContextChange": "sync"
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"setProvider","domain":"zeta","provider":"z"},
+    {"op":"setProvider","domain":"mid","provider":"m"},
+    {"op":"setProvider","domain":"alpha","provider":"a"},
+    {"op":"setContext","domain":"mid","context":{"targetingKey":"m"}},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONTEXT_CHANGED","handler":"hA"},
+    {"op":"setContext","context":{"targetingKey":"g"}},
+    {"op":"status","domain":"zeta"},
+    {"op":"status","domain":"mid"},
+    {"op":"status","domain":"alpha"},
+    {"op":"getContext","domain":"mid"},
+    {"op":"getContext","domain":"zeta"}
+  ]
+}

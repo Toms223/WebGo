@@ -1,0 +1,19 @@
+[
+{"i":0,"kind":"step","op":"clientMetadata"},
+{"kind":"metadata","value":{"paradigm":"client","providerMetadata":{"name":"No-op Provider"}},"which":"client"},
+{"i":1,"kind":"step","op":"clientMetadata"},
+{"kind":"metadata","value":{"domain":"d","name":"d","paradigm":"client","providerMetadata":{"name":"No-op Provider"},"version":"2.0"},"which":"client"},
+{"i":2,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":3,"kind":"step","op":"clientMetadata"},
+{"kind":"metadata","value":{"domain":"d","name":"d","paradigm":"client","providerMetadata":{"name":"qq"}},"which":"client"},
+{"i":4,"kind":"step","op":"clientMetadata"},
+{"kind":"metadata","value":{"paradigm":"client","providerMetadata":{"name":"No-op Provider"},"version":"1"},"which":"client"},
+{"i":5,"kind":"step","op":"evaluate"},
+{"kind":"log","level":"debug","msg":"Unable to find context for 'd'."},
+{"context":{},"defaultValue":true,"domain":"d","flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"qq","stage":"before"},
+{"args":["f",true,{}],"call":"resolveBooleanEvaluation","kind":"provider","p":"q"},
+{"context":{},"defaultValue":true,"details":{"flagKey":"f","flagMetadata":{},"reason":"DEFAULT","value":true},"domain":"d","flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"qq","stage":"after"},
+{"context":{},"defaultValue":true,"details":{"flagKey":"f","flagMetadata":{},"reason":"DEFAULT","value":true},"domain":"d","flagKey":"f","flagValueType":"boolean","h":"h","kind":"hook","providerName":"qq","stage":"finally"},
+{"details":{"flagKey":"f","flagMetadata":{},"reason":"DEFAULT","value":true},"kind":"result"}
+]

@@ -9,16 +9,17 @@ import (
 	"github.com/Toms223/WebGo/docs/pages/browser"
 	"github.com/Toms223/WebGo/docs/pages/components"
 	"github.com/Toms223/WebGo/docs/pages/deploy"
+	"github.com/Toms223/WebGo/docs/pages/featureflags"
 	"github.com/Toms223/WebGo/docs/pages/home"
 	"github.com/Toms223/WebGo/docs/pages/markdown"
 	"github.com/Toms223/WebGo/docs/pages/migrating"
 	"github.com/Toms223/WebGo/docs/pages/news"
 	"github.com/Toms223/WebGo/docs/pages/routing"
+	"github.com/Toms223/WebGo/docs/pages/scripts"
 	"github.com/Toms223/WebGo/docs/pages/start"
 	"github.com/Toms223/WebGo/docs/pages/state"
 	"github.com/Toms223/WebGo/docs/pages/styling"
 	"github.com/Toms223/WebGo/docs/pages/tests"
-	"github.com/Toms223/WebGo/page"
 )
 
 func Entries() []nav.Entry {
@@ -28,6 +29,8 @@ func Entries() []nav.Entry {
 		{Title: state.Title, Route: state.Route},
 		{Title: styling.Title, Route: styling.Route},
 		{Title: applying.Title, Route: applying.Route},
+		{Title: scripts.Title, Route: scripts.Route},
+		{Title: featureflags.Title, Route: featureflags.Route},
 		{Title: components.Title, Route: components.Route, Group: "Core"},
 		{Title: routing.Title, Route: routing.Route, Group: "Core"},
 		{Title: actions.Title, Route: actions.Route, Group: "Core"},
@@ -46,7 +49,7 @@ func Routes() []string {
 	return append(routes, news.Routes()...)
 }
 
-func Screens() ([]page.Screen, error) {
+func Screens() ([]app.Routed, error) {
 	homeScreen, err := home.New()
 	if err != nil {
 		return nil, err
@@ -68,6 +71,14 @@ func Screens() ([]page.Screen, error) {
 		return nil, err
 	}
 	applyingScreen, err := applying.New()
+	if err != nil {
+		return nil, err
+	}
+	scriptsScreen, err := scripts.New()
+	if err != nil {
+		return nil, err
+	}
+	featureFlagsScreen, err := featureflags.New()
 	if err != nil {
 		return nil, err
 	}
@@ -103,21 +114,23 @@ func Screens() ([]page.Screen, error) {
 	if err != nil {
 		return nil, err
 	}
-	return append([]page.Screen{homeScreen, startScreen, markdownScreen, stateScreen, stylingScreen, applyingScreen, componentsScreen, routingScreen, actionsScreen, browserScreen, deployScreen, testsScreen, migratingScreen}, newsScreens...), nil
+	return append([]app.Routed{homeScreen, startScreen, markdownScreen, stateScreen, stylingScreen, applyingScreen, scriptsScreen, featureFlagsScreen, componentsScreen, routingScreen, actionsScreen, browserScreen, deployScreen, testsScreen, migratingScreen}, newsScreens...), nil
+}
+
+func Shell() (*app.Shell[base.State], error) {
+	screens, err := Screens()
+	if err != nil {
+		return nil, err
+	}
+	return base.New(Entries(), screens)
 }
 
 func Register() {
-	for _, route := range Routes() {
-		app.Route(route, func() app.Composer {
-			screens, err := Screens()
-			if err != nil {
-				panic(err)
-			}
-			shell, err := base.New(Entries(), screens)
-			if err != nil {
-				panic(err)
-			}
-			return shell
-		})
-	}
+	app.Serve(func() *app.Shell[base.State] {
+		s, err := Shell()
+		if err != nil {
+			panic(err)
+		}
+		return s
+	})
 }

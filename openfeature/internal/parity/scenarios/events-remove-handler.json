@@ -1,0 +1,25 @@
+{
+  "id": "events-remove-handler",
+  "requirements": ["5.2.7"],
+  "providers": {
+    "p": {
+      "runsOn": "client",
+      "events": true
+    }
+  },
+  "steps": [
+    {"op":"setProvider","provider":"p"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hA"},
+    {"op":"addHandler","target":"api","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hB"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hC"},
+    {"op":"addHandler","target":"client:","event":"PROVIDER_CONFIGURATION_CHANGED","handler":"hD"},
+    {"op":"emit","provider":"p","event":"PROVIDER_CONFIGURATION_CHANGED"},
+    {"op":"removeHandler","handler":"hA"},
+    {"op":"removeHandler","handler":"hC"},
+    {"op":"emit","provider":"p","event":"PROVIDER_CONFIGURATION_CHANGED"},
+    {"op":"removeHandler","handler":"hB"},
+    {"op":"removeHandler","handler":"hD"},
+    {"op":"emit","provider":"p","event":"PROVIDER_CONFIGURATION_CHANGED"},
+    {"op":"status"}
+  ]
+}

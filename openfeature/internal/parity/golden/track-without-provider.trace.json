@@ -1,0 +1,10 @@
+[
+{"i":0,"kind":"step","op":"track"},
+{"args":["provider has not yet initialized"],"kind":"log","level":"debug","msg":"Error recording tracking event."},
+{"i":1,"kind":"step","op":"setProvider"},
+{"kind":"return","op":"setProvider"},
+{"i":2,"kind":"step","op":"track"},
+{"kind":"log","level":"debug","msg":"Provider does not support the track function; will no-op."},
+{"i":3,"kind":"step","op":"status"},
+{"kind":"status","status":"READY"}
+]

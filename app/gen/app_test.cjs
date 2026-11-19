@@ -6,6 +6,7 @@ const vm = require("node:vm");
 
 const source = readFileSync(join(__dirname, "app.js"), "utf8")
   .replace("{{.Env}}", "{}")
+  .replace("{{.Imports}}", "[]")
   .replaceAll(/\{\{\.[A-Za-z]+\}\}/g, "")
   .replace("goappInitWebAssembly();\n", "");
 
